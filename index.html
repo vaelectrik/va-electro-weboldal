@@ -1,19 +1,165 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="hu">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#111111">
-<meta name="description" content="VA ELECTRO – villanyszerelés, hibaelhárítás, elosztószekrények és elektromos autótöltők kiépítése.">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#111111">
+<meta name="description" content="VA ELECTRO – villanyszerelés Kaposváron és környékén. Új hálózat, hibakeresés, elosztószekrény és elektromosautó-töltő kiépítése.">
 <title>VA ELECTRO | Villanyszerelés</title>
 <style>
-:root{--bg:#101010;--panel:#191919;--copper:#c58a5a;--text:#f7f4ef;--muted:#bcb5ad;--line:#37312c}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;line-height:1.6}a{color:inherit;text-decoration:none}.wrap{width:min(1100px,92%);margin:auto}.top{padding:20px 0;border-bottom:1px solid var(--line)}.nav{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}.logo{font-size:1.5rem;font-weight:900;letter-spacing:2px}.logo span{color:var(--copper)}.navlinks{display:flex;gap:18px;flex-wrap:wrap;color:var(--muted);font-size:.95rem}.hero{padding:82px 0 72px;background:radial-gradient(ellipse at 80% 20%,#3a2a20 0,transparent 45%)}.eyebrow{color:var(--copper);text-transform:uppercase;letter-spacing:3px;font-size:.8rem;font-weight:bold}.hero h1{font-size:clamp(2.5rem,7vw,5rem);line-height:1.05;max-width:780px;margin:18px 0}.hero h1 span{color:var(--copper)}.lead{max-width:650px;color:var(--muted);font-size:1.12rem}.buttons{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}.btn{display:inline-block;padding:13px 20px;border-radius:4px;font-weight:bold}.primary{background:var(--copper);color:#17110d}.secondary{border:1px solid #746050}.section{padding:65px 0}.section h2{font-size:clamp(1.8rem,4vw,2.7rem);line-height:1.2;margin:8px 0 14px}.muted{color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:28px}.card{padding:24px;background:var(--panel);border:1px solid var(--line);border-radius:8px}.card .num{color:var(--copper);font-size:1.4rem;font-weight:bold}.card h3{margin:12px 0 8px}.price{font-size:clamp(2rem,5vw,3.3rem);font-weight:900;color:var(--copper);margin:16px 0 4px}.price small{font-size:1rem;color:var(--muted);font-weight:normal}.pricebox{border:1px solid var(--copper);padding:28px;border-radius:8px;background:linear-gradient(120deg,#201913,#151515)}.contactgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;margin-top:25px}.contactitem{padding:20px;background:var(--panel);border-radius:8px}.contactitem b{display:block;color:var(--copper);margin-bottom:5px}footer{border-top:1px solid var(--line);padding:24px 0;color:var(--muted);font-size:.9rem}.notice{font-size:.9rem;color:var(--muted)}@media(max-width:600px){.hero{padding:60px 0 52px}.navlinks{gap:12px}.section{padding:48px 0}}
-</style></head>
+:root{--bg:#101010;--panel:#191919;--copper:#c58b59;--text:#f4f0eb;--muted:#b8b0a8;--line:#39312b}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;line-height:1.6}
+a{color:inherit}
+.wrap{width:min(1080px,92%);margin:auto}
+header{border-bottom:1px solid var(--line);position:sticky;top:0;background:#101010f2;z-index:5}
+.nav{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:15px 0;flex-wrap:wrap}
+.logo{font-size:22px;font-weight:900;letter-spacing:2px}.logo span{color:var(--copper)}
+nav{display:flex;gap:15px;flex-wrap:wrap;font-size:13px}
+nav a{text-decoration:none;color:var(--muted)}
+.hero{padding:78px 0 65px;background:radial-gradient(ellipse at 85% 15%,#5b3b253d,transparent 45%)}
+.kicker{color:var(--copper);text-transform:uppercase;letter-spacing:3px;font-size:12px;font-weight:bold}
+h1{font-size:clamp(38px,8vw,68px);line-height:1.05;margin:18px 0}
+h2{font-size:clamp(27px,5vw,38px);line-height:1.15;margin:0 0 18px}
+h3{margin:0 0 8px}
+p{color:var(--muted)}
+.hero p{max-width:620px;font-size:17px}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:25px}
+.btn{display:inline-block;padding:13px 19px;border:1px solid var(--copper);border-radius:5px;text-decoration:none;font-weight:bold}
+.btn.primary{background:var(--copper);color:#17110c}
+section{padding:58px 0;border-top:1px solid #282421}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:22px}
+.symbol{color:var(--copper);font-size:25px;margin-bottom:8px}
+.price{font-size:clamp(30px,6vw,42px);font-weight:800;color:var(--copper)}
+.small{font-size:13px;color:var(--muted)}
+.gallery{min-height:100px;border:1px dashed #6c5543;border-radius:6px;padding:20px;text-align:center;color:var(--muted)}
+form{display:grid;gap:15px}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+label{display:block;font-size:14px;margin-bottom:6px}
+input,select,textarea{width:100%;padding:13px;border:1px solid #51453a;border-radius:5px;background:#111;color:#fff;font:inherit}
+textarea{min-height:130px;resize:vertical}
+button{font:inherit;cursor:pointer}
+footer{padding:28px 0;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+.notice{background:#211b16;border-left:3px solid var(--copper);padding:13px;color:var(--muted);font-size:13px}
+@media(max-width:500px){.hero{padding:55px 0 45px}nav{gap:10px}.nav{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
 <body>
-<header class="top"><div class="wrap nav"><a class="logo" href="#kezdo">VA <span>ELECTRO</span></a><nav class="navlinks"><a href="#szolgaltatasok">Szolgáltatások</a><a href="#arak">Árak</a><a href="#munkak">Munkáim</a><a href="#kapcsolat">Kapcsolat</a></nav></div></header>
+<header>
+<div class="wrap nav">
+<div class="logo"><span>VA</span> ELECTRO</div>
+<nav>
+<a href="#szolgaltatasok">Szolgáltatások</a>
+<a href="#arak">Árak</a>
+<a href="#munkak">Munkáim</a>
+<a href="#ajanlat">Ajánlatkérés</a>
+</nav>
+</div>
+</header>
 <main>
-<section class="hero" id="kezdo"><div class="wrap"><div class="eyebrow">Villanyszerelés • Kaposvár és környéke</div><h1>Biztonságos megoldások.<br><span>Precíz kivitelezés.</span></h1><p class="lead">VA ELECTRO – villanyszerelés új építésnél, felújításnál és hibaelhárításnál. Átgondolt munka, tiszta kommunikáció, megbízható kivitelezés.</p><div class="buttons"><a class="btn primary" href="tel:+36303933196">Hívás: 06 30 393 3196</a><a class="btn secondary" href="#kapcsolat">Ajánlatot kérek</a></div><p class="notice">Precizitás. Biztonság. Megbízhatóság.</p></div></section>
-<section class="section" id="szolgaltatasok"><div class="wrap"><div class="eyebrow">Miben segíthetek?</div><h2>Villamos megoldások egy kézből</h2><p class="muted">A feladat felmérésétől a kivitelezésig – előre egyeztetett tartalommal és átlátható árazással.</p><div class="grid"><article class="card"><div class="num">01</div><h3>Új villamos hálózat</h3><p class="muted">Új építésű házak és lakások vezetékezése, kiállások és szerelvényezés.</p></article><article class="card"><div class="num">02</div><h3>Hibaelhárítás</h3><p class="muted">Elektromos hibák feltárása, javítás és biztonságos működés helyreállítása.</p></article><article class="card"><div class="num">03</div><h3>Elosztószekrény</h3><p class="muted">Elosztók kialakítása, átalakítása és átlátható, rendezett szerelése.</p></article><article class="card"><div class="num">04</div><h3>Autótöltő kiépítése</h3><p class="muted">Elektromos autó töltéséhez szükséges áramkör és csatlakozás kialakítása.</p></article><article class="card"><div class="num">05</div><h3>Villamos biztonság</h3><p class="muted">Villamos biztonsági felülvizsgálat egyeztetett feladatkör szerint.</p></article></div></div></section>
-<section class="section" id="arak"><div class="wrap"><div class="eyebrow">Tájékoztató ár</div><h2>Átlátható árazás</h2><div class="pricebox"><div class="price">25 000 Ft/m² <small>munkadíj</small></div><p>Teljes villanyszerelés új építésű lakásban vagy házban, előzetesen egyeztetett műszaki tartalommal.</p><p class="notice">Az ár tájékoztató jellegű, az anyagköltséget nem tartalmazza. A pontos munkadíj a tervek, a kiállások száma és a helyszíni adottságok alapján, írásos egyeztetés után adható meg. A különleges és nem alapcsomagba tartozó tételek külön árazandók.</p><a class="btn primary" href="mailto:vaelectrik@gmail.com?subject=Villanyszerel%C3%A9si%20%C3%A1raj%C3%A1nlat">Egyedi ajánlatot kérek</a></div></div></section>
-<section class="section" id="munkak"><div class="wrap"><div class="eyebrow">Referenciák</div><h2>Munkáim</h2><p class="muted">A referenciafotók feltöltés alatt állnak. Ezen a felületen később kategóriánként jelennek meg a saját munkákról készült képek és rövid leírások.</p><div class="grid"><article class="card"><h3>Új hálózatok</h3><p class="muted">Saját referenciafotók hamarosan.</p></article><article class="card"><h3>Elosztószekrények</h3><p class="muted">Saját referenciafotók hamarosan.</p></article><article class="card"><h3>Felújítások</h3><p class="muted">Saját referenciafotók hamarosan.</p></article></div></div></section>
-<section class="section" id="kapcsolat"><div class="wrap"><div class="eyebrow">Vegyük fel a kapcsolatot</div><h2>Kérj ajánlatot</h2><p class="muted">Írd meg röviden, milyen munkára van szükséged. A részletek egyeztetése után személyre szabott ajánlatot készítek.</p><div class="contactgrid"><a class="contactitem" href="tel:+36303933196"><b>Telefon</b>06 30 393 3196</a><a class="contactitem" href="mailto:vaelectrik@gmail.com?subject=VA%20ELECTRO%20-%20%C3%A1raj%C3%A1nlat"><b>E-mail</b>vaelectrik@gmail.com</a><div class="contactitem"><b>Szolgáltatási terület</b>Kaposvár és környéke</div></div><p class="notice">Az e-mailes ajánlatkéréshez kérlek írd meg a helyszínt, a munka rövid leírását és – ha ismert – a tervezett időpontot.</p></div></section>
-</main><footer><div class="wrap">© 2026 VA ELECTRO · Vörös Ákos · Precizitás. Biztonság. Megbízhatóság.</div></footer>
-</body></html>
+<section class="hero" style="border:0">
+<div class="wrap">
+<div class="kicker">Villanyszerelés · Kaposvár és környéke</div>
+<h1>Precíz munka.<br><span style="color:var(--copper)">Biztonságos otthon.</span></h1>
+<p>Megbízható villanyszerelési megoldások új hálózatokhoz, hibák elhárításához és korszerű elektromos rendszerekhez.</p>
+<div class="actions">
+<a class="btn primary" href="#ajanlat">Ajánlatot kérek</a>
+<a class="btn" href="tel:+36303933196">Hívás: 06 30 393 3196</a>
+</div>
+</div>
+</section>
+<section id="szolgaltatasok">
+<div class="wrap">
+<div class="kicker">Amiben segítek</div><h2>Szolgáltatások</h2>
+<div class="grid">
+<div class="card"><div class="symbol">⌂</div><h3>Új villamos hálózat</h3><p>Új építésű ingatlanok és felújítások villanyszerelési munkái, előzetes egyeztetés alapján.</p></div>
+<div class="card"><div class="symbol">⌁</div><h3>Hibaelhárítás</h3><p>Elektromos problémák feltárása és javítása, a hiba jellegének megfelelően.</p></div>
+<div class="card"><div class="symbol">▤</div><h3>Elosztószekrény</h3><p>Elosztók kialakítása, rendezése és korszerűsítése a helyszín felmérése alapján.</p></div>
+<div class="card"><div class="symbol">✓</div><h3>Villamos biztonsági felülvizsgálat</h3><p>Villamos biztonsági felülvizsgálat egyeztetett feladatkörben.</p></div>
+<div class="card"><div class="symbol">ϟ</div><h3>Elektromosautó-töltő</h3><p>Otthoni töltő kiépítésének előkészítése és szerelése, műszaki felmérés után.</p></div>
+</div>
+</div>
+</section>
+<section id="arak">
+<div class="wrap">
+<div class="kicker">Átlátható tájékoztatás</div><h2>Irányárak</h2>
+<div class="card">
+<div class="small">Új építésű ház vagy lakás teljes villanyszerelése</div>
+<div class="price">25 000 Ft/m²</div>
+<p>Munkadíj, az előre egyeztetett műszaki tartalom szerint. Az anyagköltség külön fizetendő.</p>
+<div class="notice">Tájékoztató irányár, nem automatikus végleges ajánlat. A pontos ár a tervtől, a kiállások számától, az ingatlan adottságaitól és a műszaki tartalomtól függ. Egyedi felmérés és egyeztetés szükséges.</div>
+</div>
+</div>
+</section>
+<section id="munkak">
+<div class="wrap">
+<div class="kicker">Munkák és megoldások</div><h2>Munkáim</h2>
+<p>A saját referenciaképek feltöltéséig az alábbi kategóriák a későbbi galéria helyét jelzik.</p>
+<div class="grid">
+<div class="gallery"><strong>Új hálózat kiépítése</strong><br><span class="small">Illusztrációk később kerülnek ide.</span></div>
+<div class="gallery"><strong>Elosztószekrények</strong><br><span class="small">Illusztrációk később kerülnek ide.</span></div>
+<div class="gallery"><strong>Világítás és szerelvényezés</strong><br><span class="small">Illusztrációk később kerülnek ide.</span></div>
+</div>
+</div>
+</section>
+<section id="ajanlat">
+<div class="wrap">
+<div class="kicker">Kérj személyre szabott ajánlatot</div><h2>Ajánlatkérés</h2>
+<p>Töltsd ki az alábbi adatokat, és a weboldal előkészít egy e-mailt a megadott információkkal.</p>
+<form id="quoteForm">
+<div class="fields">
+<div><label for="name">Név *</label><input id="name" name="Név" autocomplete="name" required></div>
+<div><label for="phone">Telefonszám *</label><input id="phone" name="Telefonszám" type="tel" autocomplete="tel" required></div>
+<div><label for="email">E-mail-cím</label><input id="email" name="E-mail" type="email" autocomplete="email"></div>
+<div><label for="location">Munkavégzés helyszíne *</label><input id="location" name="Helyszín" placeholder="Település, esetleg irányítószám" required></div>
+</div>
+<div><label for="service">Milyen munkára kérsz ajánlatot? *</label>
+<select id="service" name="Szolgáltatás" required>
+<option value="">Válassz szolgáltatást</option>
+<option>Új villamos hálózat</option>
+<option>Hibaelhárítás</option>
+<option>Elosztószekrény</option>
+<option>Villamos biztonsági felülvizsgálat</option>
+<option>Elektromosautó-töltő kiépítése</option>
+<option>Egyéb villanyszerelési munka</option>
+</select></div>
+<div><label for="details">A munka leírása *</label><textarea id="details" name="Munka leírása" placeholder="Írd le röviden, milyen munkára lenne szükség, mekkora az ingatlan, és mikorra tervezed." required></textarea></div>
+<button class="btn primary" type="submit">Ajánlatkérés előkészítése e-mailben</button>
+<p class="small">A gomb megnyitja a készülék levelezőalkalmazását. Az e-mail elküldését neked kell jóváhagynod.</p>
+</form>
+</div>
+</section>
+<section id="kapcsolat">
+<div class="wrap">
+<div class="kicker">Kapcsolat</div><h2>Beszéljük meg a feladatot!</h2>
+<div class="grid">
+<div class="card"><h3>Telefon</h3><p><a href="tel:+36303933196">06 30 393 3196</a></p></div>
+<div class="card"><h3>E-mail</h3><p><a href="mailto:vaelectrik@gmail.com">vaelectrik@gmail.com</a></p></div>
+</div>
+<p class="small">VA ELECTRO · Vörös Ákos</p>
+</div>
+</section>
+</main>
+<footer><div class="wrap">VA ELECTRO · Precizitás. Biztonság. Megbízhatóság.</div></footer>
+<script>
+document.getElementById('quoteForm').addEventListener('submit',function(e){
+e.preventDefault();
+const f=new FormData(this);
+const body=[
+'VA ELECTRO – ajánlatkérés','',
+'Név: '+(f.get('Név')||''),
+'Telefonszám: '+(f.get('Telefonszám')||''),
+'E-mail: '+(f.get('E-mail')||''),
+'Helyszín: '+(f.get('Helyszín')||''),
+'Szolgáltatás: '+(f.get('Szolgáltatás')||''),
+'Munka leírása: '+(f.get('Munka leírása')||'')
+].join('\n');
+window.location.href='mailto:vaelectrik@gmail.com?subject='+encodeURIComponent('VA ELECTRO – ajánlatkérés')+'&body='+encodeURIComponent(body);
+});
+</script>
+</body>
+</html>
+    
