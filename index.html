@@ -3,308 +3,173 @@
 <html lang="hu">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#11100f">
-<meta name="description" content="VA ELECTRO – villanyszerelés, hibakeresés, elosztószekrények, villamos biztonsági felülvizsgálat és elektromosautó-töltő kiépítése.">
+<meta name="description" content="VA ELECTRO – villanyszerelés, hibakeresés, hálózatfelújítás, elosztószekrény és elektromosautó-töltő kiépítése Kaposvár és környékén.">
 <title>VA ELECTRO | Villanyszerelés</title>
 
 <style>
 :root {
-  --bg: #11100f;
-  --panel: #1b1917;
-  --panel2: #23201d;
-  --copper: #c78b5a;
-  --copper-light: #e2b48b;
-  --text: #f5f0ea;
-  --muted: #b9b0a7;
-  --line: rgba(199,139,90,.25);
-  --danger: #ff8278;
-  --success: #a7d8ad;
-  --radius: 18px;
-  --max: 1120px;
+  --bg:#11100f;
+  --panel:#1b1917;
+  --panel2:#24201c;
+  --copper:#c78b5a;
+  --light:#e4b58d;
+  --text:#f5f0ea;
+  --muted:#b9b0a7;
+  --line:rgba(199,139,90,.28);
+  --danger:#ff9188;
+  --radius:18px;
+  --max:1160px;
 }
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 88px; }
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  line-height: 1.65;
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+  line-height:1.65
 }
-a { color: var(--copper-light); }
-button, input, select, textarea { font: inherit; }
-button, .btn { cursor: pointer; }
-img { max-width: 100%; }
-.wrap { width: min(var(--max), calc(100% - 36px)); margin: auto; }
-section { padding: 76px 0; }
-section:nth-of-type(even) { background: #151311; }
-h1, h2, h3 { line-height: 1.2; margin-top: 0; }
-h1 { font-size: clamp(2.5rem, 8vw, 5rem); letter-spacing: -.045em; }
-h2 { font-size: clamp(1.8rem, 5vw, 2.8rem); letter-spacing: -.025em; }
-h3 { font-size: 1.15rem; }
-p { color: var(--muted); }
-.eyebrow {
-  color: var(--copper-light);
-  text-transform: uppercase;
-  letter-spacing: .17em;
-  font-size: .76rem;
-  font-weight: 800;
+a{color:var(--light)}
+button,input,select,textarea{font:inherit}
+button,a{touch-action:manipulation}
+button{cursor:pointer}
+.wrap{width:min(var(--max),calc(100% - 36px));margin:auto}
+section{padding:76px 0}
+section:nth-of-type(even){background:#151311}
+h1,h2,h3{line-height:1.2;margin-top:0}
+h1{font-size:clamp(2.7rem,8vw,5.4rem);letter-spacing:-.05em;margin-bottom:14px}
+h2{font-size:clamp(1.9rem,5vw,3rem);letter-spacing:-.03em}
+h3{font-size:1.14rem}
+p{color:var(--muted)}
+.eyebrow{
+  color:var(--light);font-size:.76rem;font-weight:800;
+  letter-spacing:.17em;text-transform:uppercase
 }
-.section-head { max-width: 720px; margin-bottom: 32px; }
-.section-head p { max-width: 680px; }
-.copper { color: var(--copper-light); }
-.muted { color: var(--muted); }
-.small { font-size: .88rem; }
-.card {
-  border: 1px solid var(--line);
-  background: linear-gradient(145deg, #211e1b, #181614);
-  border-radius: var(--radius);
-  padding: 24px;
+.copper{color:var(--light)}
+.small{font-size:.86rem}
+.section-head{max-width:760px;margin-bottom:32px}
+.section-head p{max-width:700px}
+.grid{display:grid;gap:18px}
+.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.card{
+  border:1px solid var(--line);border-radius:var(--radius);
+  background:linear-gradient(145deg,#211e1b,#181614);padding:24px
 }
-.grid { display: grid; gap: 18px; }
-.grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: 1px solid var(--copper);
-  background: var(--copper);
-  color: #17120e;
-  font-weight: 800;
-  padding: 12px 18px;
-  border-radius: 10px;
-  text-decoration: none;
-  transition: .2s ease;
+.btn{
+  display:inline-flex;justify-content:center;align-items:center;gap:8px;
+  border:1px solid var(--copper);border-radius:10px;
+  background:var(--copper);color:#17120e;text-decoration:none;
+  font-weight:800;padding:12px 18px;transition:.2s
 }
-.btn:hover { background: var(--copper-light); transform: translateY(-1px); }
-.btn-outline { background: transparent; color: var(--copper-light); }
-.btn-outline:hover { color: #17120e; }
-.btn-small { padding: 8px 12px; font-size: .9rem; }
-.btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
-header {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background: rgba(17,16,15,.96);
-  border-bottom: 1px solid var(--line);
-  backdrop-filter: blur(12px);
+.btn:hover{background:var(--light);transform:translateY(-1px)}
+.btn-outline{background:transparent;color:var(--light)}
+.btn-outline:hover{color:#17120e}
+.btn-small{padding:8px 12px;font-size:.88rem}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+header{
+  position:sticky;top:0;z-index:30;
+  background:rgba(17,16,15,.97);border-bottom:1px solid var(--line);
+  backdrop-filter:blur(12px)
 }
-.nav {
-  min-height: 76px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 18px;
+.nav{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--text);font-weight:900;letter-spacing:.08em}
+.brand-mark{
+  width:44px;height:44px;display:grid;place-items:center;
+  border:1px solid var(--copper);border-radius:12px;color:var(--light);
+  font-size:1.1rem;letter-spacing:-.08em
 }
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  color: var(--text);
-  text-decoration: none;
-  font-weight: 900;
-  letter-spacing: .08em;
+.brand small{display:block;color:var(--muted);font-size:.66rem;letter-spacing:.14em}
+.nav-links{display:flex;align-items:center;gap:18px}
+.nav-links a{text-decoration:none;color:var(--muted);font-size:.88rem}
+.nav-links a:hover{color:var(--light)}
+.menu-btn{display:none;background:transparent;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:8px 12px}
+.hero{
+  padding:92px 0 78px;
+  background:radial-gradient(ellipse at 82% 30%,rgba(199,139,90,.15),transparent 36%),linear-gradient(135deg,#11100f 45%,#1b1714)
 }
-.brand-mark {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border: 1px solid var(--copper);
-  color: var(--copper-light);
-  border-radius: 12px;
-  font-size: 1.1rem;
-  letter-spacing: -.08em;
+.hero-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:38px;align-items:center}
+.hero p{max-width:670px;font-size:1.04rem}
+.hero-panel{
+  min-height:330px;display:flex;flex-direction:column;justify-content:center;
+  align-items:center;text-align:center;border:1px solid var(--line);
+  border-radius:26px;background:radial-gradient(circle,rgba(199,139,90,.14),transparent 60%),#191613;padding:30px
 }
-.brand small { display: block; color: var(--muted); font-size: .68rem; letter-spacing: .14em; }
-.nav-links { display: flex; gap: 20px; align-items: center; }
-.nav-links a {
-  text-decoration: none;
-  color: var(--muted);
-  font-size: .9rem;
+.monogram{font-size:clamp(5rem,12vw,8rem);font-weight:900;color:var(--light);letter-spacing:-.12em;line-height:1;text-shadow:0 0 42px rgba(199,139,90,.2)}
+.rule{height:1px;width:65%;background:var(--copper);margin:24px 0 14px}
+.pills{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px}
+.pill{border:1px solid var(--line);border-radius:99px;padding:6px 11px;color:var(--muted);font-size:.82rem}
+.service-card{display:flex;flex-direction:column;align-items:flex-start}
+.service-icon{width:44px;height:44px;display:grid;place-items:center;border-radius:12px;background:rgba(199,139,90,.12);border:1px solid var(--line);color:var(--light);font-size:1.25rem;margin-bottom:17px}
+.service-card p{flex:1}
+details summary{cursor:pointer;color:var(--light);font-weight:700}
+details[open] summary{margin-bottom:10px}
+.portfolio-art{
+  min-height:160px;display:grid;place-items:center;border:1px solid var(--line);
+  border-radius:13px;margin-bottom:15px;color:var(--light);font-size:2.7rem;
+  background:linear-gradient(135deg,rgba(199,139,90,.18),transparent),repeating-linear-gradient(135deg,#28231f 0,#28231f 12px,#211d1a 12px,#211d1a 24px)
 }
-.nav-links a:hover { color: var(--copper-light); }
-.menu-btn {
-  display: none;
-  background: transparent;
-  color: var(--text);
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  padding: 8px 12px;
+.illustration-label{display:inline-block;font-size:.72rem;border:1px solid var(--line);padding:3px 8px;border-radius:99px;color:var(--muted);margin-bottom:10px}
+.price-highlight{font-size:clamp(2rem,5vw,3rem);color:var(--light);font-weight:900;line-height:1.2}
+.price-table{width:100%;border-collapse:collapse;min-width:560px}
+.price-table th,.price-table td{padding:12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.price-table th{color:var(--light)}
+.price-table td{color:var(--muted)}
+.table-scroll{overflow-x:auto}
+.notice{border:1px solid var(--line);border-left:4px solid var(--copper);border-radius:10px;padding:15px 17px;background:rgba(199,139,90,.06);color:var(--muted);margin:18px 0}
+.notice strong{color:var(--text)}
+.notice-danger{border-color:rgba(255,145,136,.5);border-left-color:var(--danger);background:rgba(255,145,136,.07)}
+.field{margin-bottom:16px}
+label{display:block;color:var(--text);font-size:.91rem;font-weight:650;margin-bottom:7px}
+input,select,textarea{
+  display:block;width:100%;color:var(--text);background:#100f0e;
+  border:1px solid #494038;border-radius:9px;padding:12px 13px;outline:none
 }
-.hero {
-  padding: 92px 0 78px;
-  background:
-    radial-gradient(ellipse at 82% 30%, rgba(199,139,90,.13), transparent 35%),
-    linear-gradient(135deg, #11100f 45%, #1b1714);
+input:focus,select:focus,textarea:focus{border-color:var(--copper);box-shadow:0 0 0 3px rgba(199,139,90,.12)}
+input[type=checkbox],input[type=radio]{width:auto;display:inline-block;accent-color:var(--copper)}
+textarea{min-height:125px;resize:vertical}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px}
+.full{grid-column:1/-1}
+.check-label{display:flex;gap:10px;align-items:flex-start;font-weight:400;color:var(--muted)}
+.hidden{display:none!important}
+.fault-step{border:1px solid var(--line);border-radius:13px;padding:18px;margin:14px 0;background:#171513}
+.fault-options{display:grid;gap:10px;margin-top:15px}
+.fault-option{display:flex;gap:11px;align-items:flex-start;padding:12px;border:1px solid #494038;border-radius:10px;cursor:pointer;color:var(--muted)}
+.fault-option:has(input:checked){border-color:var(--copper);background:rgba(199,139,90,.07)}
+.fault-option input{margin-top:6px;flex:0 0 auto}
+.step-nav{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+footer{padding:48px 0 24px;background:#0b0a09;border-top:1px solid var(--line)}
+.footer-grid{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:24px}
+footer a{text-decoration:none}
+.footer-bottom{border-top:1px solid var(--line);margin-top:28px;padding-top:20px;font-size:.82rem;color:var(--muted)}
+@media(max-width:900px){
+  .grid-3{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hero-grid{grid-template-columns:1fr}
+  .hero-panel{min-height:240px}
+  .nav-links{gap:10px}
 }
-.hero-grid { display: grid; grid-template-columns: 1.25fr .75fr; gap: 38px; align-items: center; }
-.hero p { max-width: 660px; font-size: 1.08rem; }
-.hero-panel {
-  min-height: 330px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  border: 1px solid var(--line);
-  border-radius: 26px;
-  background:
-    radial-gradient(circle, rgba(199,139,90,.14), transparent 60%),
-    #191613;
-  padding: 30px;
-}
-.hero-monogram {
-  color: var(--copper-light);
-  font-size: clamp(5rem, 12vw, 8rem);
-  font-weight: 900;
-  letter-spacing: -.12em;
-  line-height: 1;
-  text-shadow: 0 0 42px rgba(199,139,90,.16);
-}
-.hero-panel .rule { height: 1px; width: 65%; background: var(--copper); margin: 24px 0 14px; }
-.trust-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 25px; }
-.pill {
-  border: 1px solid var(--line);
-  border-radius: 100px;
-  padding: 7px 12px;
-  color: var(--muted);
-  font-size: .83rem;
-}
-.service-card { display: flex; flex-direction: column; align-items: flex-start; }
-.service-icon {
-  width: 44px; height: 44px; display: grid; place-items: center;
-  border-radius: 12px; background: rgba(199,139,90,.12);
-  border: 1px solid var(--line); color: var(--copper-light);
-  font-size: 1.25rem; margin-bottom: 18px;
-}
-.service-card p { flex: 1; }
-.service-card details { width: 100%; }
-details summary { cursor: pointer; color: var(--copper-light); font-weight: 700; }
-details[open] summary { margin-bottom: 10px; }
-.portfolio-art {
-  min-height: 165px;
-  border: 1px solid var(--line);
-  border-radius: 13px;
-  display: grid;
-  place-items: center;
-  background:
-    linear-gradient(135deg, rgba(199,139,90,.16), transparent),
-    repeating-linear-gradient(135deg, #28231f 0, #28231f 12px, #211d1a 12px, #211d1a 24px);
-  color: var(--copper-light);
-  font-size: 2.4rem;
-  margin-bottom: 16px;
-}
-.illustration-label {
-  display: inline-block;
-  font-size: .72rem;
-  border: 1px solid var(--line);
-  padding: 3px 8px;
-  border-radius: 100px;
-  color: var(--muted);
-  margin-bottom: 10px;
-}
-.price-highlight {
-  font-size: clamp(2rem, 5vw, 3rem);
-  color: var(--copper-light);
-  font-weight: 900;
-  line-height: 1.15;
-}
-.price-table { width: 100%; border-collapse: collapse; }
-.price-table th, .price-table td {
-  padding: 13px 12px;
-  border-bottom: 1px solid var(--line);
-  text-align: left;
-  vertical-align: top;
-}
-.price-table th { color: var(--copper-light); font-weight: 800; }
-.price-table td { color: var(--muted); }
-.table-scroll { overflow-x: auto; }
-.notice {
-  border: 1px solid var(--line);
-  border-left: 4px solid var(--copper);
-  border-radius: 10px;
-  padding: 15px 17px;
-  background: rgba(199,139,90,.06);
-  color: var(--muted);
-  margin: 18px 0;
-}
-.notice strong { color: var(--text); }
-.notice-danger {
-  border-color: rgba(255,130,120,.4);
-  border-left-color: var(--danger);
-  background: rgba(255,130,120,.06);
-}
-.field { margin-bottom: 16px; }
-label { display: block; color: var(--text); font-size: .92rem; font-weight: 650; margin-bottom: 7px; }
-input, select, textarea {
-  display: block;
-  width: 100%;
-  color: var(--text);
-  background: #100f0e;
-  border: 1px solid #494038;
-  border-radius: 9px;
-  padding: 12px 13px;
-  outline: none;
-}
-input:focus, select:focus, textarea:focus { border-color: var(--copper); box-shadow: 0 0 0 3px rgba(199,139,90,.12); }
-input[type="checkbox"] { width: auto; display: inline-block; accent-color: var(--copper); }
-.check-label { display: flex; align-items: flex-start; gap: 10px; font-weight: 400; color: var(--muted); }
-textarea { min-height: 125px; resize: vertical; }
-.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
-.full { grid-column: 1 / -1; }
-.hidden { display: none !important; }
-.fault-step { border: 1px solid var(--line); border-radius: 13px; padding: 18px; margin: 14px 0; background: #171513; }
-.fault-step h3 { margin-bottom: 8px; }
-.fault-options { display: grid; gap: 10px; margin-top: 15px; }
-.fault-option {
-  display: flex; gap: 11px; align-items: flex-start;
-  padding: 12px; border: 1px solid #494038; border-radius: 10px;
-  cursor: pointer; color: var(--muted);
-}
-.fault-option:has(input:checked) { border-color: var(--copper); background: rgba(199,139,90,.07); }
-.fault-option input { width: auto; margin-top: 5px; flex: 0 0 auto; }
-.fault-result { margin-top: 18px; padding: 18px; border-radius: 12px; border: 1px solid var(--line); }
-.fault-result h3 { color: var(--copper-light); }
-.step-nav { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
-footer { padding: 50px 0 24px; background: #0b0a09; border-top: 1px solid var(--line); }
-.footer-grid { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 24px; }
-footer a { text-decoration: none; }
-.footer-bottom { border-top: 1px solid var(--line); margin-top: 30px; padding-top: 20px; font-size: .82rem; color: var(--muted); }
-hr { border: 0; border-top: 1px solid var(--line); margin: 25px 0; }
-@media (max-width: 900px) {
-  .grid-4 { grid-template-columns: repeat(2, minmax(0,1fr)); }
-  .grid-3 { grid-template-columns: repeat(2, minmax(0,1fr)); }
-  .hero-grid { grid-template-columns: 1fr; }
-  .hero-panel { min-height: 250px; }
-  .nav-links { gap: 12px; }
-}
-@media (max-width: 680px) {
-  section { padding: 55px 0; }
-  .wrap { width: min(100% - 28px, var(--max)); }
-  .nav { min-height: 68px; }
-  .menu-btn { display: inline-block; }
-  .nav-links {
-    display: none; position: absolute; top: 68px; left: 0; right: 0;
-    padding: 18px 20px 22px; background: #11100f;
-    border-bottom: 1px solid var(--line); flex-direction: column; align-items: stretch;
+@media(max-width:680px){
+  section{padding:54px 0}
+  .wrap{width:calc(100% - 28px)}
+  .nav{min-height:68px}
+  .menu-btn{display:inline-block}
+  .nav-links{
+    display:none;position:absolute;top:68px;left:0;right:0;padding:18px 20px 22px;
+    background:#11100f;border-bottom:1px solid var(--line);
+    flex-direction:column;align-items:stretch
   }
-  .nav-links.open { display: flex; }
-  .nav-links a { padding: 8px 0; }
-  .nav-links .btn { text-align: center; }
-  .grid-2, .grid-3, .grid-4, .form-grid, .footer-grid { grid-template-columns: 1fr; }
-  .full { grid-column: auto; }
-  .hero { padding: 62px 0 55px; }
-  .hero-panel { min-height: 220px; }
-  .card { padding: 19px; }
-  .price-table th, .price-table td { padding: 10px 8px; font-size: .88rem; }
-  .btn { width: 100%; }
-  .btn-small { width: auto; }
-  .btn-row { flex-direction: column; }
+  .nav-links.open{display:flex}
+  .nav-links a{padding:8px 0}
+  .nav-links .btn{text-align:center}
+  .grid-2,.grid-3,.form-grid,.footer-grid{grid-template-columns:1fr}
+  .full{grid-column:auto}
+  .hero{padding:60px 0 52px}
+  .hero-panel{min-height:210px}
+  .card{padding:19px}
+  .btn{width:100%}
+  .btn-small{width:auto}
+  .btn-row{flex-direction:column}
+  .step-nav .btn{width:100%}
 }
 </style>
 </head>
@@ -333,24 +198,20 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 25px 0; }
     <div>
       <div class="eyebrow">Precíz villamos megoldások</div>
       <h1>VA <span class="copper">ELECTRO</span></h1>
-      <p class="copper">Precizitás. Biztonság. Megbízhatóság.</p>
-      <p>Villanyszerelési megoldások új építéshez, felújításhoz és hibakereséshez. Kérj ajánlatot, vagy indulj el a hibakereső ellenőrzőlistán, ha otthonodban nincs áram.</p>
+      <p class="copper"><strong>Precizitás. Biztonság. Megbízhatóság.</strong></p>
+      <p>Villanyszerelés új építéshez, felújításhoz és hibaelhárításhoz. Kérj ajánlatot, vagy használd a biztonságos hibakereső útmutatót.</p>
       <div class="btn-row">
         <a class="btn" href="#ajanlat">Árajánlatot kérek ↗</a>
         <a class="btn btn-outline" href="#hibakereses">Hibakeresés indítása</a>
       </div>
-      <div class="trust-row">
-        <span class="pill">Új hálózat</span>
-        <span class="pill">Hibaelhárítás</span>
-        <span class="pill">Elosztószekrény</span>
-        <span class="pill">EV-töltő</span>
+      <div class="pills">
+        <span class="pill">Új hálózat</span><span class="pill">Hibaelhárítás</span>
+        <span class="pill">Elosztószekrény</span><span class="pill">EV-töltő</span>
       </div>
     </div>
     <div class="hero-panel">
-      <div class="hero-monogram">VA</div>
-      <div class="rule"></div>
-      <strong>Vörös Ákos</strong>
-      <p>Villanyszerelés, átgondoltan.</p>
+      <div class="monogram">VA</div><div class="rule"></div>
+      <strong>Vörös Ákos</strong><p>Villanyszerelés, átgondoltan.</p>
     </div>
   </div>
 </section>
@@ -358,341 +219,161 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 25px 0; }
 <section id="szolgaltatasok">
   <div class="wrap">
     <div class="section-head">
-      <div class="eyebrow">Miben segíthetek?</div>
-      <h2>Szolgáltatások</h2>
-      <p>A pontos munkatartalom és a végleges ár minden esetben az igények, a helyszín és a meglévő hálózat állapota alapján határozható meg.</p>
+      <div class="eyebrow">Miben segíthetek?</div><h2>Szolgáltatások</h2>
+      <p>A végleges munkatartalom és ár az igények, a helyszín és a meglévő hálózat állapota alapján határozható meg.</p>
     </div>
     <div class="grid grid-3">
-      <article class="card service-card">
-        <div class="service-icon">⌁</div><h3>Új elektromos hálózat</h3>
-        <p>Új építésű házak és lakások villamos hálózatának kiépítése, átgondolt áramkörökkel és elhelyezéssel.</p>
-        <details><summary>Mit tartalmazhat?</summary><p>Vezetékek, védőcsövek, szerelvénydobozok, dugalj- és kapcsolóhelyek kialakítása a megállapodott csomag szerint. Az elosztószekrény és egyes külön áramkörök külön tételt jelenthetnek.</p></details>
-        <a class="btn btn-outline btn-small" href="#arak">Csomag megtekintése</a>
-      </article>
-      <article class="card service-card">
-        <div class="service-icon">↻</div><h3>Teljes hálózatfelújítás</h3>
-        <p>Régi vezetékek és szerelvények korszerűsítése, a meglévő hálózat állapotának figyelembevételével.</p>
-        <details><summary>Fontos tudnivalók</summary><p>A falazat, a régi vezetékek, a hozzáférés és az elosztószekrény állapota jelentősen befolyásolhatja a munkát. Ezért felújításra külön felmérés szükséges.</p></details>
-        <a class="btn btn-outline btn-small" href="#ajanlat">Ajánlatot kérek</a>
-      </article>
-      <article class="card service-card">
-        <div class="service-icon">⌕</div><h3>Hibakeresés és hibaelhárítás</h3>
-        <p>Áramkimaradás, leoldó kismegszakító vagy FI-relé, illetve hibás dugalj esetén a hiba okának felderítése.</p>
-        <details><summary>Hogyan induljunk?</summary><p>Először a biztonságos, otthon is elvégezhető ellenőrzéseket mutatjuk meg. Ha veszélyre utaló jelet tapasztalsz, ne folytasd a vizsgálatot.</p></details>
-        <a class="btn btn-outline btn-small" href="#hibakereses">Ellenőrzőlista</a>
-      </article>
-      <article class="card service-card">
-        <div class="service-icon">▤</div><h3>Elosztószekrény</h3>
-        <p>Elosztószekrény kiépítése, cseréje, rendezése és korszerűsítése.</p>
-        <details><summary>Mikor érdemes?</summary><p>Ha bővítésre, új áramkörökre, korszerűbb védelemre vagy a meglévő elosztó felülvizsgálatára van szükség.</p></details>
-        <a class="btn btn-outline btn-small" href="#ajanlat">Ajánlatot kérek</a>
-      </article>
-      <article class="card service-card">
-        <div class="service-icon">☼</div><h3>Világítás, kapcsolók, dugaljak</h3>
-        <p>Lámpakiállások, kapcsolók és dugaljak szerelése, cseréje, bővítése.</p>
-        <details><summary>Mi számít külön tételnek?</summary><p>A lámpatestek, különleges szerelvények, új vezetéknyomvonalak és a csomagban foglalt mennyiséget meghaladó kiállások külön egyeztetést igényelnek.</p></details>
-        <a class="btn btn-outline btn-small" href="#ajanlat">Ajánlatot kérek</a>
-      </article>
-      <article class="card service-card">
-        <div class="service-icon">⇣</div><h3>Földkábel fektetése</h3>
-        <p>Kültéri villamos nyomvonalak és földkábelezési munkák tervezett kialakítása.</p>
-        <details><summary>A felmérésnél</summary><p>A nyomvonal, a távolság, a talaj, a szükséges védelem és az esetleges földmunka alapján készül az árajánlat.</p></details>
-        <a class="btn btn-outline btn-small" href="#ajanlat">Ajánlatot kérek</a>
-      </article>
-      <article class="card service-card">
-        <div class="service-icon">✓</div><h3>Villamos biztonsági felülvizsgálat</h3>
-        <p>Villamos berendezések biztonsági felülvizsgálatának egyeztetése és ajánlatkérés.</p>
-        <details><summary>Mi kell az ajánlathoz?</summary><p>Az ingatlan típusa, mérete, a hálózat jellege és a felülvizsgálat célja. A szükséges jogosultság és a konkrét munkatartalom előzetes egyeztetést igényel.</p></details>
-        <a class="btn btn-outline btn-small" href="#ajanlat">Ajánlatot kérek</a>
-      </article>
-      <article class="card service-card">
-        <div class="service-icon">⚡</div><h3>Elektromosautó-töltő</h3>
-        <p>Otthoni elektromosautó-töltő kiépítésének előzetes felmérése és ajánlatadása.</p>
-        <details><summary>Mit kell megadni?</summary><p>A töltő típusa, a rendelkezésre álló teljesítmény, a mérőhely és a parkoló közötti távolság segít a pontosabb ajánlat elkészítésében.</p></details>
-        <a class="btn btn-outline btn-small" href="#ajanlat">Ajánlatot kérek</a>
-      </article>
-      <article class="card service-card">
-        <div class="service-icon">＋</div><h3>Kisebb villanyszerelési munkák</h3>
-        <p>Kisebb javítások, szerelvénycserék és egyéb villamos munkák egyedi egyeztetéssel.</p>
-        <details><summary>Hogyan kérj árat?</summary><p>Írd le a feladatot, a helyszínt és a darabszámot az ajánlatkérő űrlapon. Fotót is csatolhatsz.</p></details>
-        <a class="btn btn-outline btn-small" href="#ajanlat">Ajánlatot kérek</a>
-      </article>
+      <article class="card service-card"><div class="service-icon">⌁</div><h3>Új elektromos hálózat</h3><p>Új építésű házak és lakások villamos hálózatának kiépítése.</p><details><summary>Mit tartalmazhat?</summary><p>Vezetékek, védőcsövek, szerelvénydobozok és a megbeszélt mennyiségű kiállások. Az elosztószekrény és külön áramkörök külön tételt jelenthetnek.</p></details><a class="btn btn-outline btn-small" href="#arak">Csomag megtekintése</a></article>
+      <article class="card service-card"><div class="service-icon">↻</div><h3>Teljes hálózatfelújítás</h3><p>Régi vezetékek és szerelvények korszerűsítése.</p><details><summary>Fontos tudnivalók</summary><p>A falazat, a hozzáférés és a meglévő hálózat állapota miatt külön felmérés szükséges.</p></details><a class="btn btn-outline btn-small" href="#ajanlat">Ajánlatot kérek</a></article>
+      <article class="card service-card"><div class="service-icon">⌕</div><h3>Hibakeresés és hibaelhárítás</h3><p>Áramkimaradás, leoldó kismegszakító vagy FI-relé, hibás dugalj.</p><details><summary>Hogyan induljunk?</summary><p>Először a biztonságot ellenőrizd. Veszélyre utaló jel esetén ne folytasd az otthoni vizsgálatot.</p></details><a class="btn btn-outline btn-small" href="#hibakereses">Ellenőrzőlista</a></article>
+      <article class="card service-card"><div class="service-icon">▤</div><h3>Elosztószekrény</h3><p>Kiépítés, csere, bővítés és korszerűsítés.</p><details><summary>Mikor érdemes?</summary><p>Új áramkörök, bővítés vagy korszerűbb védelem igénye esetén.</p></details><a class="btn btn-outline btn-small" href="#ajanlat">Ajánlatot kérek</a></article>
+      <article class="card service-card"><div class="service-icon">☼</div><h3>Világítás, kapcsolók, dugaljak</h3><p>Lámpakiállások, kapcsolók és dugaljak szerelése, cseréje.</p><details><summary>Mi lehet külön tétel?</summary><p>Lámpatestek, különleges szerelvények és a csomagban foglalt mennyiségen felüli kiállások.</p></details><a class="btn btn-outline btn-small" href="#ajanlat">Ajánlatot kérek</a></article>
+      <article class="card service-card"><div class="service-icon">⇣</div><h3>Földkábel fektetése</h3><p>Kültéri villamos nyomvonalak és földkábelezés.</p><details><summary>A felmérésnél</summary><p>A hossz, a nyomvonal, a talaj és az esetleges földmunka befolyásolja az árat.</p></details><a class="btn btn-outline btn-small" href="#ajanlat">Ajánlatot kérek</a></article>
+      <article class="card service-card"><div class="service-icon">✓</div><h3>Villamos biztonsági felülvizsgálat</h3><p>Felülvizsgálat igényének egyeztetése és ajánlatkérés.</p><details><summary>Mi kell az ajánlathoz?</summary><p>Ingatlantípus, méret, a felülvizsgálat célja és a szükséges jogosultságok tisztázása.</p></details><a class="btn btn-outline btn-small" href="#ajanlat">Ajánlatot kérek</a></article>
+      <article class="card service-card"><div class="service-icon">⚡</div><h3>Elektromosautó-töltő</h3><p>Otthoni töltő kiépítésének előzetes felmérése.</p><details><summary>Mit kell megadni?</summary><p>Töltőteljesítmény, fázisok, távolság, parkoló és a meglévő villamos kapacitás.</p></details><a class="btn btn-outline btn-small" href="#ajanlat">Ajánlatot kérek</a></article>
+      <article class="card service-card"><div class="service-icon">＋</div><h3>Kisebb villanyszerelési munkák</h3><p>Kisebb javítások, szerelvénycserék és egyéb feladatok.</p><details><summary>Hogyan kérj árat?</summary><p>Írd le a feladatot és a darabszámot. Fényképet is csatolhatsz az ajánlatkéréshez.</p></details><a class="btn btn-outline btn-small" href="#ajanlat">Ajánlatot kérek</a></article>
     </div>
   </div>
 </section>
 
-<!-- A korábbi megbeszélés szerint a Munkáim rész megelőzi az árlistát. -->
 <section id="munkak">
   <div class="wrap">
-    <div class="section-head">
-      <div class="eyebrow">Munkáim</div>
-      <h2>Megoldások a gyakorlatban</h2>
-      <p>Amíg saját referenciaképek nem kerülnek fel, az alábbi kártyák kizárólag illusztrációk. Nem valódi, saját munkaként bemutatott fotók.</p>
-    </div>
+    <div class="section-head"><div class="eyebrow">Munkáim</div><h2>Megoldások a gyakorlatban</h2><p>Amíg saját referenciaképek nem kerülnek fel, ezek a kártyák illusztrációk, nem saját munkaként bemutatott fotók.</p></div>
     <div class="grid grid-3">
-      <article class="card">
-        <div class="portfolio-art" aria-hidden="true">▤</div>
-        <span class="illustration-label">Illusztráció</span>
-        <h3>Elosztószekrény</h3>
-        <p>Rendezett, feliratozott áramkörök és átgondolt védelem – a konkrét kialakítás mindig az adott hálózattól függ.</p>
-        <details><summary>További részletek</summary><p>Az ajánlathoz hasznos az elosztó külső, zárt állapotban készült fényképe. Ne vedd le a burkolatot fotózás miatt!</p></details>
-      </article>
-      <article class="card">
-        <div class="portfolio-art" aria-hidden="true">⌁</div>
-        <span class="illustration-label">Illusztráció</span>
-        <h3>Új hálózat kiépítése</h3>
-        <p>Nyomvonalak és kiállások kialakítása a helyiségek használatához igazítva.</p>
-        <details><summary>További részletek</summary><p>A kiállások mennyiségét és helyét a kivitelezés előtt egyeztetjük.</p></details>
-      </article>
-      <article class="card">
-        <div class="portfolio-art" aria-hidden="true">⚡</div>
-        <span class="illustration-label">Illusztráció</span>
-        <h3>EV-töltő előkészítése</h3>
-        <p>Otthoni töltési lehetőség kialakítása az ingatlan villamos adottságai alapján.</p>
-        <details><summary>További részletek</summary><p>A teljesítmény, a vezetékút és a védelem meghatározása felmérést igényel.</p></details>
-      </article>
+      <article class="card"><div class="portfolio-art">▤</div><span class="illustration-label">Illusztráció – nem saját munkafotó</span><h3>Elosztószekrény</h3><p>Átgondolt áramkörök és a feladathoz igazított védelem.</p><details><summary>További részletek</summary><p>Az ajánlathoz hasznos lehet a zárt elosztóról készült fénykép. Fotózás miatt ne vedd le a burkolatot!</p></details></article>
+      <article class="card"><div class="portfolio-art">⌁</div><span class="illustration-label">Illusztráció – nem saját munkafotó</span><h3>Új hálózat</h3><p>Nyomvonalak és kiállások a helyiségek használatához igazítva.</p><details><summary>További részletek</summary><p>A kiállások mennyiségét és helyét a kivitelezés előtt egyeztetjük.</p></details></article>
+      <article class="card"><div class="portfolio-art">⚡</div><span class="illustration-label">Illusztráció – nem saját munkafotó</span><h3>EV-töltő előkészítése</h3><p>Otthoni töltés az ingatlan villamos adottságai alapján.</p><details><summary>További részletek</summary><p>A teljesítmény, a vezetékút és a védelem meghatározása felmérést igényel.</p></details></article>
     </div>
-    <div class="notice"><strong>Referenciák később:</strong> amikor lesznek saját, engedéllyel közzétehető képeid, ezeket az illusztrációkat le lehet cserélni, és a munkákat kategóriákba rendezhetjük.</div>
   </div>
 </section>
 
 <section id="arak">
   <div class="wrap">
-    <div class="section-head">
-      <div class="eyebrow">Árlista és előzetes kalkuláció</div>
-      <h2>Átláthatóbb tervezés</h2>
-      <p>A kalkulátor tájékoztató jellegű. A végleges árhoz a munkatartalom és a helyszín ismerete szükséges.</p>
-    </div>
-
+    <div class="section-head"><div class="eyebrow">Átlátható árképzés</div><h2>Árak és előzetes kalkulátor</h2><p>Az alábbi kalkulátor tájékoztató jellegű. Nem helyettesíti a helyszíni felmérést és a tételes ajánlatot.</p></div>
     <div class="grid grid-2">
       <div class="card">
-        <h3>Új építésű ingatlan – alapcsomag</h3>
+        <h3>Új építésű alapcsomag</h3>
         <div class="price-highlight">20 000 Ft/m²</div>
-        <p>Tájékoztató alapár, amely munkadíjat és a megadott mennyiségek szerinti, előre egyeztetett alapanyagokat tartalmazza.</p>
-        <div class="notice">
-          <strong>Az alapcsomag feltételei</strong>
-          <ul>
-            <li>Új építésű ház vagy lakás.</li>
-            <li>Hagyományos tégla- vagy pórusbeton falazat.</li>
-            <li>Rejtett, falban vezetett szerelés.</li>
-            <li>Falhorony kialakítása benne van; a fal javítása, vakolása és festése nincs.</li>
-            <li>Középkategóriás, fehér kapcsolók és dugaljak, a csomag szerinti mennyiségben.</li>
-            <li>Normál dugalj- és világítási áramkörök, kiállások és alapvető ellenőrzések.</li>
-          </ul>
-        </div>
-        <h3>Nem része az alapárnak</h3>
-        <ul class="muted">
-          <li>Elosztószekrény és védelmi készülékei.</li>
-          <li>Sütő, főzőlap, bojler vagy klíma külön áramköre.</li>
-          <li>Lámpatestek és különleges szerelvények.</li>
-          <li>A csomag mennyiségét meghaladó kiállások és anyagok.</li>
-          <li>Faljavítás, vakolás, festés.</li>
-          <li>Villamos biztonsági felülvizsgálat (VBF).</li>
-        </ul>
+        <p>Előzetes munkadíj- és alapanyagcsomag hagyományos tégla vagy pórusbeton falazatú, rejtett szerelésű új építéshez.</p>
+        <div class="notice"><strong>Az ár nem minden villamos munkát foglal magában.</strong><br>Falhorony kialakítása benne lehet, de a faljavítás és felület-helyreállítás nem. A lámpatestek, elosztószekrény és védelmi készülékek, külön nagyfogyasztói áramkörök és az egyedi igények külön ajánlatba kerülnek.</div>
+        <p class="small">A tényleges anyagok, mennyiségek és műszaki tartalom a felmérés során véglegesíthetők.</p>
       </div>
-
       <div class="card">
-        <h3>Alapcsomag-kalkulátor</h3>
-        <p>Válaszd ki a munka típusát és az ingatlan mérettartományát.</p>
-        <div class="field">
-          <label for="workType">Munka típusa</label>
-          <select id="workType">
-            <option value="new">Új építésű ingatlan teljes hálózata</option>
-            <option value="renovation">Meglévő ingatlan teljes felújítása</option>
-          </select>
+        <h3>Számold ki a tájékoztató összeget</h3>
+        <div class="field"><label for="workType">Munka típusa</label><select id="workType"><option value="new">Új építésű alapcsomag</option><option value="renovation">Teljes hálózatfelújítás</option></select></div>
+        <div class="field"><label for="areaRange">Ingatlan mérete</label><select id="areaRange"><option value="50">Legfeljebb 50 m²</option><option value="60">50–60 m²</option><option value="70" selected>60–70 m²</option><option value="80">70–80 m²</option><option value="90">80–90 m²</option><option value="100">90–100 m²</option><option value="120">100–120 m²</option><option value="over">120 m² felett</option></select></div>
+        <div class="price-highlight" id="estimatePrice" aria-live="polite">1 400 000 Ft</div>
+        <p id="estimateText">Előzetes becslés.</p>
+        <hr>
+        <div class="grid grid-3">
+          <div><span class="small">Dugaljkeret</span><h3 id="socketQty">23 db</h3></div>
+          <div><span class="small">Kapcsolókeret</span><h3 id="switchQty">9 db</h3></div>
+          <div><span class="small">Világítási kiállás</span><h3 id="lightQty">9 db</h3></div>
         </div>
-        <div class="field">
-          <label for="areaRange">Ingatlan alapterülete</label>
-          <select id="areaRange">
-            <option value="50">50 m²-ig</option>
-            <option value="60">50–60 m²</option>
-            <option value="70">60–70 m²</option>
-            <option value="80">70–80 m²</option>
-            <option value="90" selected>80–90 m²</option>
-            <option value="100">90–100 m²</option>
-            <option value="120">100–120 m²</option>
-            <option value="over">120 m² felett</option>
-          </select>
-        </div>
-        <div id="estimateBox" aria-live="polite">
-          <div class="notice">
-            <div class="small">Előzetes becslés a kiválasztott felső határral</div>
-            <div class="price-highlight" id="estimatePrice">1 800 000 Ft</div>
-            <p id="estimateText">90 m² × 20 000 Ft/m². Új építésű alapcsomag.</p>
-          </div>
-        </div>
-        <h3>A csomagban foglalt kiállások</h3>
-        <div class="table-scroll">
-          <table class="price-table">
-            <tbody>
-              <tr><th>Dugalj</th><td id="socketQty">30 db</td></tr>
-              <tr><th>Kapcsoló</th><td id="switchQty">12 db</td></tr>
-              <tr><th>Világítási kiállás</th><td id="lightQty">12 db</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p class="small">A kiválasztott mérettartomány felső értékével számolunk. 120 m² felett egyedi ajánlat szükséges. A kiállások tájékoztató csomagkeretek; a végleges tételes tartalom egyeztetendő.</p>
-        <div class="btn-row">
-          <a class="btn" href="#ajanlat" id="estimateRequest">Ezzel kérek ajánlatot</a>
-        </div>
+        <p class="small">A kiállásszám tervezési keret, nem helyiségenkénti terv. A pontos elhelyezés és a külön áramkörök egyeztetést igényelnek.</p>
+        <div class="field"><label for="travelKm">Egyirányú távolság Kaposvártól (km)</label><input type="number" min="0" max="500" id="travelKm" value="0"></div>
+        <p id="travelText" class="small">Az első 15 km díjmentes. E fölött a teljes oda-vissza távolság 200 Ft/km alapján számolunk.</p>
+        <div class="notice">A kalkulátor nem tartalmaz automatikus felújítási árat. Felújításnál minden esetben egyedi felmérés szükséges.</div>
+        <button class="btn" id="estimateRequest" type="button">Ezt kérem az ajánlatkérésbe</button>
       </div>
     </div>
-
     <div class="card" style="margin-top:20px">
-      <h3>Kiállási mennyiségek – jelenlegi kalkulációs táblázat</h3>
-      <div class="table-scroll">
-        <table class="price-table">
-          <thead><tr><th>Alapterület</th><th>Dugalj</th><th>Kapcsoló</th><th>Világítási kiállás</th></tr></thead>
-          <tbody>
-            <tr><td>50 m²-ig</td><td>18</td><td>7</td><td>7</td></tr>
-            <tr><td>50–60 m²</td><td>20</td><td>8</td><td>8</td></tr>
-            <tr><td>60–70 m²</td><td>23</td><td>9</td><td>9</td></tr>
-            <tr><td>70–80 m²</td><td>26</td><td>10</td><td>10</td></tr>
-            <tr><td>80–90 m²</td><td>30</td><td>12</td><td>12</td></tr>
-            <tr><td>90–100 m²</td><td>33</td><td>13</td><td>13</td></tr>
-            <tr><td>100–120 m²</td><td>38</td><td>15</td><td>15</td></tr>
-            <tr><td>120 m² felett</td><td colspan="3">Egyedi felmérés és kiállási terv szükséges.</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="small">Ezek a mennyiségek a jelenlegi tervezetben szerepelnek; közzététel előtt érdemes véglegesíteni őket. A 60–70 m²-es tartományban a világítási kiállások száma 9 db.</p>
+      <h3>Tájékoztató mennyiségi keret új építéshez</h3>
+      <div class="table-scroll"><table class="price-table">
+        <thead><tr><th>Alapterület</th><th>Dugalj</th><th>Kapcsoló</th><th>Világítási kiállás</th></tr></thead>
+        <tbody>
+          <tr><td>Legfeljebb 50 m²</td><td>18</td><td>7</td><td>7</td></tr>
+          <tr><td>50–60 m²</td><td>20</td><td>8</td><td>8</td></tr>
+          <tr><td>60–70 m²</td><td>23</td><td>9</td><td>9</td></tr>
+          <tr><td>70–80 m²</td><td>26</td><td>10</td><td>10</td></tr>
+          <tr><td>80–90 m²</td><td>30</td><td>12</td><td>12</td></tr>
+          <tr><td>90–100 m²</td><td>33</td><td>13</td><td>13</td></tr>
+          <tr><td>100–120 m²</td><td>38</td><td>15</td><td>15</td></tr>
+          <tr><td>120 m² felett</td><td colspan="3">Egyedi felmérés és ajánlat</td></tr>
+        </tbody>
+      </table></div>
+      <div class="notice"><strong>Külön tétel lehet:</strong> lámpatest, elosztószekrény és védelmi készülékek, sütő/főzőlap/bojler/klíma külön áramköre, VBF, faljavítás, a kereten felüli mennyiség és a különleges szerelvények.</div>
+      <p><strong>Felújítás:</strong> egyedi felmérés alapján, nem a 20 000 Ft/m²-es újépítésű csomag szerint.</p>
+      <p><strong>Kiszállás:</strong> Kaposvártól az első 15 km díjmentes; ezen túl 200 Ft/km a teljes oda-vissza út minden kilométerére. Például 20 km egy irányban: 40 km × 200 Ft = 8 000 Ft.</p>
     </div>
-
-    <div class="grid grid-2" style="margin-top:20px">
-      <div class="card">
-        <h3>Meglévő ingatlan felújítása</h3>
-        <p>A teljes hálózatfelújítás ára nem azonos automatikusan az új építésű alapcsomagéval. A meglévő vezetékek, falak, hozzáférés, bontás és az elosztó állapota miatt egyedi felmérés szükséges.</p>
-        <a class="btn btn-outline" href="#ajanlat">Felújítási ajánlatot kérek</a>
-      </div>
-      <div class="card">
-        <h3>Kiszállás</h3>
-        <p>Kaposvártól számított 15 km-en belül a tervezett feltétel szerint díjmentes. Ezen túl 200 Ft/km a teljes oda-vissza távolság alapján.</p>
-        <p class="small">Példa: 20 km egyirányú távolság esetén 40 km oda-vissza × 200 Ft = 8 000 Ft. A végleges feltételt az ajánlatban kell rögzíteni.</p>
-      </div>
-    </div>
-    <div class="notice"><strong>Fontos:</strong> az árkalkuláció nem végleges árajánlat, nem tartalmazza automatikusan a külön feltüntetett tételeket, a helyszíni felmérés pedig módosíthatja a munkatartalmat.</div>
   </div>
 </section>
 
 <section id="hibakereses">
   <div class="wrap">
-    <div class="section-head">
-      <div class="eyebrow">Segítő ellenőrzőlista</div>
-      <h2>Hibakeresés otthon – biztonságosan</h2>
-      <p>Válaszolj a kérdésekre sorban. A cél, hogy kiderüljön, valószínűleg hálózati áramszünetről vagy az ingatlanon belüli hibáról van-e szó.</p>
-    </div>
-
-    <div class="notice notice-danger">
-      <strong>Biztonság az első!</strong>
-      Ha füstöt, szikrázást, égett szagot, sercegést, forró vagy sérült szerelvényt, áramütést vagy beázást észlelsz, ne folytasd a listát. Ne érints meg semmilyen sérült berendezést, és ne bonts burkolatot. Közvetlen veszély esetén távolodj el a helyszíntől, és szükség szerint hívd a 112-t.
-    </div>
-
+    <div class="section-head"><div class="eyebrow">Biztonság az első</div><h2>Hibakereső útmutató</h2><p>Az útmutató segít eldönteni, mi legyen a következő biztonságos lépés. Nem helyettesíti a villanyszerelői vizsgálatot, és nem garantálja az áram visszaállítását.</p></div>
+    <div class="notice notice-danger"><strong>Azonnali veszély esetén állj meg!</strong> Füst, tűz, szikrázás, égett szag, sercegés, forró vagy elszíneződött elosztó, beázás, sérült vagy szabad vezeték, illetve áramütésérzet esetén ne érj a berendezéshez. Távolodj el; közvetlen veszély vagy tűz esetén hívd a 112-t.</div>
     <div class="card">
       <div id="faultStart">
-        <h3>1. Milyen jellegű a hiba?</h3>
+        <h3>1. Milyen problémát tapasztalsz?</h3>
         <div class="fault-options">
-          <label class="fault-option"><input type="radio" name="faultType" value="whole"> Az egész házban/lakásban nincs áram.</label>
-          <label class="fault-option"><input type="radio" name="faultType" value="part"> Csak egy helyiségben vagy néhány dugaljnál nincs áram.</label>
-          <label class="fault-option"><input type="radio" name="faultType" value="breaker"> Leoldott egy kismegszakító vagy a FI-relé.</label>
-          <label class="fault-option"><input type="radio" name="faultType" value="other"> Más jellegű a hiba, például villog a világítás vagy egy eszköz nem működik.</label>
+          <label class="fault-option"><input type="radio" name="faultType" value="whole"><span>Az egész házban vagy lakásban nincs áram.</span></label>
+          <label class="fault-option"><input type="radio" name="faultType" value="part"><span>Csak néhány helyiségben, dugaljnál vagy lámpánál nincs áram.</span></label>
+          <label class="fault-option"><input type="radio" name="faultType" value="breaker"><span>Leoldott egy kismegszakító vagy a FI-relé.</span></label>
+          <label class="fault-option"><input type="radio" name="faultType" value="other"><span>Más hiba: villogó fény, hibás szerelvény vagy egyéb probléma.</span></label>
         </div>
-        <div class="step-nav"><button class="btn" type="button" id="startFault">Tovább</button></div>
+        <button class="btn" id="startFault" type="button" style="margin-top:18px">Biztonsági ellenőrzés indítása</button>
       </div>
-
-      <div id="faultWizard" class="hidden" aria-live="polite"></div>
+      <div id="faultWizard" class="hidden"></div>
       <div id="faultResult" class="hidden" aria-live="polite"></div>
+      <input type="hidden" id="formFault" value="Nem használta a hibakeresőt">
     </div>
   </div>
 </section>
 
 <section id="ajanlat">
   <div class="wrap">
-    <div class="section-head">
-      <div class="eyebrow">Kapcsolat</div>
-      <h2>Kérj árajánlatot</h2>
-      <p>Írd le röviden, mire van szükséged. Minél pontosabb a leírás, annál könnyebb előkészíteni az egyeztetést.</p>
-    </div>
-
-    <div class="grid grid-2">
-      <div class="card">
-        <h3>Ajánlatkérő űrlap</h3>
-        <form action="https://formsubmit.co/vaelectrik@gmail.com" method="POST" enctype="multipart/form-data">
-          <input type="hidden" name="_subject" value="Új VA ELECTRO árajánlatkérés">
-          <input type="hidden" name="_template" value="table">
-          <input type="hidden" name="_captcha" value="true">
-          <input type="hidden" name="Kalkulátor becslése" id="formEstimate" value="Nem választott kalkulációt">
-          <input type="hidden" name="Hibakereső összefoglaló" id="formFault" value="Nem használta a hibakeresőt">
-
-          <div class="form-grid">
-            <div class="field">
-              <label for="name">Név *</label>
-              <input id="name" name="Név" autocomplete="name" required>
-            </div>
-            <div class="field">
-              <label for="phone">Telefonszám *</label>
-              <input id="phone" name="Telefonszám" type="tel" autocomplete="tel" required>
-            </div>
-            <div class="field">
-              <label for="email">E-mail-cím *</label>
-              <input id="email" name="E-mail" type="email" autocomplete="email" required>
-            </div>
-            <div class="field">
-              <label for="town">Település *</label>
-              <input id="town" name="Település" autocomplete="address-level2" required>
-            </div>
-            <div class="field full">
-              <label for="job">Milyen munkára kérsz ajánlatot? *</label>
-              <select id="job" name="Munka típusa" required>
-                <option value="">Válassz...</option>
-                <option>Új elektromos hálózat</option>
-                <option>Teljes hálózatfelújítás</option>
-                <option>Hibakeresés / hibaelhárítás</option>
-                <option>Elosztószekrény</option>
-                <option>Világítás, kapcsolók, dugaljak</option>
-                <option>Földkábel fektetése</option>
-                <option>Villamos biztonsági felülvizsgálat</option>
-                <option>Elektromosautó-töltő</option>
-                <option>Kisebb villanyszerelési munka</option>
-                <option>Egyéb</option>
-              </select>
-            </div>
-            <div class="field full">
-              <label for="description">A munka leírása *</label>
-              <textarea id="description" name="Munka leírása" placeholder="Mi a feladat, mekkora az ingatlan, mi a tapasztalt hiba, és mikor lenne aktuális a munka?" required></textarea>
-            </div>
-            <div class="field full">
-              <label for="photo">Fénykép csatolása (nem kötelező)</label>
-              <input id="photo" type="file" name="attachment" accept="image/*">
-              <p class="small">Csak a munkához kapcsolódó képet tölts fel. Ne bonts burkolatot, és ne nyúlj elektromos berendezésbe fényképezés miatt.</p>
-            </div>
-            <div class="field full">
-              <label class="check-label">
-                <input type="checkbox" name="Adatkezelési tájékoztató elfogadása" value="Elfogadva" required>
-                <span>Hozzájárulok ahhoz, hogy az adataimat az árajánlatkérés megválaszolása céljából kezeljék. *</span>
-              </label>
-              <p class="small">Az űrlap élesítése előtt itt el kell helyezni a vállalkozás tényleges adatkezelési tájékoztatójának linkjét.</p>
-            </div>
-            <div class="field full">
-              <button class="btn" type="submit">Árajánlatkérés elküldése ↗</button>
-              <p class="small">Az űrlap a FormSubmit szolgáltatáson keresztül küldi el az adatokat. Első használatkor e-mailes megerősítésre lehet szükség.</p>
-            </div>
+    <div class="section-head"><div class="eyebrow">Kapcsolatfelvétel</div><h2>Kérj személyre szabott ajánlatot</h2><p>Válaszd ki a szolgáltatást. Az űrlap az adott munkához kapcsolódó kérdéseket jeleníti meg, hogy minél pontosabban meg tudd adni az igényeidet.</p></div>
+    <div class="card">
+      <form id="quoteForm" action="https://formsubmit.co/vaelectrik@gmail.com" method="POST" enctype="multipart/form-data" accept-charset="UTF-8">
+        <input type="hidden" name="_subject" value="Új ajánlatkérés – VA ELECTRO">
+        <input type="hidden" name="_template" value="table">
+        <input type="hidden" name="_captcha" value="true">
+        <input type="hidden" name="Kalkulátor eredménye" id="formEstimate" value="Nem használt kalkulátort">
+        <input type="hidden" name="Hibakereső összefoglaló" id="formFaultSubmit" value="Nem használta a hibakeresőt">
+        <div class="form-grid">
+          <div class="field"><label for="name">Név *</label><input id="name" name="Név" autocomplete="name" required maxlength="100"></div>
+          <div class="field"><label for="phone">Telefonszám *</label><input id="phone" name="Telefonszám" type="tel" autocomplete="tel" required maxlength="40" placeholder="+36 ..."></div>
+          <div class="field"><label for="email">E-mail-cím *</label><input id="email" name="E-mail" type="email" autocomplete="email" required maxlength="150"></div>
+          <div class="field"><label for="town">Település *</label><input id="town" name="Település" autocomplete="address-level2" required maxlength="100" placeholder="Pl. Kaposvár"></div>
+          <div class="field full"><label for="service">Milyen munkához kérsz ajánlatot? *</label>
+            <select id="service" name="Szolgáltatás" required>
+              <option value="">Válassz szolgáltatást</option>
+              <option value="Új elektromos hálózat">Új elektromos hálózat</option>
+              <option value="Teljes hálózatfelújítás">Teljes hálózatfelújítás</option>
+              <option value="Hibakeresés és hibaelhárítás">Hibakeresés és hibaelhárítás</option>
+              <option value="Elosztószekrény">Elosztószekrény</option>
+              <option value="Világítás, kapcsolók, dugaljak">Világítás, kapcsolók, dugaljak</option>
+              <option value="Földkábel fektetése">Földkábel fektetése</option>
+              <option value="Villamos biztonsági felülvizsgálat">Villamos biztonsági felülvizsgálat</option>
+              <option value="Elektromosautó-töltő">Elektromosautó-töltő kiépítése</option>
+              <option value="Kisebb villanyszerelési munkák">Kisebb villanyszerelési munkák</option>
+              <option value="Egyéb">Egyéb</option>
+            </select>
           </div>
-        </form>
-      </div>
+        </div>
 
-      <div class="card">
-        <h3>Elérhetőségek</h3>
-        <p>Vörös Ákos</p>
-        <p><strong class="copper">VA ELECTRO</strong></p>
-        <hr>
-        <p>Telefon</p>
-        <p><a href="tel:+36303933196">+36 30 393 3196</a></p>
-        <p>E-mail</p>
-        <p><a href="mailto:vaelectrik@gmail.com">vaelectrik@gmail.com</a></p>
-        <hr>
-        <p class="copper">Precizitás. Biztonság. Megbízhatóság.</p>
-        <p class="small">A munkavégzés helyét és az elérhető szolgáltatási területet az ajánlatkérés során egyeztetjük.</p>
-      </div>
+        <div id="serviceQuestions" class="form-grid">
+          <p class="small full">A szolgáltatás kiválasztása után itt jelennek meg a hozzá tartozó egyedi kérdések.</p>
+        </div>
+
+        <div class="field"><label for="description">Részletes leírás *</label><textarea id="description" name="Részletes leírás" required maxlength="5000" placeholder="Írd le, mit szeretnél megvalósítani, hol van a probléma, és van-e fontos határidő."></textarea></div>
+        <div class="field"><label for="photos">Fényképek csatolása (nem kötelező)</label><input id="photos" name="attachment" type="file" accept="image/*" multiple><p class="small">Csak olyan képet csatolj, amelyet biztonságosan, a burkolatok megbontása nélkül tudsz elkészíteni. A fájlméret és a darabszám a levelezőrendszer korlátaitól függhet.</p></div>
+        <div class="field"><label class="check-label"><input type="checkbox" name="Adatkezelési hozzájárulás" value="Elfogadom" required><span>Hozzájárulok ahhoz, hogy a VA ELECTRO az általam megadott adatokat az ajánlatkérés megválaszolásához kezelje. *</span></label></div>
+        <p class="small">Az adatkezelési tájékoztatót a weboldal élesítése előtt külön el kell készíteni és ide be kell linkelni. Ez a jelölőnégyzet önmagában nem helyettesíti a teljes adatkezelési tájékoztatót.</p>
+        <button class="btn" type="submit">Ajánlatkérés elküldése ↗</button>
+        <p class="small">Az elküldés után a FormSubmit első használatkor e-mailes megerősítést kérhet. Az űrlap éles működését külön tesztelni kell.</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section id="kapcsolat">
+  <div class="wrap">
+    <div class="section-head"><div class="eyebrow">Kapcsolat</div><h2>Beszéljük meg a feladatot</h2><p>Kaposvár és környéke, illetve előzetes egyeztetés alapján távolabbi munkák.</p></div>
+    <div class="grid grid-2">
+      <div class="card"><h3>Vörös Ákos</h3><p>VA ELECTRO – villanyszerelés</p><p><strong>Telefon:</strong><br><a href="tel:+36303933196">+36 30 393 3196</a></p><p><strong>E-mail:</strong><br><a href="mailto:vaelectrik@gmail.com">vaelectrik@gmail.com</a></p></div>
+      <div class="card"><h3>Precizitás. Biztonság. Megbízhatóság.</h3><p>Írd le a feladatot az ajánlatkérőben, és add meg a legfontosabb részleteket. A végleges ár a munkatartalom és a helyszín ismeretében készül.</p><a class="btn" href="#ajanlat">Ajánlatot kérek</a></div>
     </div>
   </div>
 </section>
@@ -701,52 +382,37 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 25px 0; }
 <footer>
   <div class="wrap">
     <div class="footer-grid">
-      <div>
-        <a class="brand" href="#kezdolap"><span class="brand-mark">VA</span><span>VA ELECTRO<small>VILLANYSZERELÉS</small></span></a>
-        <p>Precizitás. Biztonság. Megbízhatóság.</p>
-      </div>
-      <div>
-        <h3>Gyorslinkek</h3>
-        <p><a href="#szolgaltatasok">Szolgáltatások</a></p>
-        <p><a href="#munkak">Munkáim</a></p>
-        <p><a href="#arak">Árak és kalkulátor</a></p>
-        <p><a href="#hibakereses">Hibakeresés</a></p>
-      </div>
-      <div>
-        <h3>Kapcsolat</h3>
-        <p><a href="tel:+36303933196">+36 30 393 3196</a></p>
-        <p><a href="mailto:vaelectrik@gmail.com">vaelectrik@gmail.com</a></p>
-      </div>
+      <div><div class="brand"><span class="brand-mark">VA</span><span>VA ELECTRO<small>VILLANYSZERELÉS</small></span></div><p>Precizitás. Biztonság. Megbízhatóság.</p></div>
+      <div><h3>Gyors elérés</h3><p><a href="tel:+36303933196">+36 30 393 3196</a></p><p><a href="mailto:vaelectrik@gmail.com">vaelectrik@gmail.com</a></p></div>
+      <div><h3>Oldalak</h3><p><a href="#szolgaltatasok">Szolgáltatások</a></p><p><a href="#arak">Árak és kalkulátor</a></p><p><a href="#hibakereses">Hibakeresés</a></p><p><a href="#ajanlat">Ajánlatkérés</a></p></div>
     </div>
-    <div class="footer-bottom">© <span id="year"></span> VA ELECTRO · Minden jog fenntartva.</div>
+    <div class="footer-bottom">© <span id="year"></span> VA ELECTRO · Minden jog fenntartva. Az árkalkulátor tájékoztató jellegű.</div>
   </div>
 </footer>
 
 <script>
-/* Mobil navigáció */
+/* Mobilmenü */
 const menuBtn = document.getElementById("menuBtn");
 const navLinks = document.getElementById("navLinks");
 menuBtn.addEventListener("click", () => {
   const open = navLinks.classList.toggle("open");
   menuBtn.setAttribute("aria-expanded", String(open));
 });
-navLinks.querySelectorAll("a").forEach(link => {
-  link.addEventListener("click", () => {
-    navLinks.classList.remove("open");
-    menuBtn.setAttribute("aria-expanded", "false");
-  });
-});
+navLinks.querySelectorAll("a").forEach(a => a.addEventListener("click", () => {
+  navLinks.classList.remove("open");
+  menuBtn.setAttribute("aria-expanded", "false");
+}));
 document.getElementById("year").textContent = new Date().getFullYear();
 
-/* Alapterület és kiállás kalkulátor */
+/* Ár- és kiálláskalkulátor */
 const quantities = {
-  "50": {area:50, sockets:18, switches:7, lights:7, label:"50 m²-ig"},
-  "60": {area:60, sockets:20, switches:8, lights:8, label:"50–60 m²"},
-  "70": {area:70, sockets:23, switches:9, lights:9, label:"60–70 m²"},
-  "80": {area:80, sockets:26, switches:10, lights:10, label:"70–80 m²"},
-  "90": {area:90, sockets:30, switches:12, lights:12, label:"80–90 m²"},
-  "100": {area:100, sockets:33, switches:13, lights:13, label:"90–100 m²"},
-  "120": {area:120, sockets:38, switches:15, lights:15, label:"100–120 m²"}
+  "50":{area:50,label:"legfeljebb 50 m²",sockets:18,switches:7,lights:7},
+  "60":{area:60,label:"50–60 m²",sockets:20,switches:8,lights:8},
+  "70":{area:70,label:"60–70 m²",sockets:23,switches:9,lights:9},
+  "80":{area:80,label:"70–80 m²",sockets:26,switches:10,lights:10},
+  "90":{area:90,label:"80–90 m²",sockets:30,switches:12,lights:12},
+  "100":{area:100,label:"90–100 m²",sockets:33,switches:13,lights:13},
+  "120":{area:120,label:"100–120 m²",sockets:38,switches:15,lights:15}
 };
 const workType = document.getElementById("workType");
 const areaRange = document.getElementById("areaRange");
@@ -757,21 +423,25 @@ const switchQty = document.getElementById("switchQty");
 const lightQty = document.getElementById("lightQty");
 const formEstimate = document.getElementById("formEstimate");
 const description = document.getElementById("description");
+const travelKm = document.getElementById("travelKm");
+const travelText = document.getElementById("travelText");
+const money = n => Math.round(n).toLocaleString("hu-HU") + " Ft";
 
 function updateEstimate() {
   const type = workType.value;
   const key = areaRange.value;
   const q = quantities[key];
+  const km = Math.max(0, Number(travelKm.value) || 0);
+  const travel = km <= 15 ? 0 : km * 2 * 200;
+  travelText.textContent = km <= 15
+    ? "A megadott távolságnál a kiszállás díjmentes."
+    : "Tájékoztató kiszállási díj: " + money(travel) + " (oda-vissza " + (km * 2) + " km).";
 
   if (key === "over") {
     estimatePrice.textContent = "Egyedi ajánlat";
-    estimateText.textContent = "120 m² felett egyedi felmérés és kiállási terv szükséges.";
-    socketQty.textContent = "Egyedi";
-    switchQty.textContent = "Egyedi";
-    lightQty.textContent = "Egyedi";
-    formEstimate.value = type === "new"
-      ? "Új építés, 120 m² felett: egyedi ajánlat"
-      : "Teljes felújítás, 120 m² felett: egyedi ajánlat";
+    estimateText.textContent = "120 m² felett helyszíni felmérés és egyedi kiállási terv szükséges.";
+    socketQty.textContent = switchQty.textContent = lightQty.textContent = "Egyedi";
+    formEstimate.value = (type === "new" ? "Új építés" : "Felújítás") + ", 120 m² felett: egyedi ajánlat. " + travelText.textContent;
     return;
   }
 
@@ -781,302 +451,283 @@ function updateEstimate() {
 
   if (type === "new") {
     const total = q.area * 20000;
-    estimatePrice.textContent = total.toLocaleString("hu-HU") + " Ft";
+    estimatePrice.textContent = money(total);
     estimateText.textContent = q.area + " m² × 20 000 Ft/m². Új építésű alapcsomag, a felsorolt kizárásokkal.";
-    formEstimate.value = "Új építésű alapcsomag: " + q.label + ", kalkuláció " + total.toLocaleString("hu-HU") + " Ft; kiállások: " + q.sockets + " dugalj, " + q.switches + " kapcsoló, " + q.lights + " világítási kiállás.";
+    formEstimate.value = "Új építésű alapcsomag: " + q.label + ", becsült összeg " + money(total) +
+      "; keret: " + q.sockets + " dugalj, " + q.switches + " kapcsoló, " + q.lights + " világítási kiállás. " + travelText.textContent;
   } else {
     estimatePrice.textContent = "Egyedi ajánlat";
-    estimateText.textContent = "A felújítás ára a meglévő hálózat és a bontási, helyreállítási körülmények felmérése után adható meg.";
-    formEstimate.value = "Teljes hálózatfelújítás: " + q.label + ", egyedi felmérés szükséges; tervezett kiállási keret: " + q.sockets + " dugalj, " + q.switches + " kapcsoló, " + q.lights + " világítási kiállás.";
+    estimateText.textContent = "Felújításnál a meglévő hálózat, a bontás és a helyreállítás körülményei alapján készül ár.";
+    formEstimate.value = "Teljes hálózatfelújítás: " + q.label + ", egyedi felmérés szükséges. Tervezési keret: " +
+      q.sockets + " dugalj, " + q.switches + " kapcsoló, " + q.lights + " világítási kiállás. " + travelText.textContent;
   }
 }
-workType.addEventListener("change", updateEstimate);
-areaRange.addEventListener("change", updateEstimate);
+[workType,areaRange,travelKm].forEach(el => el.addEventListener("change", updateEstimate));
+travelKm.addEventListener("input", updateEstimate);
 document.getElementById("estimateRequest").addEventListener("click", () => {
   updateEstimate();
-  if (!description.value.trim()) {
-    description.value = "A kalkulátor alapján érdeklődöm: " + formEstimate.value;
-  }
+  if (!description.value.trim()) description.value = "A kalkulátor alapján érdeklődöm: " + formEstimate.value;
+  document.getElementById("service").value = workType.value === "new" ? "Új elektromos hálózat" : "Teljes hálózatfelújítás";
+  renderServiceQuestions();
+  document.getElementById("ajanlat").scrollIntoView({behavior:"smooth"});
 });
 updateEstimate();
 
-/* Hibakereső ellenőrzőlista */
-const faultStart = document.getElementById("faultStart");
+/* Szolgáltatásfüggő ajánlatkérő kérdések */
+const serviceSelect = document.getElementById("service");
+const serviceQuestions = document.getElementById("serviceQuestions");
+
+const questionSets = {
+  "Új elektromos hálózat": [
+    ["Ingatlan típusa","property","select",["Családi ház","Lakás","Egyéb"]],
+    ["Alapterület (m²)","area","number",null],
+    ["Építési állapot","buildStage","select",["Tervezés alatt","Falazat kész","Szerkezetkész","Gépészeti előkészítés","Egyéb"]],
+    ["Falazat típusa","wall","select",["Tégla","Pórusbeton / Ytong","Könnyűszerkezetes","Vegyes","Nem tudom"]],
+    ["Különleges igények","special","text",null]
+  ],
+  "Teljes hálózatfelújítás": [
+    ["Ingatlan típusa","property","select",["Családi ház","Lakás","Egyéb"]],
+    ["Alapterület (m²)","area","number",null],
+    ["Felújítás mértéke","renovationExtent","select",["Teljes hálózatcsere","Részleges felújítás","Hálózat bővítése","Még nem tudom"]],
+    ["Falak állapota","wallState","select",["Üres / felújítás alatt","Lakott ingatlan, bontás egyeztethető","Kész felületek, minimális bontás","Nem tudom"]],
+    ["Fontos körülmények","special","text",null]
+  ],
+  "Hibakeresés és hibaelhárítás": [
+    ["Hiba jellege","faultTypeDetail","select",["Teljes áramszünet","Részleges áramszünet","Kismegszakító leold","FI-relé leold","Villogó fény","Dugalj / kapcsoló hibája","Más probléma"]],
+    ["Mikor jelentkezik?","whenOccurs","select",["Folyamatosan","Időnként","Egy készülék használatakor","Eső / nedvesség után","Nem tudom"]],
+    ["Érintett helyiség vagy készülék","affected","text",null]
+  ],
+  "Elosztószekrény": [
+    ["Milyen munkát szeretnél?","boardWork","select",["Új elosztó","Csere","Bővítés","Rendezés / felülvizsgálat","Nem tudom"]],
+    ["Ingatlan típusa","property","select",["Családi ház","Lakás","Üzlet / műhely","Egyéb"]],
+    ["További információ","boardNote","text",null]
+  ],
+  "Világítás, kapcsolók, dugaljak": [
+    ["Milyen munkáról van szó?","fittingWork","select",["Csere","Új kiállás","Bővítés","Hibás szerelvény","Lámpatest felszerelése","Egyéb"]],
+    ["Becsült darabszám","quantity","number",null],
+    ["Szerelés módja","mounting","select",["Süllyesztett","Külső / falon kívüli","Még nem tudom"]],
+    ["Van meglévő kiállás?","existingPoint","select",["Igen","Nincs, új vezetékezés kellhet","Nem tudom"]]
+  ],
+  "Földkábel fektetése": [
+    ["Becsült kábelhossz (méter)","cableLength","number",null],
+    ["Nyomvonal","route","select",["Föld / kert","Térkő alatt","Beton / burkolat alatt","Vegyes","Nem tudom"]],
+    ["Szükséges lehet földmunka?","digging","select",["Igen","Nem","Nem tudom"]],
+    ["Mit látna el a kábel?","cablePurpose","text",null]
+  ],
+  "Villamos biztonsági felülvizsgálat": [
+    ["Ingatlan típusa","property","select",["Családi ház","Lakás","Üzlet / iroda","Műhely / egyéb"]],
+    ["Alapterület (m²)","area","number",null],
+    ["Felülvizsgálat célja","inspectionPurpose","select",["Eladás / bérbeadás","Új létesítés / átalakítás","Időszakos ellenőrzés","Egyéb / nem tudom"]]
+  ],
+  "Elektromosautó-töltő": [
+    ["Töltő típusa / teljesítménye","chargerType","select",["Még nincs kiválasztva","11 kW","22 kW","Más teljesítményű","Nem tudom"]],
+    ["Hálózat fázisai","phases","select",["1 fázis","3 fázis","Nem tudom"]],
+    ["Töltő és mérőhely távolsága","chargerDistance","number",null],
+    ["Parkoló helye","parking","select",["Garázs","Fedett beálló","Kültéri beálló","Társasházi parkoló","Egyéb"]],
+    ["Szükséges lehet teljesítménybővítés?","capacity","select",["Igen","Nem","Nem tudom"]],
+    ["Mérőhely állapota","meterState","select",["Ismert, megfelelőnek tűnik","Régi / felújítandó lehet","Nem tudom"]]
+  ],
+  "Kisebb villanyszerelési munkák": [
+    ["Munka típusa","smallWork","select",["Szerelvénycsere","Lámpaszerelés","Kisebb javítás","Új dugalj / kapcsoló","Egyéb"]],
+    ["Becsült darabszám","quantity","number",null],
+    ["További részletek","smallNote","text",null]
+  ],
+  "Egyéb": [
+    ["Milyen munkára van szükség?","otherWork","text",null],
+    ["További körülmények","otherNote","text",null]
+  ]
+};
+
+function makeField(question,index){
+  const [labelText,name,type,options] = question;
+  const id = "serviceField" + index;
+  let control = "";
+  if(type === "select"){
+    control = '<select id="'+id+'" name="Munka részlete – '+labelText.replace(/"/g,"")+'"><option value="">Válassz</option>'+
+      options.map(o=>'<option value="'+o.replace(/&/g,"&amp;").replace(/"/g,"&quot;")+'">'+o+'</option>').join("")+
+      '</select>';
+  }else{
+    const inputType = type === "number" ? 'number" min="0' : 'text';
+    control = '<input id="'+id+'" name="Munka részlete – '+labelText.replace(/"/g,"")+'" type="'+inputType+'" maxlength="300" '+(type==="number"?'inputmode="decimal"':'')+'>';
+  }
+  return '<div class="field"><label for="'+id+'">'+labelText+'</label>'+control+'</div>';
+}
+function renderServiceQuestions(){
+  const service = serviceSelect.value;
+  const questions = questionSets[service] || [];
+  serviceQuestions.innerHTML = questions.length
+    ? questions.map(makeField).join("")
+    : '<p class="small full">Válassz szolgáltatást a kapcsolódó kérdések megjelenítéséhez.</p>';
+
+  if(service === "Elektromosautó-töltő"){
+    const capacity = document.getElementById("serviceField4");
+    if(capacity){
+      capacity.addEventListener("change", () => {
+        let extra = document.getElementById("meterExtra");
+        if(capacity.value === "Igen" || capacity.value === "Nem tudom"){
+          if(!extra){
+            extra = document.createElement("div");
+            extra.id = "meterExtra";
+            extra.className = "field full";
+            extra.innerHTML = '<label for="meterNote">Mérőhely / teljesítménybővítés megjegyzés</label><textarea id="meterNote" name="Mérőhely és bővítés megjegyzés" placeholder="Ha tudod, írd le a meglévő mérőhely állapotát vagy a bővítés igényét. A mérőhely burkolatát ne bontsd meg fotózás vagy ellenőrzés miatt."></textarea>';
+            serviceQuestions.appendChild(extra);
+          }
+        }else if(extra){extra.remove();}
+      });
+    }
+  }
+}
+serviceSelect.addEventListener("change",renderServiceQuestions);
+renderServiceQuestions();
+
+/* Hibakereső – a veszélyjelek ellenőrzése mindig az első lépés */
 const faultWizard = document.getElementById("faultWizard");
 const faultResult = document.getElementById("faultResult");
+const faultStart = document.getElementById("faultStart");
 const formFault = document.getElementById("formFault");
+const formFaultSubmit = document.getElementById("formFaultSubmit");
 let faultSummary = [];
-let faultPath = "";
 
 const providers = [
-  {name:"E.ON Dél-dunántúli Áramhálózati Zrt.", phone:"06 80 20 50 20"},
-  {name:"E.ON Észak-dunántúli Áramhálózati Zrt.", phone:"06 80 533 533"},
-  {name:"ELMŰ Hálózati Kft. (Budapest és Pest vármegye)", phone:"06 80 38 39 40"},
-  {name:"MVM Émász Áramhálózati Kft.", phone:"06 80 42 43 44"},
-  {name:"MVM Démász Áramhálózati Kft.", phone:"06 62 565 881"},
-  {name:"OPUS TITÁSZ Áramhálózati Zrt.", phone:"06 80 210 310"}
+  {name:"E.ON Dél-dunántúli Áramhálózati Zrt.",phone:"06 80 20 50 20"},
+  {name:"E.ON Észak-dunántúli Áramhálózati Zrt.",phone:"06 80 533 533"},
+  {name:"ELMŰ Hálózati Kft.",phone:"06 80 38 39 40"},
+  {name:"MVM Émász Áramhálózati Kft.",phone:"06 80 42 43 44"},
+  {name:"MVM Démász Áramhálózati Kft.",phone:"06 62 565 881"},
+  {name:"OPUS TITÁSZ Áramhálózati Zrt.",phone:"06 80 210 310"}
 ];
 
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-  }[c]));
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
-function addSummary(text) {
-  faultSummary.push(text);
-  formFault.value = faultSummary.join(" | ");
+function syncFaultSummary(){
+  formFault.value = faultSummary.join(" | ") || "Nem használta a hibakeresőt";
+  formFaultSubmit.value = formFault.value;
 }
-function resetFault() {
-  faultSummary = [];
-  formFault.value = "Nem használta a hibakeresőt";
+function addFaultSummary(s){faultSummary.push(s);syncFaultSummary();}
+function resetFault(){
+  faultSummary=[];
+  syncFaultSummary();
   faultWizard.classList.add("hidden");
   faultResult.classList.add("hidden");
-  faultWizard.innerHTML = "";
-  faultResult.innerHTML = "";
+  faultWizard.innerHTML="";
+  faultResult.innerHTML="";
   faultStart.classList.remove("hidden");
+  document.querySelectorAll('input[name="faultType"]').forEach(x=>x.checked=false);
 }
-function showResult(title, text, kind = "normal", extra = "") {
+function showFaultResult(title,text,danger=false,extra=""){
   faultWizard.classList.add("hidden");
   faultResult.classList.remove("hidden");
-  faultResult.innerHTML = `
-    <div class="fault-result ${kind === "danger" ? "notice-danger" : ""}">
-      <h3>${title}</h3>
-      <p>${text}</p>
-      ${extra}
-      <div class="step-nav">
-        <button type="button" class="btn btn-outline" id="restartFault">Ellenőrzőlista újrakezdése</button>
-        <a class="btn" href="#ajanlat">Villanyszerelőt keresek</a>
-      </div>
-    </div>`;
-  document.getElementById("restartFault").addEventListener("click", resetFault);
+  faultResult.innerHTML='<div class="fault-step '+(danger?'notice-danger':'')+'"><h3>'+escapeHtml(title)+'</h3><p>'+escapeHtml(text)+'</p>'+extra+
+    '<div class="step-nav"><button type="button" class="btn btn-outline" id="restartFault">Újrakezdés</button><a class="btn" href="#ajanlat">Villanyszerelőt keresek</a></div></div>';
+  document.getElementById("restartFault").addEventListener("click",resetFault);
 }
-function renderStep(title, explanation, options, onNext, back = true) {
+function renderFaultStep(title,explanation,options,onNext,backFn=null){
   faultStart.classList.add("hidden");
   faultResult.classList.add("hidden");
   faultWizard.classList.remove("hidden");
-  const optionHtml = options.map((o, i) => `
-    <label class="fault-option">
-      <input type="radio" name="wizardChoice" value="${escapeHtml(o.value)}" ${i === 0 ? "" : ""}>
-      <span>${o.label}</span>
-    </label>`).join("");
-  faultWizard.innerHTML = `
-    <div class="fault-step">
-      <h3>${title}</h3>
-      <p>${explanation}</p>
-      <div class="fault-options">${optionHtml}</div>
-      <div class="step-nav">
-        ${back ? '<button type="button" class="btn btn-outline" id="backFault">Vissza</button>' : ""}
-        <button type="button" class="btn" id="nextFault">Tovább</button>
-      </div>
-      <p class="small">Ha bármelyik lépés nem biztonságos vagy nem egyértelmű, állj meg, és kérj szakembertől segítséget.</p>
-    </div>`;
-  if (back) {
-    document.getElementById("backFault").addEventListener("click", () => {
-      faultWizard.classList.add("hidden");
-      faultResult.classList.add("hidden");
-      faultStart.classList.remove("hidden");
-    });
-  }
-  document.getElementById("nextFault").addEventListener("click", () => {
-    const selected = faultWizard.querySelector('input[name="wizardChoice"]:checked');
-    if (!selected) {
-      alert("Kérlek, válassz egy választ a folytatáshoz.");
-      return;
-    }
+  faultWizard.innerHTML='<div class="fault-step"><h3>'+escapeHtml(title)+'</h3><p>'+escapeHtml(explanation)+'</p><div class="fault-options">'+
+    options.map((o,i)=>'<label class="fault-option"><input type="radio" name="wizardChoice" value="'+escapeHtml(o.value)+'"><span>'+escapeHtml(o.label)+'</span></label>').join("")+
+    '</div><div class="step-nav">'+(backFn?'<button type="button" class="btn btn-outline" id="backFault">Vissza</button>':'')+
+    '<button type="button" class="btn" id="nextFault">Tovább</button></div></div>';
+  if(backFn)document.getElementById("backFault").addEventListener("click",backFn);
+  document.getElementById("nextFault").addEventListener("click",()=>{
+    const selected=faultWizard.querySelector('input[name="wizardChoice"]:checked');
+    if(!selected){alert("Kérlek, válassz egy lehetőséget.");return;}
     onNext(selected.value);
   });
 }
-function providerStep() {
-  const options = providers.map((p, i) => ({
-    value:String(i),
-    label:`${escapeHtml(p.name)} – ${escapeHtml(p.phone)}`
-  }));
-  renderStep(
-    "Melyik hálózati elosztó az illetékes?",
-    "A villanyszámlán keresd az elosztóhálózat nevét, ne csak az áramszámlát kiállító kereskedő nevét. Ha nem tudod, válaszd a „Nem tudom” lehetőséget, és nézd meg a számlarészletezőt.",
-    [...options, {value:"unknown", label:"Nem tudom, melyik az illetékes elosztó."}],
-    value => {
-      if (value === "unknown") {
-        addSummary("Az egész ingatlanban nincs áram; a szomszédoknál sincs; elosztó nem ismert.");
-        showResult(
-          "Ellenőrizd a villanyszámlát",
-          "A területileg illetékes hálózati elosztó nevét és hibabejelentőjét a villanyszámlán vagy az elosztó hivatalos honlapján keresd. Ha az áramszámlán más vállalat szerepel, az nem feltétlenül a hálózati hiba bejelentésére illetékes cég.",
-          "normal",
-          '<p><a href="https://www.mvmnext.hu/aram/pages/aloldal.jsp?id=4549791" target="_blank" rel="noopener">Hivatalos hibabejelentő telefonszámok megtekintése ↗</a></p>'
-        );
-      } else {
-        const p = providers[Number(value)];
-        addSummary("Az egész ingatlanban nincs áram; a szomszédoknál sincs; elosztó: " + p.name);
-        showResult(
-          "Hálózati hibabejelentés",
-          "A kiválasztott elosztó hibabejelentője: " + p.name + ". Hívás előtt készítsd elő a címet és a villanyszámlán szereplő felhasználási hely azonosítóját.",
-          "normal",
-          `<p><a class="btn" href="tel:${p.phone.replace(/\s/g, "")}">Hívás: ${p.phone}</a></p><p class="small">Ellenőrizd, hogy valóban ez az elosztó szerepel-e a számládon. A telefonszámok változhatnak.</p>`
-        );
+function providerStep(){
+  const opts=providers.map((p,i)=>({value:String(i),label:p.name+" – "+p.phone}));
+  opts.push({value:"unknown",label:"Nem tudom, melyik hálózati elosztó az illetékes."});
+  renderFaultStep("Melyik hálózati elosztó az illetékes?","A villanyszámlán keresd a hálózati elosztó nevét. Ha nem tudod, nézd meg az elosztó hivatalos hibabejelentő oldalát.",opts,v=>{
+    if(v==="unknown"){
+      addFaultSummary("Szomszédoknál is áramszünet; az elosztó nem ismert.");
+      showFaultResult("Ellenőrizd a hálózati elosztót","A területileg illetékes elosztó nevét és telefonszámát a villanyszámlán vagy az elosztó hivatalos oldalán keresd.",
+        false,'<p><a href="https://www.mvmnext.hu/aram/pages/aloldal.jsp?id=4549791" target="_blank" rel="noopener">Hivatalos hibabejelentő információk ↗</a></p>');
+    }else{
+      const p=providers[Number(v)];
+      addFaultSummary("Hálózati elosztó: "+p.name);
+      showFaultResult("Hálózati hibabejelentés","Kiválasztott elosztó: "+p.name+". Hívás előtt készítsd elő a címet és a felhasználási hely azonosítóját.",
+        false,'<p><a class="btn" href="tel:'+p.phone.replace(/\s/g,"")+'">Hívás: '+p.phone+'</a></p><p class="small">Ellenőrizd a számládon, hogy valóban ez az illetékes elosztó. A telefonszámok változhatnak.</p>');
+    }
+  });
+}
+function startFault(type){
+  faultSummary=[];
+  addFaultSummary("Hiba típusa: "+type);
+  formFaultSubmit.value=formFault.value;
+  renderFaultStep("1. Tapasztalsz veszélyre utaló jelet?","Ide tartozik az égett szag, füst, szikrázás, sercegés, forró vagy elszíneződött elosztó, nedvesség, sérült vezeték vagy áramütésérzet. Ha igen, ne folytasd az ellenőrzést.",[
+    {value:"yes",label:"Igen, van veszélyre utaló jel."},
+    {value:"no",label:"Nem tapasztalok ilyen jelet."},
+    {value:"unsure",label:"Nem vagyok biztos benne."}
+  ],danger=>{
+    addFaultSummary("Veszélyjel: "+danger);
+    if(danger!=="no"){
+      showFaultResult("Ne nyúlj hozzá – állj meg","Ne érintsd meg és ne bontsd meg a berendezést. Távolodj el a veszélyes résztől. Közvetlen veszély vagy tűz esetén hívd a 112-t.",true);
+      return;
+    }
+    if(type==="whole"){
+      renderFaultStep("2. A szomszédoknál is elment az áram?","Csak biztonságosan ellenőrizd, például kérdezd meg a szomszédot. Ne menj veszélyes, sötét vagy viharos helyre emiatt.",[
+        {value:"yes",label:"Igen, a környéken sincs áram."},
+        {value:"no",label:"Nem, a szomszédoknál van áram."},
+        {value:"unknown",label:"Nem tudom."}
+      ],v=>{
+        addFaultSummary("Szomszédoknál is áramszünet: "+v);
+        if(v==="yes"){providerStep();return;}
+        if(v==="unknown"){
+          showFaultResult("Ellenőrizd a hálózati tájékoztatást","Ha biztonságosan nem tudod megállapítani, van-e környékbeli áramszünet, ellenőrizd az illetékes elosztó tájékoztatását vagy kérj segítséget.");
+          return;
+        }
+        breakerStep(true);
+      });
+    }else if(type==="part"||type==="breaker"){
+      breakerStep(false);
+    }else{
+      showFaultResult("Kérj célzott hibakeresést","Írd le az ajánlatkérőben, melyik készülék vagy áramkör érintett, mikor jelentkezik a hiba, és történt-e előtte változás. Ne bontsd meg a dugaljat vagy kapcsolót, és ne mérj feszültséget.");
+    }
+  });
+}
+function breakerStep(wholeHouse){
+  renderFaultStep(wholeHouse?"3. Mit látsz a zárt elosztón?":"2. Látható leoldott kapcsoló?",wholeHouse?
+    "Csak a zárt, száraz, sértetlen elosztó látható kezelőkarjait nézd. Ne nyisd fel a mérőhelyet, ne bonts plombát és ne érints vezetéket.":
+    "Csak a zárt, száraz, sértetlen elosztó kívülről látható kezelőkarjait nézd. Égett szag, szikrázás, melegedés vagy nedvesség esetén ne nyúlj hozzá.",[
+      {value:"tripped",label:"Egy kismegszakító vagy FI-relé leoldott állásban van."},
+      {value:"on",label:"Minden látható kapcsoló bekapcsolt állásban van."},
+      {value:"unsure",label:"Nem tudom biztonságosan megállapítani."}
+    ],v=>{
+      addFaultSummary("Látható kapcsoló állapota: "+v);
+      if(v==="unsure"){
+        showFaultResult("Ne találgass a kapcsolókkal","Ha a berendezés sérült, nedves vagy nem egyértelmű, ne nyúlj hozzá. Kérj villanyszerelőt.",true);
+      }else if(v==="on"){
+        showFaultResult("Szakemberes hibakeresés javasolt","Ha minden látható kapcsoló bekapcsolt állásban van, de nincs áram, további vizsgálat szükséges. Ne bontsd meg az elosztót, mérőhelyet, dugaljat vagy kapcsolót.");
+      }else{
+        renderFaultStep("FI-relé vagy kismegszakító oldott le?","Csak a zárt elosztó egyértelműen felismerhető kapcsolóit nézd. A FI-relén gyakran TEST/T feliratú gomb és 30 mA jelölés látható; ne bontsd meg a burkolatot.",[
+          {value:"rcd",label:"A FI-relé oldott le."},
+          {value:"breaker",label:"Egy kismegszakító oldott le."},
+          {value:"unknown",label:"Nem tudom biztosan."}
+        ],kind=>{
+          addFaultSummary("Leoldott eszköz: "+kind);
+          if(kind==="unknown"){
+            showFaultResult("Kérj segítséget a beazonosításhoz","Ne kapcsolgasd találomra az eszközöket. Kérj villanyszerelőt, és ne bontsd meg az elosztó burkolatát.");
+          }else if(kind==="breaker"){
+            showFaultResult("Ne kapcsold vissza újra és újra","Csak akkor próbálható meg egyszer a kezelőkar visszakapcsolása, ha a zárt elosztó száraz, sértetlen, veszélyjel nincs, és a kezelőkar egyértelműen azonosítható. Ha újra leold, hagyd lekapcsolva és hívj villanyszerelőt.");
+          }else{
+            showFaultResult("FI-relé leoldása – óvatosság szükséges","FI-relé leoldásánál a hiba oka lehet valamelyik készülék vagy áramkör hibája. Csak akkor próbálj egyetlen ellenőrzést, ha a zárt elosztó száraz, sértetlen, minden kezelőkar egyértelmű, és nincs veszélyjel: a leágazó kismegszakítók lekapcsolása után a FI-relé egyszer visszakapcsolható, majd a kismegszakítók egyenként visszakapcsolhatók. Ha ismét leold, az érintett kört hagyd kikapcsolva. Ne ismételd a próbát. Ha bizonytalan vagy, ne végezd el, hanem hívj villanyszerelőt.");
+          }
+        });
       }
-    },
-    false
-  );
+    });
 }
-function startWizard(type) {
-  faultSummary = [];
-  formFault.value = "";
-  faultPath = type;
-  if (type === "whole") {
-    addSummary("Hiba típusa: az egész házban/lakásban nincs áram.");
-    renderStep(
-      "2. A szomszédoknál is elment az áram?",
-      "Csak akkor ellenőrizd, ha ezt biztonságosan meg tudod tenni – például megkérdezed a szomszédot, vagy megnézed, világít-e a közös területen a világítás. Ne menj ki veszélyes, sötét vagy viharos helyre emiatt.",
-      [
-        {value:"yes", label:"Igen, a szomszédoknál vagy a környéken sincs áram."},
-        {value:"no", label:"Nem, náluk van áram."},
-        {value:"unknown", label:"Nem tudom megállapítani."}
-      ],
-      value => {
-        addSummary("Szomszédoknál is áramszünet: " + value);
-        if (value === "yes") {
-          providerStep();
-        } else if (value === "unknown") {
-          showResult("Először tisztázd, van-e hálózati áramszünet",
-            "Ha biztonságosan megtehető, kérdezd meg a szomszédot, vagy ellenőrizd a hálózati elosztó hivatalos áramszüneti tájékoztatóját. Ha nem tudod biztonságosan ellenőrizni, ne kockáztass; hívd fel az elosztót vagy kérj segítséget.");
-        } else {
-          renderStep(
-            "3. Nézd meg kívülről a mérőhelyet és a látható kapcsolókat",
-            "Csak akkor folytasd, ha a mérőszekrény száraz, sértetlen, nincs égett szag, szikrázás vagy sérülés, és a kezelőszervek biztonságosan hozzáférhetők. Ne nyisd fel a mérő burkolatát, ne bonts plombát, és ne érints vezetéket.",
-            [
-              {value:"tripped", label:"Egy jól látható kismegszakító vagy főkapcsoló lekapcsolt állásban van."},
-              {value:"all_on", label:"Minden látható kapcsoló bekapcsolt állásban van."},
-              {value:"unsafe", label:"Sérülés, nedvesség, égett szag vagy bizonytalanság miatt nem biztonságos ellenőrizni."}
-            ],
-            answer => {
-              addSummary("Mérőhely/látható kapcsolók: " + answer);
-              if (answer === "unsafe") {
-                showResult("Ne nyúlj hozzá – kérj segítséget",
-                  "Ne nyisd ki a szekrényt és ne próbáld visszakapcsolni. Ha közvetlen veszélyt észlelsz, távolodj el és hívd a megfelelő segélyszolgálatot vagy hálózati elosztót.", "danger");
-              } else if (answer === "tripped") {
-                showResult("Csak akkor kapcsold vissza, ha egyértelműen biztonságos",
-                  "Ne próbáld ismételten visszakapcsolni. Ha a kapcsoló könnyen és biztonságosan hozzáférhető, nincs sérülés vagy veszélyjel, egyszer megpróbálható a kezelőkar visszakapcsolása. Ha azonnal leold, nem marad bekapcsolva, vagy bizonytalan vagy, hagyd úgy és kérj villanyszerelőt. Plombált vagy szolgáltatói berendezéshez ne nyúlj.", "normal");
-              } else {
-                renderStep(
-                  "4. Van FI-relé (áram-védőkapcsoló)?",
-                  "A FI-relé általában szélesebb modul a kismegszakítók mellett. Lehet rajta „T” vagy „TEST” feliratú kis tesztgomb, illetve „I/ON” és „O/OFF” jelölés. Sokszor „RCD” vagy „30 mA” jelölés is látható. Ne bontsd meg a szekrényt, csak a zárt elosztó látható kezelőszerveit nézd.",
-                  [
-                    {value:"yes", label:"Igen, egyértelműen felismerem a FI-relét."},
-                    {value:"no", label:"Nem látok ilyet."},
-                    {value:"unknown", label:"Nem tudom biztosan, melyik az."}
-                  ],
-                  rcd => {
-                    addSummary("FI-relé felismerése: " + rcd);
-                    if (rcd === "yes") {
-                      renderStep(
-                        "5. A FI-relé leoldott állapotban van?",
-                        "Csak száraz, sértetlen, zárt elosztónál folytasd. Ne érints belső alkatrészt vagy vezetéket. Ha bármilyen veszélyjel van, állj meg.",
-                        [
-                          {value:"tripped", label:"Igen, leoldott állapotban van."},
-                          {value:"on", label:"Nem, bekapcsolt állásban van."},
-                          {value:"unsure", label:"Nem tudom biztosan."}
-                        ],
-                        state => {
-                          addSummary("FI-relé állapota: " + state);
-                          if (state === "tripped") {
-                            renderStep(
-                              "6. Biztonságosan hozzáférsz a zárt elosztó kezelőkarjaihoz?",
-                              "A következő lépést csak akkor végezd el, ha az elosztó teljesen zárt, száraz, sértetlen, és a kapcsolókarok egyértelműen azonosíthatók. Ha nem vagy biztos benne, ne folytasd.",
-                              [
-                                {value:"safe", label:"Igen, a zárt elosztó kezelőkarjai jól láthatók és biztonságosan elérhetők."},
-                                {value:"not_safe", label:"Nem, vagy bármiben bizonytalan vagyok."}
-                              ],
-                              safe => {
-                                addSummary("Biztonságosan elérhető zárt elosztó: " + safe);
-                                if (safe !== "safe") {
-                                  showResult("Állj meg, és kérj szakembert",
-                                    "Ne próbálkozz a kapcsolók kezelésével, ha az elosztó nem biztonságos vagy nem egyértelműen felismerhető.", "danger");
-                                } else {
-                                  showResult("Óvatos ellenőrzés – csak egyértelműen biztonságos esetben",
-                                    "Ha nincs égett szag, melegedés, nedvesség, sérülés vagy más veszélyjel, a zárt elosztó egyértelműen felismerhető kezelőkarjainál megpróbálható az összes leágazó kismegszakítót lekapcsolni, majd a FI-relét egyszer visszakapcsolni. Ezután a kismegszakítókat egyenként, lassan kapcsold vissza. Ha bármelyiknél leold a FI-relé vagy a kismegszakító, azt a kört hagyd lekapcsolva, és ne próbáld újra. Hívj villanyszerelőt. Ha bármelyik lépés nem egyértelmű, ne végezd el.", "normal");
-                                }
-                              }
-                            );
-                          } else if (state === "on") {
-                            showResult("Valószínűleg további vizsgálat szükséges",
-                              "Ha a FI-relé bekapcsolt állapotban van, de az egész ingatlanban nincs áram, ne bontsd meg a berendezést. Kérj villanyszerelőt; a mérőhely vagy a hálózati betáplálás hibáját szakembernek kell ellenőriznie.");
-                          } else {
-                            showResult("Ne találgass a kapcsolókkal",
-                              "Ha nem tudod biztosan megállapítani a FI-relé állapotát, ne kapcsolgass találomra. Kérj villanyszerelőt, vagy küldj ajánlatkérést a hiba leírásával.");
-                          }
-                        }
-                      );
-                    } else if (rcd === "no") {
-                      showResult("Ne bontsd meg az elosztót",
-                        "Ha nem látsz FI-relét, az nem bizonyítja önmagában, hogy a hálózat hibás vagy veszélyes. Ne nyisd ki az elosztót, és ne próbálj belső alkatrészt azonosítani. Mivel az egész házban nincs áram, javasolt villanyszerelővel egyeztetni.");
-                    } else {
-                      showResult("Segítünk beazonosítani",
-                        "A FI-relén gyakran van „T” vagy „TEST” feliratú tesztgomb, és általában szélesebb modul a kismegszakítók mellett. A burkolatot ne vedd le, és ne nyúlj a vezetékekhez. Ha nem tudod biztosan azonosítani, ne kapcsolgasd találomra – kérj villanyszerelőt.");
-                    }
-                  }
-                );
-              }
-            }
-          );
-        }
-      },
-      false
-    );
-  } else if (type === "part" || type === "breaker") {
-    addSummary("Hiba típusa: " + (type === "part" ? "részleges áramkimaradás" : "kismegszakító/FI-relé leold"));
-    renderStep(
-      "2. Leoldott valamelyik kapcsoló?",
-      "Csak a zárt, száraz, sértetlen elosztó kívülről látható kezelőkarjait ellenőrizd. Ne vedd le a burkolatot. Égett szag, szikrázás, melegedés vagy nedvesség esetén ne nyúlj hozzá.",
-      [
-        {value:"yes", label:"Igen, egy kismegszakító vagy FI-relé lekapcsolt."},
-        {value:"no", label:"Nem látok lekapcsolt kapcsolót."},
-        {value:"unsafe", label:"Nem biztonságos vagy nem tudom megítélni."}
-      ],
-      answer => {
-        addSummary("Leoldott kapcsoló: " + answer);
-        if (answer === "unsafe") {
-          showResult("Ne nyúlj hozzá",
-            "Ne folytasd a vizsgálatot. Kérj villanyszerelőt; veszélyjel esetén távolodj el a berendezéstől.", "danger");
-        } else if (answer === "no") {
-          showResult("Szakemberes hibakeresés javasolt",
-            "Ha csak egy részterületen nincs áram, de nem látható leoldott kapcsoló, további vizsgálat szükséges. Ne bontsd ki a dugaljat vagy kapcsolót, és ne próbálj feszültséget mérni.");
-        } else {
-          showResult("Egy leoldás oka nem mindig szüntethető meg kapcsolással",
-            "Ha egy kapcsoló leoldott, ne kapcsold vissza újra és újra. Ha a hiba visszatér, vagy FI-relé old le, hagyd lekapcsolva az érintett kört, húzd ki a hozzáférhető, ép készülékeket a dugaljakból, és kérj villanyszerelőt. Nedves vagy sérült készüléket ne érints.");
-        }
-      },
-      false
-    );
-  } else {
-    addSummary("Hiba típusa: egyéb elektromos probléma.");
-    renderStep(
-      "2. Van veszélyre utaló jel?",
-      "Ilyen az égett szag, füst, szikrázás, sercegés, szokatlan melegedés, sérült vezeték, beázás vagy áramütésérzet.",
-      [
-        {value:"yes", label:"Igen, van veszélyre utaló jel."},
-        {value:"no", label:"Nincs ilyen jel."}
-      ],
-      answer => {
-        addSummary("Veszélyjel: " + answer);
-        if (answer === "yes") {
-          showResult("Ne használd tovább az érintett berendezést",
-            "Ne érintsd meg, ne bontsd meg, és ne próbáld megjavítani. Távolodj el a veszélyes résztől; közvetlen veszély esetén hívd a 112-t. Szükség esetén kérj hálózati elosztói vagy villanyszerelői segítséget.", "danger");
-        } else {
-          showResult("Kérj célzott hibakeresést",
-            "Írd le, melyik készülék vagy áramkör érintett, mikor jelentkezik a hiba, és történt-e előtte változás. Ne bontsd meg a dugaljat vagy kapcsolót, és ne mérj feszültséget, ha nem vagy erre képesített.");
-        }
-      },
-      false
-    );
-  }
-}
-document.getElementById("startFault").addEventListener("click", () => {
-  const selected = document.querySelector('input[name="faultType"]:checked');
-  if (!selected) {
-    alert("Kérlek, válaszd ki, milyen jellegű hibát tapasztalsz.");
-    return;
-  }
-  startWizard(selected.value);
+document.getElementById("startFault").addEventListener("click",()=>{
+  const selected=document.querySelector('input[name="faultType"]:checked');
+  if(!selected){alert("Kérlek, válaszd ki a hiba típusát.");return;}
+  startFault(selected.value);
+});
+
+/* Az ajánlatkérőben mindig a legfrissebb hibakereső-összefoglaló szerepeljen. */
+document.getElementById("quoteForm").addEventListener("submit",()=>{
+  formFaultSubmit.value=formFault.value || "Nem használta a hibakeresőt";
 });
 </script>
 </body>
