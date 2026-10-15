@@ -118,7 +118,7 @@ footer{padding:28px 0;color:var(--muted);font-size:13px;border-top:1px solid var
 <div class="wrap">
 <div class="kicker">Kérj személyre szabott ajánlatot</div><h2>Ajánlatkérés</h2>
 <p>Töltsd ki az alábbi adatokat, és a weboldal előkészít egy e-mailt a megadott információkkal.</p>
-<form id="quoteForm">
+<form id="quoteForm" action="https://formsubmit.co/614c5947ba5aa2c735b7c46a40044c4e" method="POST">
 <div class="fields">
 <div><label for="name">Név *</label><input id="name" name="Név" autocomplete="name" required></div>
 <div><label for="phone">Telefonszám *</label><input id="phone" name="Telefonszám" type="tel" autocomplete="tel" required></div>
@@ -154,27 +154,6 @@ footer{padding:28px 0;color:var(--muted);font-size:13px;border-top:1px solid var
 </main>
 <footer><div class="wrap">VA ELECTRO · Precizitás. Biztonság. Megbízhatóság.</div></footer>
 <script>
-document.getElementById('quoteForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-
-  const f = new FormData(this);
-
-  const body = [
-    'VA ELECTRO – ajánlatkérés',
-    '',
-    'Név: ' + (f.get('Név') || ''),
-    'Telefonszám: ' + (f.get('Telefonszám') || ''),
-    'E-mail: ' + (f.get('E-mail') || ''),
-    'Helyszín: ' + (f.get('Helyszín') || ''),
-    'Szolgáltatás: ' + (f.get('Szolgáltatás') || ''),
-    'Munka leírása: ' + (f.get('Munka leírása') || '')
-  ].join('\n');
-
-  window.location.href =
-    'mailto:vaelectrik@gmail.com?subject=' +
-    encodeURIComponent('VA ELECTRO – ajánlatkérés') +
-    '&body=' + encodeURIComponent(body);
-});
 </script>
 </body>
 </html>
