@@ -1,11 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="hu">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#10100f">
-<meta name="description" content="VA ELECTRO – villanyszerelés Somogy vármegyében. Új hálózat, felújítás, hibakeresés, elosztószekrény, elektromosautó-töltő és villamos biztonsági felülvizsgálat.">
+<meta name="description" content="VA ELECTRO – villanyszerelés Somogy vármegyében. Új hálózat, felújítás, földkábel, fogyasztásmérőhely, hibakeresés, elosztószekrény, elektromosautó-töltő és villamos biztonsági felülvizsgálat.">
 <title>VA ELECTRO | Villanyszerelés</title>
 <style>
 :root {
@@ -260,7 +259,7 @@ footer{padding:46px 0 22px;background:#0b0a09;border-top:1px solid var(--line)}
       <div class="trust"><span>✓ Részletes egyeztetés</span><span>✓ Átlátható ajánlat</span><span>✓ Biztonságközpontú szemlélet</span></div>
       <div class="pills">
         <span class="pill">Új hálózat</span><span class="pill">Felújítás</span>
-        <span class="pill">Hibakeresés</span><span class="pill">Mérőhely</span><span class="pill">EV-töltő</span>
+        <span class="pill">Hibakeresés</span><span class="pill">Földkábel</span><span class="pill">Mérőhely</span><span class="pill">EV-töltő</span>
       </div>
     </div>
     <div class="heropanel">
@@ -459,6 +458,8 @@ footer{padding:46px 0 22px;background:#0b0a09;border-top:1px solid var(--line)}
           <input type="hidden" name="_cc" id="customerCopy" value="">
           <input type="hidden" name="Kalkuláció" id="formEstimate" value="">
           <input type="hidden" name="Alap- és kért mennyiségek" id="formQuantities" value="">
+          <input type="hidden" name="Alapkeret és maximálisan tervezhető mennyiségek" id="formMaxQuantities" value="">
+          <input type="hidden" name="Ügyfél igényeinek összefoglalója" id="formClientNeeds" value="">
           <input type="hidden" name="Hibakeresés magyar nyelvű levezetése" id="formFault" value="">
           <input type="hidden" name="Ajánlatkérés típusa" id="requestKind" value="Általános ajánlatkérés">
 
@@ -492,6 +493,8 @@ footer{padding:46px 0 22px;background:#0b0a09;border-top:1px solid var(--line)}
                 <option>Elektromosautó-töltő kiépítése</option>
                 <option>Sütő, főzőlap, klíma és más gépek kiállásai</option>
                 <option>Kültéri világítás, kerti és melléképületi villanyszerelés</option>
+                <option>Földkábel fektetése és kiépítése</option>
+                <option>Fogyasztásmérőhely kialakítása, cseréje vagy szabványosítása</option>
                 <option>Egyéb villamos munka</option>
               </select>
             </div>
@@ -632,8 +635,11 @@ footer{padding:46px 0 22px;background:#0b0a09;border-top:1px solid var(--line)}
             <p class="small muted">Az adatkezelési tájékoztatót az oldal élesítése előtt a tényleges adatkezeléshez kell igazítani.</p>
           </div>
 
-          <button class="btn" id="submitBtn" type="submit">Ajánlatkérés elküldése ↗</button>
-          <p class="small muted" style="margin-top:12px">A beküldés után visszajelzést kapsz az oldalról. Ha a küldés nem igazolható, nem jelöljük sikeresnek.</p>
+          <div class="btnrow">
+            <button class="btn" id="submitBtn" type="submit">Ajánlatkérés elküldése ↗</button>
+            <button class="btn outline" id="clearFormBtn" type="button">Űrlap mezőinek törlése</button>
+          </div>
+          <p class="small muted" style="margin-top:12px">A törlés az ajánlatkérő űrlap mezőit állítja vissza. A beküldés után visszajelzést kapsz az oldalról; ha a küldés nem igazolható, nem jelöljük sikeresnek.</p>
         </form>
       </div>
     </div>
@@ -703,7 +709,7 @@ document.querySelectorAll("#navlinks a").forEach(a=>a.addEventListener("click",(
   $("menuBtn").setAttribute("aria-expanded","false");
 }));
 
-/* Szolgáltatások – csak a jóváhagyott kilenc kategória */
+/* Szolgáltatások */
 const services = [
   {
     id:"uj-halozat",icon:"⌁",title:"Új villamos hálózat kiépítése",
@@ -758,6 +764,18 @@ const services = [
     short:"Kerti és kültéri világítás, valamint melléképületek villamos munkái.",
     detail:"A helyszín, a nyomvonal, a környezeti hatások és a tervezett fogyasztók alapján egyeztetjük a műszaki tartalmat.",
     points:["Kültéri világítás","Kerti és melléképületi villamos kiállások","Vezetéknyomvonal és távolság egyeztetése","Kültéri körülmények figyelembevétele"]
+  },
+  {
+    id:"foldkabel",icon:"⌁",title:"Földkábel fektetése és kiépítése",
+    short:"Földben vezetett kábel nyomvonalának, hosszának és csatlakozási feladatának egyeztetése.",
+    detail:"A földkábel kiépítésénél fontos a nyomvonal, a becsült hossz, a végpontok, a talaj és a terep állapota, valamint az esetleges burkolatok és akadályok tisztázása. A végleges műszaki tartalom felmérés után határozható meg.",
+    points:["Kábel hozzávetőleges hossza és végpontjai","Kert, udvar, járda vagy gépjármű-beálló érintettsége","Földmunka és burkolatbontás várható igénye","Táplált épület, berendezés vagy fogyasztó megnevezése","Helyszíni felmérés és műszaki egyeztetés"]
+  },
+  {
+    id:"merohely",icon:"▦",title:"Fogyasztásmérőhely kialakítása, cseréje vagy szabványosítása",
+    short:"Új mérőhely, meglévő mérőhely átalakítása vagy korszerűsítési igény előzetes felmérése.",
+    detail:"A fogyasztásmérőhely munkájának tartalma függ a meglévő kialakítástól, a csatlakozás típusától, a teljesítményigénytől és az illetékes hálózati elosztó követelményeitől. A szükséges ügyintézést, dokumentációt és műszaki feltételeket előzetesen egyeztetni kell.",
+    points:["Új mérőhely vagy meglévő mérőhely cseréje","Szabványosítási igény előzetes tisztázása","Egy- vagy háromfázisú csatlakozás és teljesítményigény","Mérőhely elhelyezése és hozzáférhetősége","Hálózati elosztói feltételek és szükséges ügyintézés egyeztetése"]
   }
 ];
 
@@ -804,15 +822,6 @@ function chooseService(title){
   const select=$("service");
   const match=[...select.options].find(o=>o.textContent===title);
   if(match)select.value=match.value;
-  else if(title==="Új villamos hálózat kiépítése")select.value="Új villamos hálózat kiépítése";
-  else if(title==="Teljes és részleges villamos felújítás")select.value="Teljes vagy részleges villamos felújítás";
-  else if(title==="Konnektorok, kapcsolók és világítás szerelése")select.value=title;
-  else if(title==="Hibakeresés és hibaelhárítás")select.value=title;
-  else if(title==="Elosztószekrény kiépítése, csere és átalakítás")select.value=title;
-  else if(title==="Villamos biztonsági felülvizsgálat")select.value=title;
-  else if(title==="Elektromosautó-töltő kiépítése")select.value=title;
-  else if(title==="Sütő, főzőlap, klíma és más gépek kiállásai")select.value=title;
-  else if(title==="Kültéri világítás, kerti és melléképületi villanyszerelés")select.value=title;
   updateServiceQuestions();
   $("requestKind").value="Szolgáltatásból indított ajánlatkérés";
   $("ajanlat").scrollIntoView({behavior:"smooth"});
@@ -939,7 +948,6 @@ $("estimateRequest").addEventListener("click",()=>{
   $("formSockets").value=$("wantSockets").value||0;
   $("formSwitches").value=$("wantSwitches").value||0;
   $("formLights").value=$("wantLights").value||0;
-  $("formQuantities").value=requestedQtySummary()+" Alapmennyiségek a kiválasztott alapterület alapján; többlet külön egyeztetendő.";
   updateServiceQuestions();
   if(!$("description").value.trim()){
     $("description").value="Az árkalkulátor alapján kérek ajánlatot. "+($("formEstimate").value||"");
@@ -995,8 +1003,22 @@ const serviceQuestionSets={
     ["Becsült távolság vagy kábelhossz (m)","number"],
     ["Nyomvonal és helyszín részletei","textarea"]
   ],
+  "Földkábel fektetése és kiépítése":[
+    ["Mihez készül a földkábel?","select",["Melléképület vagy garázs ellátása","Kerti vagy kültéri berendezés","Kapu vagy más kültéri eszköz","Világítás","Más cél / még nem tudom"]],
+    ["Becsült kábelhossz (m)","number"],
+    ["Milyen területen haladna a nyomvonal?","select",["Föld / kert","Gyeppel borított terület","Járda vagy térköves burkolat","Gépjárművel használt beálló","Vegyes vagy nem tudom"]],
+    ["A kábel kezdő- és végpontja, akadályok, földmunka","textarea"]
+  ],
+  "Fogyasztásmérőhely kialakítása, cseréje vagy szabványosítása":[
+    ["Milyen munkára van szükség?","select",["Új fogyasztásmérőhely","Meglévő mérőhely cseréje","Szabványosítás vagy átalakítás","Teljesítménybővítéshez kapcsolódó munka","Még nem tudom"]],
+    ["Hol található a mérőhely?","select",["Épületen belül","Épületen kívül","Kerítésben vagy telekhatáron","Nem tudom"]],
+    ["Jelenlegi csatlakozás","select",["Egyfázisú","Háromfázisú","Nem tudom"]],
+    ["Igényelt vagy tervezett teljesítmény, ha ismert","text"],
+    ["Mérőhely állapota és egyéb körülmények","textarea"]
+  ],
   "Egyéb villamos munka":[["A munka leírása","textarea"]]
 };
+
 function updateServiceQuestions(){
   const service=$("service").value;
   const set=serviceQuestionSets[service];
@@ -1026,7 +1048,7 @@ function updateServiceQuestions(){
         input=document.createElement("input");
         input.type=q[1];
         if(q[1]==="number"){input.min="0";input.max="100000"}
-        input.maxLength=250;
+        if(q[1]!=="number")input.maxLength=250;
       }
       input.id=id;
       input.name="Szolgáltatás részlete – "+q[0];
@@ -1076,7 +1098,9 @@ function showFaultResult(title,desc,danger=false,extra=""){
     $("service").value="Hibakeresés és hibaelhárítás";
     updateServiceQuestions();
     $("requestKind").value="Hibakeresési ajánlatkérés";
-    $("formFault").value="Hibakereső levezetése – magyar nyelvű lépések és válaszok:\n• "+faultSummary.join("\n• ");
+    $("formFault").value=
+      "HIBAKERESÉSI LEVEZETÉS – a felhasználó válaszai és a javasolt biztonságos következő lépés:\n"+
+      faultSummary.map((x,i)=>`${i+1}. ${x}`).join("\n");
     $("description").value=$("description").value.trim()||
       "Hibakeresésre kérek ajánlatot. A magyar nyelvű hibakereső levezetését az űrlap tartalmazza.";
     $("ajanlat").scrollIntoView({behavior:"smooth"});
@@ -1108,7 +1132,7 @@ function networkOutageResult(){
       <li><a href="https://www.mvmhalozat.hu/" target="_blank" rel="noopener noreferrer">MVM Hálózat – hivatalos honlap</a></li>
       <li><a href="https://www.opustitasz.hu/" target="_blank" rel="noopener noreferrer">OPUS TITÁSZ – hivatalos honlap</a></li>
     </ul>
-    <p class="small muted">A honlapon keresd a hálózati hibabejelentés vagy áramszünet menüpontot. A hibabejelentő elérhetőségét és az illetékes szolgáltatót ellenőrizd, mielőtt telefonálsz.</p>`;
+    <p class="small muted">A honlapon keresd a hálózati hibabejelentés vagy áramszünet menüpontot. Az illetékes elosztót és a hibabejelentő elérhetőségét ellenőrizd, mielőtt telefonálsz.</p>`;
   showFaultResult(
     "Lehetséges hálózati áramszünet",
     "Ha a szomszédoknál vagy a környéken sincs áram, a probléma a közcélú hálózaton is lehet. Elsőként az illetékes hálózati elosztó hivatalos hibabejelentőjét keresd fel.",
@@ -1124,7 +1148,7 @@ function startFault(type){
     light:"Villogó fény, dugalj vagy kapcsoló hibája",
     other:"Egyéb hiba"
   };
-  addFault("Hiba típusa: "+names[type]);
+  addFault("A felhasználó által megadott hibatípus: "+names[type]);
   faultStep(
     "1. Tapasztalsz veszélyre utaló jelet?",
     "Ilyen jel az égett szag, füst, szikrázás, sercegés, forró vagy elszíneződött szerelvény, nedvesség, sérült vezeték vagy áramütésérzet.",
@@ -1174,17 +1198,49 @@ function startFault(type){
 }
 function breakerStep(){
   faultStep(
-    "Kívülről látható leoldott kapcsoló?",
+    "A zárt elosztón kívülről látható leoldott kapcsoló?",
     "Csak a zárt, száraz, sértetlen elosztó kívülről látható kezelőkarjait nézd. Ne nyisd fel a burkolatot, ne bonts plombát és ne érints vezetéket.",
-    [["tripped","Egy kismegszakító vagy FI-relé leoldott."],["on","Minden látható kapcsoló bekapcsolt állásban van."],["unsure","Nem tudom biztonságosan megállapítani."]],
+    [["tripped","Egy kapcsoló láthatóan leoldott."],["on","Minden látható kapcsoló bekapcsolt állásban van."],["unsure","Nem tudom biztonságosan megállapítani."]],
     v=>{
-      addFault("A látható kapcsoló állapota: "+({tripped:"egy leoldott",on:"bekapcsolt állásban",unsure:"nem állapítható meg biztonságosan"}[v]));
+      addFault("A látható kapcsoló állapota: "+({tripped:"egy kapcsoló leoldott",on:"minden látható kapcsoló bekapcsolt állásban van",unsure:"nem állapítható meg biztonságosan"}[v]));
       if(v==="unsure"){
         showFaultResult("Ne találgass","Ha a berendezés sérült, nedves vagy nem egyértelmű, ne nyúlj hozzá. Kérj villanyszerelőt.",true);
       }else if(v==="on"){
         showFaultResult("Szakemberes hibakeresés javasolt","Ha minden kapcsoló bekapcsolt állásban van, de nincs áram, további vizsgálat szükséges. Ne bontsd meg az elosztót vagy a mérőhelyet.");
       }else{
-        showFaultResult("Ne kapcsold vissza újra és újra","Ha a védelem leoldott, és nem egyértelmű az ok, ne végezz ismételt visszakapcsolási próbákat. Veszélyjel esetén ne nyúlj hozzá. Hagyd biztonságos állapotban, és kérj villanyszerelőt.");
+        faultStep(
+          "Melyik készülék oldott le a felirata alapján?",
+          "Csak a zárt elosztó kívülről olvasható feliratát vedd figyelembe. Ha nem egyértelmű, válaszd a „Nem tudom” lehetőséget. Ne nyúlj a készülékhez, és ne próbáld visszakapcsolni.",
+          [
+            ["mcb","Kismegszakító – például B16 vagy C16 jelölésű, áramkörhöz tartozó kapcsoló."],
+            ["rcd","FI-relé / ÁVK – jellemző lehet a „T” vagy „TEST” gomb és a 30 mA jelölés."],
+            ["unknown","Nem tudom megkülönböztetni."]
+          ],
+          device=>{
+            const deviceNames={
+              mcb:"A felhasználó kismegszakítót azonosított a felirata alapján.",
+              rcd:"A felhasználó FI-relét / ÁVK-t azonosított a felirata alapján.",
+              unknown:"A felhasználó nem tudta biztonságosan megkülönböztetni a védelmi készüléket."
+            };
+            addFault(deviceNames[device]);
+            if(device==="mcb"){
+              showFaultResult(
+                "Kismegszakító oldott le",
+                "A kismegszakító egy áramkör túlterhelése vagy zárlata miatt is leoldhat. Ne nyisd fel az elosztót, ne bonts szerelvényt, és ne próbálkozz ismételt visszakapcsolással. A hiba okának megállapítását bízd villanyszerelőre."
+              );
+            }else if(device==="rcd"){
+              showFaultResult(
+                "FI-relé / ÁVK oldott le",
+                "A FI-relé többek között szivárgó áram vagy szigetelési hiba miatt oldhat le. Ez önmagában nem azonos a kismegszakító túlterhelés elleni működésével. Ne iktasd ki a védelmet, ne nyomd meg a TEST gombot hibakeresés céljából, és ne próbálkozz ismételt visszakapcsolással. A hiba okát villanyszerelőnek kell megvizsgálnia."
+              );
+            }else{
+              showFaultResult(
+                "A készülék típusa nem egyértelmű",
+                "Ne próbáld találgatással azonosítani vagy működtetni. Hagyd a berendezést biztonságos állapotban, és kérj villanyszerelői segítséget."
+              );
+            }
+          }
+        );
       }
     }
   );
@@ -1195,26 +1251,129 @@ $("startFault").addEventListener("click",()=>{
   startFault(selected.value);
 });
 
+/* Alapkeret és ügyféligények összegyűjtése az e-mailhez */
+function getBaseQuantityText(){
+  const area=Number($("areaForm").value)||0;
+  const service=$("service").value;
+  const relevant=[
+    "Új villamos hálózat kiépítése",
+    "Teljes vagy részleges villamos felújítás"
+  ].includes(service);
+  if(!relevant||area<=0){
+    return "Az alapterülethez tartozó alapkeret nem állapítható meg vagy nem releváns.";
+  }
+  const b=bracketForArea(area);
+  if(!b){
+    return `${area} m²: 120 m² felett egyedi alapkeret szükséges; a maximálisan tervezhető mennyiséget felméréskor kell meghatározni.`;
+  }
+  const q=qty[b];
+  return `${area} m² alapterülethez tartozó ajánlott alapkeret: ${q[0]} konnektor, ${q[1]} kapcsoló, ${q[2]} világítási kiállás. A kereten felüli igény külön egyeztetendő.`;
+}
+function getRequestedQuantityText(){
+  return [
+    `Kért konnektorok: ${$("formSockets").value||"nincs megadva"} db`,
+    `Kért kapcsolók: ${$("formSwitches").value||"nincs megadva"} db`,
+    `Kért világítási kiállások: ${$("formLights").value||"nincs megadva"} db`
+  ].join("\n");
+}
+function getQuantityOverageText(){
+  const area=Number($("areaForm").value)||0;
+  const service=$("service").value;
+  const relevant=[
+    "Új villamos hálózat kiépítése",
+    "Teljes vagy részleges villamos felújítás"
+  ].includes(service);
+  if(!relevant||area<=0)return "A többletmennyiség nem számítható ki megbízhatóan: nincs megadva releváns alapterület.";
+  const b=bracketForArea(area);
+  if(!b)return "120 m² felett a mennyiségi keret egyedi egyeztetést igényel.";
+  const q=qty[b];
+  const requested=[
+    Number($("formSockets").value)||0,
+    Number($("formSwitches").value)||0,
+    Number($("formLights").value)||0
+  ];
+  return [
+    `Konnektor: ${Math.max(0,requested[0]-q[0])} db az alapkereten felül`,
+    `Kapcsoló: ${Math.max(0,requested[1]-q[1])} db az alapkereten felül`,
+    `Világítási kiállás: ${Math.max(0,requested[2]-q[2])} db az alapkereten felül`
+  ].join("\n");
+}
+function collectFormDetails(){
+  const form=$("quoteForm");
+  const extras=[...form.querySelectorAll('input[name="Extra igény"]:checked')].map(x=>x.value);
+  const baseText=getBaseQuantityText();
+  const requestedText=getRequestedQuantityText();
+  const overageText=getQuantityOverageText();
+
+  $("formMaxQuantities").value=
+    "ALAPTERÜLET ALAPJÁN TERVEZHETŐ ALAPKERET:\n"+baseText+
+    "\n\nKÉRT MENNYISÉGEK:\n"+requestedText+
+    "\n\nALAPKERETEN FELÜLI MENNYISÉGEK:\n"+overageText;
+
+  $("formQuantities").value=[
+    "Alapkeret: "+baseText,
+    requestedText,
+    "Alapkereten felül: "+overageText,
+    "Extra igények: "+(extras.join(", ")||"nincs kiválasztva"),
+    "Extra igények részletei: "+$("extraDetails").value,
+    "Helyiségenkénti bontás: "+$("roomDetails").value
+  ].join("\n\n");
+
+  $("formClientNeeds").value=[
+    "Igényelt szolgáltatás: "+$("service").value,
+    "Ingatlan típusa: "+$("propertyType").value,
+    "Alapterület: "+($("areaForm").value||"nincs megadva")+" m²",
+    "Helyiségek száma: "+($("rooms").value||"nincs megadva"),
+    "Építési vagy felújítási állapot: "+($("buildingStatus").value||"nincs megadva"),
+    "Falazat: "+($("wallType").value||"nincs megadva"),
+    "Munka leírása: "+$("description").value,
+    "Különleges igények: "+$("specialNeeds").value,
+    "Egyéb megjegyzés: "+$("notes").value,
+    "Extra igények: "+(extras.join(", ")||"nincs kiválasztva"),
+    "Extra igények részletei: "+$("extraDetails").value,
+    "Helyiségenkénti részletezés: "+$("roomDetails").value,
+    "Anyagbeszerzés: "+($("materialSource").value||"nincs megadva"),
+    "Szerelvény termékcsalád: "+($("productFamily").value||"nincs megadva"),
+    "Szerelvény színe: "+($("color").value||"nincs megadva"),
+    "Anyagválasztási megjegyzés: "+$("productNotes").value,
+    "Kívánt időszak: "+($("preferredPeriod").value||"nincs megadva"),
+    "Kívánt dátum: "+($("preferredDate").value||"nincs megadva")
+  ].join("\n\n");
+
+  $("replyTo").value=$("email").value.trim();
+  $("customerCopy").value=$("email").value.trim();
+}
+
+/* Űrlap törlése */
+$("clearFormBtn").addEventListener("click",()=>{
+  const confirmed=confirm("Biztosan törlöd az ajánlatkérő űrlap kitöltött mezőit?");
+  if(!confirmed)return;
+
+  $("quoteForm").reset();
+  $("formStatus").className="hidden";
+  $("formStatus").textContent="";
+  $("requestKind").value="Általános ajánlatkérés";
+  $("formEstimate").value="";
+  $("formQuantities").value="";
+  $("formMaxQuantities").value="";
+  $("formClientNeeds").value="";
+  $("formFault").value="";
+  $("replyTo").value="";
+  $("customerCopy").value="";
+  $("pointPanel").classList.add("hidden");
+  $("serviceQuestions").classList.add("hidden");
+  $("serviceQuestionFields").innerHTML="";
+  $("description").value="";
+  updateServiceQuestions();
+  resetFault();
+  $("quoteForm").scrollIntoView({behavior:"smooth",block:"start"});
+});
+
 /* FormSubmit – AJAX küldés és valós visszajelzés */
 function showFormStatus(type,message){
   const el=$("formStatus");
   el.className="status "+type;
   el.textContent=message;
-}
-function collectFormDetails(){
-  const form=$("quoteForm");
-  const extras=[...form.querySelectorAll('input[name="Extra igény"]:checked')].map(x=>x.value);
-  $("formQuantities").value=[
-    requestedQtySummary(),
-    "Kért konnektor: "+($("formSockets").value||"nincs megadva"),
-    "Kért kapcsoló: "+($("formSwitches").value||"nincs megadva"),
-    "Kért világítási kiállás: "+($("formLights").value||"nincs megadva"),
-    "Extra igények: "+(extras.join(", ")||"nincs kiválasztva"),
-    "Extra igények részletei: "+$("extraDetails").value,
-    "Helyiségenkénti bontás: "+$("roomDetails").value
-  ].join("\n");
-  $("replyTo").value=$("email").value.trim();
-  $("customerCopy").value=$("email").value.trim();
 }
 $("quoteForm").addEventListener("submit",async e=>{
   e.preventDefault();
