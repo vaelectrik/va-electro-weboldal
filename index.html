@@ -89,8 +89,53 @@ document.querySelectorAll(".servicecta").forEach(a=>a.addEventListener("click",(
 $("estimateRequest").addEventListener("click",()=>{updateEstimate();service.value=$("workType").value==="new"?"Új elektromos hálózat":"Teljes hálózatfelújítás";service.dispatchEvent(new Event("change"));$("requestKind").value="Árajánlat a kalkulátorban kiválasztott munkára";if(activeEstimate&&$("workType").value==="new"){$("formEstimate").value=activeEstimate.summary+" Kiszállás: "+money(activeEstimate.travel)+". A becslés tájékoztató jellegű.";if(!$("description").value.trim())$("description").value="A kalkulátor alapján kérek ajánlatot. "+activeEstimate.summary}else{$("formEstimate").value="";if(!$("description").value.trim())$("description").value="Teljes hálózatfelújításra kérek egyedi ajánlatot."}$("ajanlat").scrollIntoView({behavior:"smooth"})});
 
 /* A hibakereső első lépése mindig a veszélyjelek kizárása. */
-let faultSummary=[];const wizard=$("faultWizard"),result=$("faultResult");
-function addFault(s){faultSummary.push(s);$("formFault").value="Hibakereső összefoglaló:\n• "+faultSummary.join("\n• ");$("formFaultSubmit").value=$("formFault").value}
+let faultSummary=[];
+const wizard=$("faultWizard"),result=$("faultResult");
+
+function translateFaultLine(s){
+  const values={
+    whole:"Teljes áramszünet",
+    part:"Részleges áramszünet",
+    breaker:"Kismegszakító leoldása",
+    light:"Villogó fény vagy hibás dugalj/kapcsoló",
+    other:"Egyéb hiba",
+    yes:"Igen",
+    no:"Nem",
+    unsure:"Nem biztos",
+    unknown:"Nem tudom",
+    tripped:"Leoldott kapcsoló",
+    on:"Bekapcsolt állás",
+    rcd:"FI-relé",
+    always:"Folyamatosan",
+    sometimes:"Időnként",
+    device:"Készülék használatakor"
+  };
+
+  const split=s.match(/^([^:]+:\s*)(.*)$/);
+  if(!split) return values[s]||s;
+
+  const label=split[1];
+  const value=split[2];
+
+  if(label.startsWith("Leoldott eszköz: ")){
+    return label+
+      (value==="rcd"?"FI-relé":
+       value==="breaker"?"kismegszakító":
+       values[value]||value);
+  }
+
+  return label+(values[value]||value);
+}
+
+function addFault(s){
+  faultSummary.push(translateFaultLine(s));
+
+  $("formFault").value=
+    "Hibakereső összefoglaló:\n• "+
+    faultSummary.join("\n• ");
+
+  $("formFaultSubmit").value=$("formFault").value;
+}
 function resetFault(){faultSummary=[];$("formFault").value=$("formFaultSubmit").value="";wizard.classList.add("hidden");result.classList.add("hidden");wizard.innerHTML=result.innerHTML=""}
 function showResult(title,desc,danger=false,extra=""){wizard.classList.add("hidden");result.classList.remove("hidden");result.innerHTML='<div class="faultstep '+(danger?'danger':'')+'"><h3>'+esc(title)+'</h3><p>'+esc(desc)+'</p>'+extra+'<div class="stepnav"><button class="btn outline" id="restartFault" type="button">Újrakezdés</button><button class="btn" id="faultToQuote" type="button">Hibakeresési ajánlatot kérek</button></div></div>';$("restartFault").onclick=resetFault;$("faultToQuote").onclick=()=>{service.value="Hibakeresés és hibaelhárítás";service.dispatchEvent(new Event("change"));$("requestKind").value="Hibakeresési ajánlatkérés";$("formFault").value="Hibakereső összefoglaló:\n• "+faultSummary.join("\n• ");$("formFaultSubmit").value=$("formFault").value;if(!$("description").value.trim())$("description").value="Hibakeresésre kérek ajánlatot. A hibakereső összefoglalóját csatoltam.";$("ajanlat").scrollIntoView({behavior:"smooth"})}}
 function step(title,desc,opts,next){$("startFault").classList.add("hidden");result.classList.add("hidden");wizard.classList.remove("hidden");wizard.innerHTML='<div class="faultstep"><h3>'+esc(title)+'</h3><p>'+esc(desc)+'</p><div class="options">'+opts.map(o=>'<label class="option"><input type="radio" name="wizardChoice" value="'+esc(o[0])+'"><span>'+esc(o[1])+'</span></label>').join("")+'</div><button class="btn" id="nextFault" type="button">Tovább</button></div>';$("nextFault").onclick=()=>{const s=wizard.querySelector('input[name="wizardChoice"]:checked');if(!s){alert("Kérlek, válassz egy lehetőséget.");return}next(s.value)}}
