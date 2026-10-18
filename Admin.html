@@ -75,12 +75,13 @@ button:disabled{opacity:.5}
         <div id="requestInfo"></div>
         <label for="status">Státusz</label>
         <select id="status">
-          <option value="Új">Új</option>
-          <option value="Kapcsolatfelvétel">Kapcsolatfelvétel</option>
-          <option value="Ajánlat elküldve">Ajánlat elküldve</option>
-          <option value="Elfogadva">Elfogadva</option>
-          <option value="Elutasítva">Elutasítva</option>
-        </select>
+<option value="new">Új</option>
+<option value="contacted">Kapcsolatfelvétel</option>
+<option value="offer_sent">Ajánlat elküldve</option>
+<option value="accepted">Elfogadva</option>
+<option value="rejected">Elutasítva</option>
+<option value="closed">Lezárva</option>
+  </select>
         <label for="notes">Belső megjegyzés</label>
         <textarea id="notes" placeholder="Ide írd a saját megjegyzéseidet..."></textarea>
         <div class="actions">
@@ -179,7 +180,7 @@ async function loadRequests() {
         <h3>${escapeHTML(item.customer_name || "Név nélkül")}</h3>
         <p>${escapeHTML(item.service_type || "Szolgáltatás nincs megadva")}</p>
         <p class="muted">${escapeHTML(formatDate(item.created_at))}</p>
-        <span class="tag">${escapeHTML(item.status || "Új")}</span>
+        <span class="tag">${escapeHTML(statusLabel(item.status))}</span>
       </div>
     `).join("");
 
@@ -196,6 +197,18 @@ async function loadRequests() {
   } catch (error) {
     message("Nem sikerült betölteni az ajánlatkéréseket: " + error.message);
   }
+}
+
+function statusLabel(value) {
+  const labels = {
+    new: "Új",
+    contacted: "Kapcsolatfelvétel",
+    offer_sent: "Ajánlat elküldve",
+    accepted: "Elfogadva",
+    rejected: "Elutasítva",
+    closed: "Lezárva"
+  };
+  return labels[value] || value || "Új";
 }
 
 function formatDate(value) {
@@ -226,15 +239,17 @@ function openRequest(item) {
       `<p><strong>${escapeHTML(label)}:</strong><br>${escapeHTML(value)}</p>`
     ).join("");
 
-  const statuses = ["Új","Kapcsolatfelvétel","Ajánlat elküldve","Elfogadva","Elutasítva"];
-  const currentStatus = item.status || "Új";
+  
+  const statuses = ["new","contacted","offer_sent","accepted","rejected","closed"];
+  const currentStatus = item.status || "new";
   if (!statuses.includes(currentStatus)) {
     const option = document.createElement("option");
     option.value = currentStatus;
-    option.textContent = currentStatus;
+    option.textContent = statusLabel(currentStatus);
     $("status").appendChild(option);
   }
   $("status").value = currentStatus;
+
   $("notes").value = item.admin_notes || "";
   $("detail").classList.remove("hidden");
   $("detail").scrollIntoView({ behavior: "smooth", block: "start" });
