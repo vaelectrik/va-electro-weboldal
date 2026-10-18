@@ -5,36 +5,53 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#10100f">
+<meta name="description" content="VA ELECTRO adminisztrációs felület">
 <title>VA ELECTRO – Admin</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--bg:#10100f;--panel:#1b1a18;--copper:#c58b58;--text:#f5f1eb;--muted:#b8b0a7;--line:#39342f}
+:root{--bg:#10100f;--panel:#1b1a18;--copper:#c58b58;--text:#f5f1eb;--muted:#b8b0a7;--line:#39342f;--green:#83c99a;--red:#e99b91}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
-header{padding:22px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}
+header{padding:18px 15px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}
 .brand{font-size:21px;font-weight:bold;letter-spacing:1px}
 .brand span{color:var(--copper)}
-main{max-width:950px;margin:auto;padding:20px 14px}
-h1{font-size:25px;margin:10px 0 8px}
-h2{font-size:19px}
-p{line-height:1.5}
+main{max-width:1100px;margin:auto;padding:18px 14px}
+h1{font-size:25px;margin:10px 0}
+h2{font-size:19px;margin-top:8px}
+h3{font-size:17px}
+p{line-height:1.5;overflow-wrap:anywhere}
 .muted{color:var(--muted);font-size:14px}
-.panel,.item{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:17px;margin:14px 0}
+.panel,.item,.summary{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}
+.item{cursor:pointer}
+.item h3{margin:0 0 8px}
+.item p{margin:6px 0}
 label{display:block;margin:14px 0 7px;font-size:14px;color:var(--muted)}
 input,textarea,select{width:100%;padding:12px;border:1px solid #51483f;border-radius:7px;background:#111;color:var(--text);font:inherit}
-textarea{min-height:110px;resize:vertical}
-button{padding:12px 15px;border:1px solid var(--copper);border-radius:7px;background:var(--copper);color:#17120d;font-weight:bold;font-size:14px;cursor:pointer}
+textarea{min-height:90px;resize:vertical}
+button{padding:11px 14px;border:1px solid var(--copper);border-radius:7px;background:var(--copper);color:#17120d;font-weight:bold;font-size:14px;cursor:pointer}
 button.secondary{background:transparent;color:var(--copper)}
 button:disabled{opacity:.5}
-.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}
-.item{cursor:pointer}
-.item h3{margin:0 0 8px;font-size:17px}
-.item p{margin:6px 0;overflow-wrap:anywhere}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:12px 0}
+.tabs button{white-space:nowrap;flex-shrink:0}
+.tabs button.active{background:var(--copper);color:#17120d}
+.tabs button:not(.active){background:transparent;color:var(--copper)}
 .tag{display:inline-block;border:1px solid var(--copper);color:var(--copper);padding:4px 8px;border-radius:20px;font-size:12px}
 .hidden{display:none!important}
-#message{padding:12px 0;white-space:pre-wrap;overflow-wrap:anywhere}
-#detail{scroll-margin-top:12px}
-@media(min-width:650px){.columns{display:grid;grid-template-columns:1fr 1.2fr;gap:16px;align-items:start}}
+#message{padding:10px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.columns{display:grid;grid-template-columns:1fr;gap:12px}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.summary{margin:0;padding:13px}
+.summary strong{display:block;font-size:19px;margin-top:8px;overflow-wrap:anywhere}
+.money{color:var(--copper)}
+.paid{color:var(--green)}
+.debt{color:var(--red)}
+.progress{height:10px;background:#39342f;border-radius:20px;overflow:hidden;margin:10px 0}
+.progress span{display:block;height:100%;background:var(--green);width:0}
+hr{border:0;border-top:1px solid var(--line);margin:16px 0}
+.payment-row{border-bottom:1px solid var(--line);padding:10px 0}
+.payment-row:last-child{border-bottom:0}
+@media(min-width:760px){.columns{grid-template-columns:1fr 1.2fr}.summary-grid{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 <body>
@@ -42,75 +59,149 @@ button:disabled{opacity:.5}
   <div class="brand"><span>VA</span> ELECTRO <span style="font-size:12px">/ ADMIN</span></div>
   <button id="logout" class="secondary hidden" type="button">Kilépés</button>
 </header>
-
 <main>
   <section id="loginPanel" class="panel">
     <h1>Admin belépés</h1>
-    <p class="muted">VA ELECTRO – ajánlatkérések kezelése</p>
+    <p class="muted">VA ELECTRO – adminisztráció</p>
     <form id="loginForm">
       <label for="email">E-mail-cím</label>
       <input id="email" type="email" autocomplete="username" required>
       <label for="password">Jelszó</label>
       <input id="password" type="password" autocomplete="current-password" required>
-      <div class="actions">
-        <button type="submit" id="loginButton">Belépés</button>
-      </div>
+      <div class="actions"><button id="loginButton" type="submit">Belépés</button></div>
     </form>
   </section>
 
   <section id="dashboard" class="hidden">
-    <h1>Ajánlatkérések</h1>
-    <p class="muted">Az ügyféladatokat kizárólag jogosult adminisztrátorként kezeld.</p>
+    <h1>Adminisztráció</h1>
+    <p class="muted">Ajánlatkérések, munkák és befizetések kezelése.</p>
     <div id="message" role="status"></div>
-    <div class="actions">
-      <button id="refresh" class="secondary" type="button">Frissítés</button>
-    </div>
-    <div class="columns">
-      <section>
-        <h2>Beérkezett kérések</h2>
-        <div id="requestList"></div>
+    <nav class="tabs" aria-label="Admin menü">
+      <button class="active" data-tab="requests" type="button">Ajánlatkérések</button>
+      <button data-tab="active" type="button">Aktív munkák</button>
+      <button data-tab="completed" type="button">Elkészült munkák</button>
+      <button data-tab="payments" type="button">Fizetések</button>
+    </nav>
+
+    <section id="tab-requests" class="tab-panel">
+      <div class="actions"><button id="refresh" class="secondary" type="button">Frissítés</button></div>
+      <div class="columns">
+        <section>
+          <h2>Beérkezett kérések</h2>
+          <div id="requestList"></div>
+        </section>
+        <section id="requestDetail" class="panel hidden">
+          <h2>Ajánlatkérés részletei</h2>
+          <div id="requestInfo"></div>
+          <label for="status">Státusz</label>
+          <select id="status">
+            <option value="new">Új</option>
+            <option value="contacted">Kapcsolatfelvétel</option>
+            <option value="offer_sent">Ajánlat elküldve</option>
+            <option value="accepted">Elfogadva – aktív munka</option>
+            <option value="completed">Elkészült munka</option>
+            <option value="rejected">Elutasítva</option>
+            <option value="closed">Lezárva</option>
+          </select>
+          <label for="acceptedAmount">Elfogadott ajánlat végösszege (Ft)</label>
+          <input id="acceptedAmount" type="number" min="0" step="1" placeholder="Például: 450000">
+          <label for="notes">Belső megjegyzés</label>
+          <textarea id="notes" placeholder="Saját megjegyzések..."></textarea>
+          <div class="actions">
+            <button id="save" type="button">Mentés</button>
+            <button id="back" class="secondary" type="button">Vissza a listához</button>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section id="tab-active" class="tab-panel hidden">
+      <h2>Aktív munkák</h2>
+      <p class="muted">Az elfogadott, folyamatban lévő munkák.</p>
+      <div id="activeList"></div>
+    </section>
+
+    <section id="tab-completed" class="tab-panel hidden">
+      <h2>Elkészült munkák</h2>
+      <p class="muted">A lezárt munkák és korábbi fizetési adataik.</p>
+      <div id="completedList"></div>
+    </section>
+
+    <section id="tab-payments" class="tab-panel hidden">
+      <h2>Fizetések áttekintése</h2>
+      <div class="summary-grid">
+        <div class="summary"><span class="muted">Elfogadott összegek összesen</span><strong id="sumAccepted" class="money">0 Ft</strong></div>
+        <div class="summary"><span class="muted">Befizetve összesen</span><strong id="sumPaid" class="paid">0 Ft</strong></div>
+        <div class="summary"><span class="muted">Fennmaradó hátralék</span><strong id="sumDebt" class="debt">0 Ft</strong></div>
+      </div>
+      <div class="actions"><button id="refreshPayments" class="secondary" type="button">Frissítés</button></div>
+      <div id="paymentJobList"></div>
+      <section id="paymentDetail" class="panel hidden">
+        <h2 id="paymentJobTitle">Munka fizetései</h2>
+        <div id="paymentJobSummary"></div>
+        <h3>Befizetési előzmények</h3>
+        <div id="paymentHistory"></div>
+        <hr>
+        <h3>Új befizetés rögzítése</h3>
+        <form id="paymentForm">
+          <label for="paymentDate">Befizetés dátuma</label>
+          <input id="paymentDate" type="date" required>
+          <label for="paymentAmount">Befizetett összeg (Ft)</label>
+          <input id="paymentAmount" type="number" min="1" step="1" required placeholder="Például: 100000">
+          <label for="paymentNote">Megjegyzés (nem kötelező)</label>
+          <textarea id="paymentNote" placeholder="Például: előleg, második részlet..."></textarea>
+          <div class="actions">
+            <button id="addPayment" type="submit">Befizetés mentése</button>
+            <button id="closePaymentDetail" class="secondary" type="button">Bezárás</button>
+          </div>
+        </form>
       </section>
-      <section id="detail" class="panel hidden">
-        <h2>Részletek</h2>
-        <div id="requestInfo"></div>
-        <label for="status">Státusz</label>
-        <select id="status">
-<option value="new">Új</option>
-<option value="contacted">Kapcsolatfelvétel</option>
-<option value="offer_sent">Ajánlat elküldve</option>
-<option value="accepted">Elfogadva</option>
-<option value="rejected">Elutasítva</option>
-<option value="closed">Lezárva</option>
-  </select>
-        <label for="notes">Belső megjegyzés</label>
-        <textarea id="notes" placeholder="Ide írd a saját megjegyzéseidet..."></textarea>
-        <div class="actions">
-          <button id="save" type="button">Mentés</button>
-          <button id="back" class="secondary" type="button">Vissza a listához</button>
-        </div>
-      </section>
-    </div>
+    </section>
   </section>
 </main>
 
 <script>
 const SUPABASE_URL = "https://fxxhxnpirxpjqadrwyzf.supabase.co";
 const SUPABASE_KEY = "sb_publishable_Zpk6zDDtgqFpkDc38ms6_g_gjzvn-ZS";
-
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const $ = id => document.getElementById(id);
 
 let selectedRequest = null;
+let selectedPaymentJob = null;
 let requests = [];
+let payments = [];
 
-function message(text) {
-  $("message").textContent = text;
-}
+function message(text) { $("message").textContent = text; }
 
 function escapeHTML(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
     "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
   }[char]));
+}
+
+function money(value) {
+  return new Intl.NumberFormat("hu-HU", {
+    style:"currency",currency:"HUF",maximumFractionDigits:0
+  }).format(Number(value) || 0);
+}
+
+function formatDate(value) {
+  if (!value) return "Nincs megadva";
+  const date = new Date(value);
+  return isNaN(date.getTime()) ? String(value) : date.toLocaleDateString("hu-HU");
+}
+
+function statusLabel(value) {
+  const labels = {
+    new:"Új",
+    contacted:"Kapcsolatfelvétel",
+    offer_sent:"Ajánlat elküldve",
+    accepted:"Aktív munka",
+    completed:"Elkészült",
+    rejected:"Elutasítva",
+    closed:"Lezárva"
+  };
+  return labels[value] || value || "Új";
 }
 
 function showDashboard() {
@@ -123,14 +214,27 @@ function showLogin() {
   $("loginPanel").classList.remove("hidden");
   $("dashboard").classList.add("hidden");
   $("logout").classList.add("hidden");
-  $("detail").classList.add("hidden");
 }
 
 async function checkAdmin() {
   const { data, error } = await client.rpc("is_va_electro_admin");
-  if (error) throw new Error("Az adminjogosultság ellenőrzése sikertelen. Ellenőrizni kell a Supabase beállításait.");
+  if (error) throw new Error("Az adminjogosultság ellenőrzése sikertelen. Ellenőrizd a Supabase beállításait.");
   if (data !== true) throw new Error("Ehhez a fiókhoz nincs adminjogosultság.");
 }
+
+function setTab(name) {
+  document.querySelectorAll("[data-tab]").forEach(button => {
+    button.classList.toggle("active", button.dataset.tab === name);
+  });
+  document.querySelectorAll(".tab-panel").forEach(panel => panel.classList.add("hidden"));
+  $("tab-" + name).classList.remove("hidden");
+  if (name !== "requests") $("requestDetail").classList.add("hidden");
+  if (name !== "payments") $("paymentDetail").classList.add("hidden");
+}
+
+document.querySelectorAll("[data-tab]").forEach(button => {
+  button.addEventListener("click", () => setTab(button.dataset.tab));
+});
 
 $("loginForm").addEventListener("submit", async event => {
   event.preventDefault();
@@ -139,8 +243,8 @@ $("loginForm").addEventListener("submit", async event => {
   button.textContent = "Belépés...";
   try {
     const { error } = await client.auth.signInWithPassword({
-      email: $("email").value.trim(),
-      password: $("password").value
+      email:$("email").value.trim(),
+      password:$("password").value
     });
     if (error) throw error;
     await checkAdmin();
@@ -156,152 +260,312 @@ $("loginForm").addEventListener("submit", async event => {
 });
 
 async function loadRequests() {
-  message("Ajánlatkérések betöltése...");
-  $("requestList").innerHTML = "";
+  message("Adatok betöltése...");
   try {
     await checkAdmin();
     const { data, error } = await client
-      .from("inquiries")
-      .select("*")
-      .order("created_at", { ascending: false });
-
+      .from("inquiries").select("*").order("created_at", {ascending:false});
     if (error) throw error;
     requests = data || [];
-    message("Találatok: " + requests.length);
 
-    if (!requests.length) {
-      $("requestList").innerHTML =
-        '<div class="item">Még nincs megjeleníthető ajánlatkérés.</div>';
-      return;
+    const jobIds = requests
+      .filter(item => ["accepted","completed"].includes(item.status))
+      .map(item => item.id);
+
+    if (jobIds.length) {
+      const result = await client.from("work_payments")
+        .select("*").in("inquiry_id", jobIds)
+        .order("payment_date", {ascending:false});
+      if (result.error) throw result.error;
+      payments = result.data || [];
+    } else {
+      payments = [];
     }
 
-    $("requestList").innerHTML = requests.map((item, index) => `
-      <div class="item" role="button" tabindex="0" data-index="${index}">
-        <h3>${escapeHTML(item.customer_name || "Név nélkül")}</h3>
-        <p>${escapeHTML(item.service_type || "Szolgáltatás nincs megadva")}</p>
-        <p class="muted">${escapeHTML(formatDate(item.created_at))}</p>
-        <span class="tag">${escapeHTML(statusLabel(item.status))}</span>
-      </div>
-    `).join("");
-
-    $("requestList").querySelectorAll("[data-index]").forEach(card => {
-      const open = () => openRequest(requests[Number(card.dataset.index)]);
-      card.addEventListener("click", open);
-      card.addEventListener("keydown", event => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          open();
-        }
-      });
-    });
+    renderRequestList();
+    renderWorkLists();
+    renderPaymentOverview();
+    message("Adatok betöltve. Ajánlatkérések: " + requests.length);
   } catch (error) {
-    message("Nem sikerült betölteni az ajánlatkéréseket: " + error.message);
+    message("Nem sikerült betölteni az adatokat: " + error.message);
   }
 }
 
-function statusLabel(value) {
-  const labels = {
-    new: "Új",
-    contacted: "Kapcsolatfelvétel",
-    offer_sent: "Ajánlat elküldve",
-    accepted: "Elfogadva",
-    rejected: "Elutasítva",
-    closed: "Lezárva"
-  };
-  return labels[value] || value || "Új";
+function renderRequestList() {
+  const list = $("requestList");
+  if (!requests.length) {
+    list.innerHTML = '<div class="item">Még nincs ajánlatkérés.</div>';
+    return;
+  }
+  list.innerHTML = requests.map((item,index) => `
+    <div class="item" role="button" tabindex="0" data-request-index="${index}">
+      <h3>${escapeHTML(item.customer_name || "Név nélkül")}</h3>
+      <p>${escapeHTML(item.service_type || "Szolgáltatás nincs megadva")}</p>
+      <p class="muted">${escapeHTML(formatDate(item.created_at))}</p>
+      <span class="tag">${escapeHTML(statusLabel(item.status))}</span>
+    </div>`).join("");
+
+  list.querySelectorAll("[data-request-index]").forEach(card => {
+    const open = () => openRequest(requests[Number(card.dataset.requestIndex)]);
+    card.addEventListener("click",open);
+    card.addEventListener("keydown",event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault(); open();
+      }
+    });
+  });
 }
 
-function formatDate(value) {
-  if (!value) return "Időpont nincs megadva";
-  const date = new Date(value);
-  return isNaN(date.getTime()) ? String(value) : date.toLocaleString("hu-HU");
+function getPaid(jobId) {
+  return payments
+    .filter(payment => payment.inquiry_id === jobId)
+    .reduce((sum,payment) => sum + Number(payment.amount || 0),0);
+}
+
+function renderWorkLists() {
+  renderJobList("activeList", requests.filter(item => item.status === "accepted"));
+  renderJobList("completedList", requests.filter(item => item.status === "completed"));
+}
+
+function renderJobList(elementId, jobs) {
+  const list = $(elementId);
+  if (!jobs.length) {
+    list.innerHTML = '<div class="item">Nincs megjeleníthető munka.</div>';
+    return;
+  }
+  list.innerHTML = jobs.map(item => {
+    const accepted = Number(item.accepted_amount) || 0;
+    const paid = getPaid(item.id);
+    const debt = accepted - paid;
+    const percent = accepted > 0 ? Math.min(100,Math.max(0,paid / accepted * 100)) : 0;
+    return `<div class="item" role="button" tabindex="0" data-job-id="${escapeHTML(item.id)}">
+      <h3>${escapeHTML(item.customer_name || "Név nélkül")}</h3>
+      <p>${escapeHTML(item.service_type || "Szolgáltatás nincs megadva")}</p>
+      <p>Ajánlat: <strong class="money">${money(accepted)}</strong></p>
+      <p>Befizetve: <strong class="paid">${money(paid)}</strong></p>
+      <p>Hátralék: <strong class="${debt > 0 ? "debt" : "paid"}">${money(debt)}</strong></p>
+      <div class="progress"><span style="width:${percent}%"></span></div>
+      <p class="muted">${percent.toFixed(0)}% befizetve · Részletek megnyitása</p>
+    </div>`;
+  }).join("");
+
+  list.querySelectorAll("[data-job-id]").forEach(card => {
+    const open = () => {
+      const job = requests.find(item => item.id === card.dataset.jobId);
+      if (job) openPaymentJob(job);
+    };
+    card.addEventListener("click",open);
+    card.addEventListener("keydown",event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault(); open();
+      }
+    });
+  });
+}
+
+function renderPaymentOverview() {
+  const jobs = requests.filter(item => ["accepted","completed"].includes(item.status));
+  const acceptedTotal = jobs.reduce((sum,job) => sum + (Number(job.accepted_amount) || 0),0);
+  const paidTotal = jobs.reduce((sum,job) => sum + getPaid(job.id),0);
+  const debtTotal = acceptedTotal - paidTotal;
+  $("sumAccepted").textContent = money(acceptedTotal);
+  $("sumPaid").textContent = money(paidTotal);
+  $("sumDebt").textContent = money(debtTotal);
+
+  if (!jobs.length) {
+    $("paymentJobList").innerHTML = '<div class="item">Még nincs elfogadott vagy elkészült munka.</div>';
+    return;
+  }
+  $("paymentJobList").innerHTML = jobs.map((job,index) => {
+    const accepted = Number(job.accepted_amount) || 0;
+    const paid = getPaid(job.id);
+    const debt = accepted - paid;
+    const percent = accepted > 0 ? Math.min(100,Math.max(0,paid / accepted * 100)) : 0;
+    return `<div class="item" role="button" tabindex="0" data-payment-index="${index}">
+      <h3>${escapeHTML(job.customer_name || "Név nélkül")}</h3>
+      <p>${escapeHTML(job.service_type || "Szolgáltatás nincs megadva")} · ${escapeHTML(statusLabel(job.status))}</p>
+      <p>Elfogadott ajánlat: <strong class="money">${money(accepted)}</strong></p>
+      <p>Befizetve: <strong class="paid">${money(paid)}</strong></p>
+      <p>Hátralék: <strong class="${debt > 0 ? "debt" : "paid"}">${money(debt)}</strong></p>
+      <div class="progress"><span style="width:${percent}%"></span></div>
+      <p class="muted">${percent.toFixed(0)}% befizetve · Befizetések megnyitása</p>
+    </div>`;
+  }).join("");
+
+  $("paymentJobList").querySelectorAll("[data-payment-index]").forEach(card => {
+    const open = () => openPaymentJob(jobs[Number(card.dataset.paymentIndex)]);
+    card.addEventListener("click",open);
+    card.addEventListener("keydown",event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault(); open();
+      }
+    });
+  });
 }
 
 function openRequest(item) {
   selectedRequest = item;
   const fields = [
-    ["Név", item.customer_name],
-    ["E-mail", item.customer_email],
-    ["Telefon", item.customer_phone],
-    ["Település", item.city],
-    ["Szolgáltatás", item.service_type],
-    ["Kért időpont", item.preferred_date],
-    ["Beérkezett", formatDate(item.created_at)],
-    ["Leírás", item.description],
-    ["Hibakeresés összefoglalója", item.troubleshooting_summary],
-    ["Becsült ár", item.estimated_price],
-    ["Visszaigazolást kért", item.customer_confirmation_requested]
+    ["Név",item.customer_name],
+    ["E-mail",item.customer_email],
+    ["Telefon",item.customer_phone],
+    ["Település",item.city],
+    ["Szolgáltatás",item.service_type],
+    ["Kért időpont",item.preferred_date],
+    ["Beérkezett",formatDate(item.created_at)],
+    ["Leírás",item.description],
+    ["Hibakeresés összefoglalója",item.troubleshooting_summary],
+    ["Becsült ár",item.estimated_price == null ? "" : money(item.estimated_price)],
+    ["Visszaigazolást kért",item.customer_confirmation_requested ? "Igen" : "Nem"]
   ];
-
   $("requestInfo").innerHTML = fields
-    .filter(([, value]) => value !== null && value !== undefined && value !== "")
-    .map(([label, value]) =>
-      `<p><strong>${escapeHTML(label)}:</strong><br>${escapeHTML(value)}</p>`
-    ).join("");
-
-  
-  const statuses = ["new","contacted","offer_sent","accepted","rejected","closed"];
-  const currentStatus = item.status || "new";
-  if (!statuses.includes(currentStatus)) {
-    const option = document.createElement("option");
-    option.value = currentStatus;
-    option.textContent = statusLabel(currentStatus);
-    $("status").appendChild(option);
-  }
-  $("status").value = currentStatus;
-
+    .filter(([,value]) => value !== null && value !== undefined && value !== "")
+    .map(([label,value]) => `<p><strong>${escapeHTML(label)}:</strong><br>${escapeHTML(value)}</p>`)
+    .join("");
+  $("status").value = item.status || "new";
+  $("acceptedAmount").value = item.accepted_amount ?? "";
   $("notes").value = item.admin_notes || "";
-  $("detail").classList.remove("hidden");
-  $("detail").scrollIntoView({ behavior: "smooth", block: "start" });
+  $("requestDetail").classList.remove("hidden");
+  $("requestDetail").scrollIntoView({behavior:"smooth",block:"start"});
 }
 
 $("save").addEventListener("click", async () => {
   if (!selectedRequest) return;
+  const rawAmount = $("acceptedAmount").value.trim();
+  const acceptedAmount = rawAmount === "" ? null : Number(rawAmount);
+  if (acceptedAmount !== null && (!Number.isFinite(acceptedAmount) || acceptedAmount < 0)) {
+    alert("Az ajánlati összeg nem lehet negatív szám.");
+    return;
+  }
   $("save").disabled = true;
   try {
     await checkAdmin();
-    const { error } = await client
-      .from("inquiries")
-      .update({
-        status: $("status").value,
-        admin_notes: $("notes").value
-      })
-      .eq("id", selectedRequest.id);
-
+    const {error} = await client.from("inquiries").update({
+      status:$("status").value,
+      accepted_amount:acceptedAmount,
+      admin_notes:$("notes").value
+    }).eq("id",selectedRequest.id);
     if (error) throw error;
+    const savedId = selectedRequest.id;
     message("A módosítások mentése sikerült.");
     await loadRequests();
-    const updated = requests.find(item => item.id === selectedRequest.id);
+    const updated = requests.find(item => item.id === savedId);
     if (updated) openRequest(updated);
-  } catch (error) {
+  } catch(error) {
     alert("Nem sikerült menteni: " + error.message);
   } finally {
     $("save").disabled = false;
   }
 });
 
-$("refresh").addEventListener("click", loadRequests);
-$("back").addEventListener("click", () => {
-  $("detail").classList.add("hidden");
+async function openPaymentJob(job) {
+  selectedPaymentJob = job;
+  setTab("payments");
+  $("paymentDetail").classList.remove("hidden");
+  $("paymentJobTitle").textContent = (job.customer_name || "Név nélkül") + " – fizetések";
+  $("paymentDate").value = new Date().toLocaleDateString("en-CA");
+  $("paymentAmount").value = "";
+  $("paymentNote").value = "";
+  $("paymentHistory").innerHTML = '<p class="muted">Befizetések betöltése...</p>';
+  await loadPaymentHistory();
+  $("paymentDetail").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+async function loadPaymentHistory() {
+  if (!selectedPaymentJob) return;
+  try {
+    await checkAdmin();
+    const {data,error} = await client.from("work_payments")
+      .select("*").eq("inquiry_id",selectedPaymentJob.id)
+      .order("payment_date",{ascending:false});
+    if (error) throw error;
+
+    const history = data || [];
+    const accepted = Number(selectedPaymentJob.accepted_amount) || 0;
+    const paid = history.reduce((sum,payment) => sum + Number(payment.amount || 0),0);
+    const debt = accepted - paid;
+    const percent = accepted > 0 ? Math.min(100,Math.max(0,paid / accepted * 100)) : 0;
+
+    $("paymentJobSummary").innerHTML = `
+      <div class="summary-grid">
+        <div class="summary"><span class="muted">Ajánlat végösszege</span><strong class="money">${money(accepted)}</strong></div>
+        <div class="summary"><span class="muted">Összes befizetés</span><strong class="paid">${money(paid)}</strong></div>
+        <div class="summary"><span class="muted">Hátralék</span><strong class="${debt > 0 ? "debt" : "paid"}">${money(debt)}</strong></div>
+      </div>
+      <div class="progress"><span style="width:${percent}%"></span></div>
+      <p class="muted">${percent.toFixed(0)}% befizetve</p>`;
+
+    $("paymentHistory").innerHTML = history.length ? history.map(payment => `
+      <div class="payment-row">
+        <strong class="paid">${money(payment.amount)}</strong>
+        <p class="muted">${escapeHTML(formatDate(payment.payment_date))}</p>
+        ${payment.note ? `<p>${escapeHTML(payment.note)}</p>` : ""}
+      </div>`).join("") : '<p class="muted">Ehhez a munkához még nincs rögzített befizetés.</p>';
+  } catch(error) {
+    $("paymentHistory").textContent = "Nem sikerült betölteni a befizetéseket: " + error.message;
+  }
+}
+
+$("paymentForm").addEventListener("submit",async event => {
+  event.preventDefault();
+  if (!selectedPaymentJob) return;
+  const amount = Number($("paymentAmount").value);
+  if (!Number.isFinite(amount) || amount <= 0) {
+    alert("Adj meg egy nullánál nagyobb befizetési összeget.");
+    return;
+  }
+  const button = $("addPayment");
+  button.disabled = true;
+  try {
+    await checkAdmin();
+    const {error} = await client.from("work_payments").insert({
+      inquiry_id:selectedPaymentJob.id,
+      amount:amount,
+      payment_date:$("paymentDate").value,
+      note:$("paymentNote").value.trim() || null
+    });
+    if (error) throw error;
+    message("A befizetés rögzítése sikerült.");
+    await loadRequests();
+    selectedPaymentJob = requests.find(item => item.id === selectedPaymentJob.id) || selectedPaymentJob;
+    await loadPaymentHistory();
+    $("paymentAmount").value = "";
+    $("paymentNote").value = "";
+  } catch(error) {
+    alert("Nem sikerült rögzíteni a befizetést: " + error.message);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+$("refresh").addEventListener("click",loadRequests);
+$("refreshPayments").addEventListener("click",loadRequests);
+$("back").addEventListener("click",() => {
+  $("requestDetail").classList.add("hidden");
   selectedRequest = null;
 });
-$("logout").addEventListener("click", async () => {
+$("closePaymentDetail").addEventListener("click",() => {
+  $("paymentDetail").classList.add("hidden");
+  selectedPaymentJob = null;
+});
+$("logout").addEventListener("click",async () => {
   await client.auth.signOut();
   selectedRequest = null;
+  selectedPaymentJob = null;
   showLogin();
 });
 
 (async function init() {
   try {
-    const { data } = await client.auth.getSession();
+    const {data} = await client.auth.getSession();
     if (data.session) {
       await checkAdmin();
       showDashboard();
       await loadRequests();
     }
-  } catch (error) {
+  } catch(error) {
     showLogin();
-    console.warn("Admin munkamenet ellenőrzése:", error.message);
+    console.warn("Admin munkamenet ellenőrzése:",error.message);
   }
 })();
 </script>
