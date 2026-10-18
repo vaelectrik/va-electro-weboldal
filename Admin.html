@@ -291,30 +291,46 @@ async function loadRequests() {
   }
 }
 
+
 function renderRequestList() {
   const list = $("requestList");
-  if (!requests.length) {
-    list.innerHTML = '<div class="item">Még nincs ajánlatkérés.</div>';
+
+  // Csak a még intézendő ajánlatkérések jelenjenek meg itt.
+  const pendingRequests = requests.filter(item =>
+    ["new", "contacted", "offer_sent"].includes(item.status)
+  );
+
+  if (!pendingRequests.length) {
+    list.innerHTML =
+      '<div class="item">Nincs függőben lévő ajánlatkérés.</div>';
     return;
   }
-  list.innerHTML = requests.map((item,index) => `
-    <div class="item" role="button" tabindex="0" data-request-index="${index}">
+
+  list.innerHTML = pendingRequests.map((item, index) => `
+    <div class="item" role="button" tabindex="0"
+         data-request-index="${index}">
       <h3>${escapeHTML(item.customer_name || "Név nélkül")}</h3>
       <p>${escapeHTML(item.service_type || "Szolgáltatás nincs megadva")}</p>
       <p class="muted">${escapeHTML(formatDate(item.created_at))}</p>
       <span class="tag">${escapeHTML(statusLabel(item.status))}</span>
-    </div>`).join("");
+    </div>
+  `).join("");
 
   list.querySelectorAll("[data-request-index]").forEach(card => {
-    const open = () => openRequest(requests[Number(card.dataset.requestIndex)]);
-    card.addEventListener("click",open);
-    card.addEventListener("keydown",event => {
+    const open = () =>
+      openRequest(pendingRequests[Number(card.dataset.requestIndex)]);
+
+    card.addEventListener("click", open);
+
+    card.addEventListener("keydown", event => {
       if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault(); open();
+        event.preventDefault();
+        open();
       }
     });
   });
 }
+
 
 function getPaid(jobId) {
   return payments
