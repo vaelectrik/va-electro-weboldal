@@ -122,7 +122,7 @@ function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",
 function renderQuestions(){
  const list=sets[service.value]||[];
  questions.innerHTML=(list.length?'<div class="eyebrow">A kiválasztott munkához</div>'+list.map((q,i)=>{
-  const id="q"+i,name="Munka részlete – "+q[0];
+  const id="q"+i,name=q[0];
   let field;
   if(q[1]==="select")field='<select id="'+id+'" name="'+esc(name)+'"><option value="">Válassz</option>'+q[2].split("|").map(v=>'<option>'+esc(v)+'</option>').join("")+'</select>';
   else if(q[1]==="textarea")field='<textarea id="'+id+'" name="'+esc(name)+'" maxlength="1500"></textarea>';
