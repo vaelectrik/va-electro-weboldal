@@ -1,0 +1,294 @@
+
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#10100f">
+<title>VA ELECTRO – Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#10100f;--panel:#1b1a18;--copper:#c58b58;--text:#f5f1eb;--muted:#b8b0a7;--line:#39342f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+header{padding:22px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{font-size:21px;font-weight:bold;letter-spacing:1px}
+.brand span{color:var(--copper)}
+main{max-width:950px;margin:auto;padding:20px 14px}
+h1{font-size:25px;margin:10px 0 8px}
+h2{font-size:19px}
+p{line-height:1.5}
+.muted{color:var(--muted);font-size:14px}
+.panel,.item{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:17px;margin:14px 0}
+label{display:block;margin:14px 0 7px;font-size:14px;color:var(--muted)}
+input,textarea,select{width:100%;padding:12px;border:1px solid #51483f;border-radius:7px;background:#111;color:var(--text);font:inherit}
+textarea{min-height:110px;resize:vertical}
+button{padding:12px 15px;border:1px solid var(--copper);border-radius:7px;background:var(--copper);color:#17120d;font-weight:bold;font-size:14px;cursor:pointer}
+button.secondary{background:transparent;color:var(--copper)}
+button:disabled{opacity:.5}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}
+.item{cursor:pointer}
+.item h3{margin:0 0 8px;font-size:17px}
+.item p{margin:6px 0;overflow-wrap:anywhere}
+.tag{display:inline-block;border:1px solid var(--copper);color:var(--copper);padding:4px 8px;border-radius:20px;font-size:12px}
+.hidden{display:none!important}
+#message{padding:12px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+#detail{scroll-margin-top:12px}
+@media(min-width:650px){.columns{display:grid;grid-template-columns:1fr 1.2fr;gap:16px;align-items:start}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span>VA</span> ELECTRO <span style="font-size:12px">/ ADMIN</span></div>
+  <button id="logout" class="secondary hidden" type="button">Kilépés</button>
+</header>
+
+<main>
+  <section id="loginPanel" class="panel">
+    <h1>Admin belépés</h1>
+    <p class="muted">VA ELECTRO – ajánlatkérések kezelése</p>
+    <form id="loginForm">
+      <label for="email">E-mail-cím</label>
+      <input id="email" type="email" autocomplete="username" required>
+      <label for="password">Jelszó</label>
+      <input id="password" type="password" autocomplete="current-password" required>
+      <div class="actions">
+        <button type="submit" id="loginButton">Belépés</button>
+      </div>
+    </form>
+  </section>
+
+  <section id="dashboard" class="hidden">
+    <h1>Ajánlatkérések</h1>
+    <p class="muted">Az ügyféladatokat kizárólag jogosult adminisztrátorként kezeld.</p>
+    <div id="message" role="status"></div>
+    <div class="actions">
+      <button id="refresh" class="secondary" type="button">Frissítés</button>
+    </div>
+    <div class="columns">
+      <section>
+        <h2>Beérkezett kérések</h2>
+        <div id="requestList"></div>
+      </section>
+      <section id="detail" class="panel hidden">
+        <h2>Részletek</h2>
+        <div id="requestInfo"></div>
+        <label for="status">Státusz</label>
+        <select id="status">
+          <option value="Új">Új</option>
+          <option value="Kapcsolatfelvétel">Kapcsolatfelvétel</option>
+          <option value="Ajánlat elküldve">Ajánlat elküldve</option>
+          <option value="Elfogadva">Elfogadva</option>
+          <option value="Elutasítva">Elutasítva</option>
+        </select>
+        <label for="notes">Belső megjegyzés</label>
+        <textarea id="notes" placeholder="Ide írd a saját megjegyzéseidet..."></textarea>
+        <div class="actions">
+          <button id="save" type="button">Mentés</button>
+          <button id="back" class="secondary" type="button">Vissza a listához</button>
+        </div>
+      </section>
+    </div>
+  </section>
+</main>
+
+<script>
+const SUPABASE_URL = "https://fxxhxnpirxpjqadrwyzf.supabase.co";
+const SUPABASE_KEY = "sb_publishable_Zpk6zDDtgqFpkDc38ms6_g_gjzvn-ZS";
+
+const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const $ = id => document.getElementById(id);
+
+let selectedRequest = null;
+let requests = [];
+
+function message(text) {
+  $("message").textContent = text;
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[char]));
+}
+
+function showDashboard() {
+  $("loginPanel").classList.add("hidden");
+  $("dashboard").classList.remove("hidden");
+  $("logout").classList.remove("hidden");
+}
+
+function showLogin() {
+  $("loginPanel").classList.remove("hidden");
+  $("dashboard").classList.add("hidden");
+  $("logout").classList.add("hidden");
+  $("detail").classList.add("hidden");
+}
+
+async function checkAdmin() {
+  const { data, error } = await client.rpc("is_va_electro_admin");
+  if (error) throw new Error("Az adminjogosultság ellenőrzése sikertelen. Ellenőrizni kell a Supabase beállításait.");
+  if (data !== true) throw new Error("Ehhez a fiókhoz nincs adminjogosultság.");
+}
+
+$("loginForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  const button = $("loginButton");
+  button.disabled = true;
+  button.textContent = "Belépés...";
+  try {
+    const { error } = await client.auth.signInWithPassword({
+      email: $("email").value.trim(),
+      password: $("password").value
+    });
+    if (error) throw error;
+    await checkAdmin();
+    showDashboard();
+    await loadRequests();
+  } catch (error) {
+    await client.auth.signOut();
+    alert("Nem sikerült belépni: " + (error.message || "Ismeretlen hiba"));
+  } finally {
+    button.disabled = false;
+    button.textContent = "Belépés";
+  }
+});
+
+async function loadRequests() {
+  message("Ajánlatkérések betöltése...");
+  $("requestList").innerHTML = "";
+  try {
+    await checkAdmin();
+    const { data, error } = await client
+      .from("inquiries")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    requests = data || [];
+    message("Találatok: " + requests.length);
+
+    if (!requests.length) {
+      $("requestList").innerHTML =
+        '<div class="item">Még nincs megjeleníthető ajánlatkérés.</div>';
+      return;
+    }
+
+    $("requestList").innerHTML = requests.map((item, index) => `
+      <div class="item" role="button" tabindex="0" data-index="${index}">
+        <h3>${escapeHTML(item.customer_name || "Név nélkül")}</h3>
+        <p>${escapeHTML(item.service_type || "Szolgáltatás nincs megadva")}</p>
+        <p class="muted">${escapeHTML(formatDate(item.created_at))}</p>
+        <span class="tag">${escapeHTML(item.status || "Új")}</span>
+      </div>
+    `).join("");
+
+    $("requestList").querySelectorAll("[data-index]").forEach(card => {
+      const open = () => openRequest(requests[Number(card.dataset.index)]);
+      card.addEventListener("click", open);
+      card.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          open();
+        }
+      });
+    });
+  } catch (error) {
+    message("Nem sikerült betölteni az ajánlatkéréseket: " + error.message);
+  }
+}
+
+function formatDate(value) {
+  if (!value) return "Időpont nincs megadva";
+  const date = new Date(value);
+  return isNaN(date.getTime()) ? String(value) : date.toLocaleString("hu-HU");
+}
+
+function openRequest(item) {
+  selectedRequest = item;
+  const fields = [
+    ["Név", item.customer_name],
+    ["E-mail", item.customer_email],
+    ["Telefon", item.customer_phone],
+    ["Település", item.city],
+    ["Szolgáltatás", item.service_type],
+    ["Kért időpont", item.preferred_date],
+    ["Beérkezett", formatDate(item.created_at)],
+    ["Leírás", item.description],
+    ["Hibakeresés összefoglalója", item.troubleshooting_summary],
+    ["Becsült ár", item.estimated_price],
+    ["Visszaigazolást kért", item.customer_confirmation_requested]
+  ];
+
+  $("requestInfo").innerHTML = fields
+    .filter(([, value]) => value !== null && value !== undefined && value !== "")
+    .map(([label, value]) =>
+      `<p><strong>${escapeHTML(label)}:</strong><br>${escapeHTML(value)}</p>`
+    ).join("");
+
+  const statuses = ["Új","Kapcsolatfelvétel","Ajánlat elküldve","Elfogadva","Elutasítva"];
+  const currentStatus = item.status || "Új";
+  if (!statuses.includes(currentStatus)) {
+    const option = document.createElement("option");
+    option.value = currentStatus;
+    option.textContent = currentStatus;
+    $("status").appendChild(option);
+  }
+  $("status").value = currentStatus;
+  $("notes").value = item.admin_notes || "";
+  $("detail").classList.remove("hidden");
+  $("detail").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+$("save").addEventListener("click", async () => {
+  if (!selectedRequest) return;
+  $("save").disabled = true;
+  try {
+    await checkAdmin();
+    const { error } = await client
+      .from("inquiries")
+      .update({
+        status: $("status").value,
+        admin_notes: $("notes").value
+      })
+      .eq("id", selectedRequest.id);
+
+    if (error) throw error;
+    message("A módosítások mentése sikerült.");
+    await loadRequests();
+    const updated = requests.find(item => item.id === selectedRequest.id);
+    if (updated) openRequest(updated);
+  } catch (error) {
+    alert("Nem sikerült menteni: " + error.message);
+  } finally {
+    $("save").disabled = false;
+  }
+});
+
+$("refresh").addEventListener("click", loadRequests);
+$("back").addEventListener("click", () => {
+  $("detail").classList.add("hidden");
+  selectedRequest = null;
+});
+$("logout").addEventListener("click", async () => {
+  await client.auth.signOut();
+  selectedRequest = null;
+  showLogin();
+});
+
+(async function init() {
+  try {
+    const { data } = await client.auth.getSession();
+    if (data.session) {
+      await checkAdmin();
+      showDashboard();
+      await loadRequests();
+    }
+  } catch (error) {
+    showLogin();
+    console.warn("Admin munkamenet ellenőrzése:", error.message);
+  }
+})();
+</script>
+</body>
+</html>
