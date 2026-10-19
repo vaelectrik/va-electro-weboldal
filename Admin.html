@@ -408,9 +408,13 @@ function renderRequestList() {
     }
 
     list.innerHTML = items.map((item, index) => `
+          list.innerHTML = items.map((item, index) => `
       <div class="item" role="button" tabindex="0"
            data-request-id="${escapeHTML(item.id)}">
-        <h3>${escapeHTML(item.customer_name || "Név nélkül")}</h3>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
+          <h3 style="margin:0;flex:1;min-width:120px;">${escapeHTML(item.customer_name || "Név nélkül")}</h3>
+          <span class="tag" style="white-space:nowrap;">${escapeHTML(item.work_number || "Nincs munkaszám")}</span>
+        </div>
         <p>${escapeHTML(item.service_type || "Szolgáltatás nincs megadva")}</p>
         <p class="muted">${escapeHTML(formatDate(item.created_at))}</p>
         <span class="tag">${escapeHTML(statusLabel(item.status))}</span>
