@@ -469,43 +469,86 @@ function renderJobList(elementId, jobs) {
 }
 
 function renderPaymentOverview() {
-  const jobs = requests.filter(item => ["accepted","completed"].includes(item.status));
-  const acceptedTotal = jobs.reduce((sum,job) => sum + (Number(job.accepted_amount) || 0),0);
-  const paidTotal = jobs.reduce((sum,job) => sum + getPaid(job.id),0);
-  const debtTotal = acceptedTotal - paidTotal;
+  // Az összesítő továbbra is minden aktív és elkészült munkát számol.
+  const jobs = requests.filter(item =>
+    ["accepted", "completed"].includes(item.status)
+  );
+
+  const acceptedTotal = jobs.reduce(
+    (sum, job) => sum + (Number(job.accepted_amount) || 0), 0
+  );
+
+  const paidTotal = jobs.reduce(
+    (sum, job) => sum + getPaid(job.id), 0
+  );
+
+  const debtTotal = jobs.reduce(
+    (sum, job) =>
+      sum + Math.max(
+        0,
+        (Number(job.accepted_amount) || 0) - getPaid(job.id)
+      ),
+    0
+  );
+
   $("sumAccepted").textContent = money(acceptedTotal);
   $("sumPaid").textContent = money(paidTotal);
   $("sumDebt").textContent = money(debtTotal);
 
-  if (!jobs.length) {
-    $("paymentJobList").innerHTML = '<div class="item">Még nincs elfogadott vagy elkészült munka.</div>';
+  // Csak a tényleges hátralékkal rendelkező munkák jelennek meg.
+  const outstandingJobs = jobs.filter(job => {
+    const accepted = Number(job.accepted_amount) || 0;
+    return accepted > 0 && getPaid(job.id) < accepted;
+  });
+
+  if (!outstandingJobs.length) {
+    $("paymentJobList").innerHTML =
+      '<div class="item">Jelenleg nincs fennálló tartozás.</div>';
     return;
   }
-  $("paymentJobList").innerHTML = jobs.map((job,index) => {
+
+  $("paymentJobList").innerHTML = outstandingJobs.map((job, index) => {
     const accepted = Number(job.accepted_amount) || 0;
     const paid = getPaid(job.id);
-    const debt = accepted - paid;
-    const percent = accepted > 0 ? Math.min(100,Math.max(0,paid / accepted * 100)) : 0;
-    return `<div class="item" role="button" tabindex="0" data-payment-index="${index}">
+    const debt = Math.max(0, accepted - paid);
+    const percent = Math.min(100, Math.max(0, paid / accepted * 100));
+
+    return `<div class="item" role="button" tabindex="0"
+      data-payment-index="${index}">
       <h3>${escapeHTML(job.customer_name || "Név nélkül")}</h3>
-      <p>${escapeHTML(job.service_type || "Szolgáltatás nincs megadva")} · ${escapeHTML(statusLabel(job.status))}</p>
-      <p>Elfogadott ajánlat: <strong class="money">${money(accepted)}</strong></p>
-      <p>Befizetve: <strong class="paid">${money(paid)}</strong></p>
-      <p>Hátralék: <strong class="${debt > 0 ? "debt" : "paid"}">${money(debt)}</strong></p>
-      <div class="progress"><span style="width:${percent}%"></span></div>
-      <p class="muted">${percent.toFixed(0)}% befizetve · Befizetések megnyitása</p>
+      <p>${escapeHTML(job.service_type || "Szolgáltatás nincs megadva")}
+        · ${escapeHTML(statusLabel(job.status))}</p>
+      <p>Elfogadott ajánlat:
+        <strong class="money">${money(accepted)}</strong></p>
+      <p>Befizetve:
+        <strong class="paid">${money(paid)}</strong></p>
+      <p>Hátralék:
+        <strong class="debt">${money(debt)}</strong></p>
+      <div class="progress">
+        <span style="width:${percent}%"></span>
+      </div>
+      <p class="muted">${percent.toFixed(0)}% befizetve
+        · Befizetések megnyitása</p>
     </div>`;
   }).join("");
 
-  $("paymentJobList").querySelectorAll("[data-payment-index]").forEach(card => {
-    const open = () => openPaymentJob(jobs[Number(card.dataset.paymentIndex)]);
-    card.addEventListener("click",open);
-    card.addEventListener("keydown",event => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault(); open();
-      }
+  $("paymentJobList")
+    .querySelectorAll("[data-payment-index]")
+    .forEach(card => {
+      const open = () =>
+        openPaymentJob(
+          outstandingJobs[Number(card.dataset.paymentIndex)]
+        );
+
+      card.addEventListener("click", open);
+
+      card.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          open();
+        }
+      });
     });
-  });
 }
 
 function openRequest(item) {
