@@ -374,7 +374,13 @@ function renderRequestList() {
 
     if (!list) return;
 
-    const items = requests.filter(item => item.status === status);
+    const items = status === "closed"
+  ? requests.filter(item =>
+      item.status === "completed" &&
+      Number(item.accepted_amount) > 0 &&
+      getPaid(item.id) >= Number(item.accepted_amount)
+    )
+  : requests.filter(item => item.status === status);
 
     if (!items.length) {
       list.innerHTML =
