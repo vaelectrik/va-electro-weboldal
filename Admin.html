@@ -643,18 +643,22 @@ function renderPaymentOverview() {
 function openRequest(item) {
   selectedRequest = item;
   const fields = [
-    ["Név",item.customer_name],
-    ["E-mail",item.customer_email],
-    ["Telefon",item.customer_phone],
-    ["Település",item.city],
-    ["Szolgáltatás",item.service_type],
-    ["Kért időpont",item.preferred_date],
-    ["Beérkezett",formatDate(item.created_at)],
-    ["Leírás",item.description],
-    ["Hibakeresés összefoglalója",item.troubleshooting_summary],
-    ["Becsült ár",item.estimated_price == null ? "" : money(item.estimated_price)],
-    ["Visszaigazolást kért",item.customer_confirmation_requested ? "Igen" : "Nem"]
-  ];
+    ["Munkaszám", item.work_number || "Nincs kiosztva"],
+    ["Név", item.customer_name],
+    ["E-mail", item.customer_email],
+    ["Telefon", item.customer_phone],
+    ["Település", item.city],
+    ["Szolgáltatás", item.service_type],
+    ["Kért időpont", item.preferred_date],
+    ["Beérkezett", formatDate(item.created_at)],
+    ["Leírás", item.description],
+    ["Hibakeresés összefoglalója", item.troubleshooting_summary],
+    ["Becsült ár", item.estimated_price == null ? "" : money(item.estimated_price)],
+    ["Elfogadott ajánlat", item.accepted_amount == null ? "" : money(item.accepted_amount)],
+    ["Összes befizetés", money(getPaid(item.id))],
+    ["Hátralék", money(Math.max(0, (Number(item.accepted_amount) || 0) - getPaid(item.id)))],
+    ["Visszaigazolást kért", item.customer_confirmation_requested ? "Igen" : "Nem"]
+];
   $("requestInfo").innerHTML = fields
     .filter(([,value]) => value !== null && value !== undefined && value !== "")
     .map(([label,value]) => `<p><strong>${escapeHTML(label)}:</strong><br>${escapeHTML(value)}</p>`)
