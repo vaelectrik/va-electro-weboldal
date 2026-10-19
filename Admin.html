@@ -77,89 +77,138 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0}
     <p class="muted">Ajánlatkérések, munkák és befizetések kezelése.</p>
     <div id="message" role="status"></div>
     <nav class="tabs" aria-label="Admin menü">
-      <button class="active" data-tab="requests" type="button">Ajánlatkérések</button>
-      <button data-tab="active" type="button">Aktív munkák</button>
-      <button data-tab="completed" type="button">Elkészült munkák</button>
-      <button data-tab="payments" type="button">Fizetések</button>
-    </nav>
+  <button class="active" data-tab="new" type="button">Új</button>
+  <button data-tab="contacted" type="button">Kapcsolatfelvétel</button>
+  <button data-tab="offer_sent" type="button">Ajánlat elküldve</button>
+  <button data-tab="accepted" type="button">Elfogadva – aktív munka</button>
+  <button data-tab="completed" type="button">Elkészült munka</button>
+  <button data-tab="rejected" type="button">Elutasítva</button>
+  <button data-tab="closed" type="button">Lezárva</button>
+  <button data-tab="payments" type="button">Fizetések</button>
+</nav>
 
-    <section id="tab-requests" class="tab-panel">
-      <div class="actions"><button id="refresh" class="secondary" type="button">Frissítés</button></div>
-      <div class="columns">
-        <section>
-          <h2>Beérkezett kérések</h2>
-          <div id="requestList"></div>
-        </section>
-        <section id="requestDetail" class="panel hidden">
-          <h2>Ajánlatkérés részletei</h2>
-          <div id="requestInfo"></div>
-          <label for="status">Státusz</label>
-          <select id="status">
-            <option value="new">Új</option>
-            <option value="contacted">Kapcsolatfelvétel</option>
-            <option value="offer_sent">Ajánlat elküldve</option>
-            <option value="accepted">Elfogadva – aktív munka</option>
-            <option value="completed">Elkészült munka</option>
-            <option value="rejected">Elutasítva</option>
-            <option value="closed">Lezárva</option>
-          </select>
-          <label for="acceptedAmount">Elfogadott ajánlat végösszege (Ft)</label>
-          <input id="acceptedAmount" type="number" min="0" step="1" placeholder="Például: 450000">
-          <label for="notes">Belső megjegyzés</label>
-          <textarea id="notes" placeholder="Saját megjegyzések..."></textarea>
-          <div class="actions">
-            <button id="save" type="button">Mentés</button>
-            <button id="back" class="secondary" type="button">Vissza a listához</button>
-          </div>
-        </section>
+<section id="tab-new" class="tab-panel">
+  <h2>Új ajánlatkérések</h2>
+  <div class="actions">
+    <button id="refresh" class="secondary" type="button">Frissítés</button>
+  </div>
+  <div id="list-new"></div>
+</section>
+
+<section id="tab-contacted" class="tab-panel hidden">
+  <h2>Kapcsolatfelvétel</h2>
+  <div id="list-contacted"></div>
+</section>
+
+<section id="tab-offer_sent" class="tab-panel hidden">
+  <h2>Ajánlat elküldve</h2>
+  <p class="muted">Itt követheted a 15 napos ajánlati határidőket.</p>
+  <div id="list-offer_sent"></div>
+</section>
+
+<section id="tab-accepted" class="tab-panel hidden">
+  <h2>Elfogadva – aktív munka</h2>
+  <div id="list-accepted"></div>
+</section>
+
+<section id="tab-completed" class="tab-panel hidden">
+  <h2>Elkészült munkák</h2>
+  <div id="completedList"></div>
+</section>
+
+<section id="tab-rejected" class="tab-panel hidden">
+  <h2>Elutasított ajánlatok</h2>
+  <div id="list-rejected"></div>
+</section>
+
+<section id="tab-closed" class="tab-panel hidden">
+  <h2>Lezárt ajánlatkérések</h2>
+  <div id="list-closed"></div>
+</section>
+
+<section id="requestDetail" class="panel hidden">
+  <h2>Ajánlatkérés részletei</h2>
+  <div id="requestInfo"></div>
+
+  <label for="status">Státusz</label>
+  <select id="status">
+    <option value="new">Új</option>
+    <option value="contacted">Kapcsolatfelvétel</option>
+    <option value="offer_sent">Ajánlat elküldve</option>
+    <option value="accepted">Elfogadva – aktív munka</option>
+    <option value="completed">Elkészült munka</option>
+    <option value="rejected">Elutasítva</option>
+    <option value="closed">Lezárva</option>
+  </select>
+
+  <label for="acceptedAmount">Elfogadott ajánlat végösszege (Ft)</label>
+  <input id="acceptedAmount" type="number" min="0" step="1" placeholder="Például: 450000">
+
+  <label for="notes">Belső megjegyzés</label>
+  <textarea id="notes" placeholder="Saját megjegyzések..."></textarea>
+
+  <div class="actions">
+    <button id="save" type="button">Mentés</button>
+    <button id="back" class="secondary" type="button">Vissza a listához</button>
+  </div>
+</section>
+
+<section id="tab-payments" class="tab-panel hidden">
+  <h2>Fizetések áttekintése</h2>
+
+  <div class="summary-grid">
+    <div class="summary">
+      <span class="muted">Kiküldött ajánlatok összege</span>
+      <strong id="sumAccepted" class="money">0 Ft</strong>
+    </div>
+    <div class="summary">
+      <span class="muted">Összes kifizetés</span>
+      <strong id="sumPaid" class="paid">0 Ft</strong>
+    </div>
+    <div class="summary">
+      <span class="muted">Fennmaradó hátralék</span>
+      <strong id="sumDebt" class="debt">0 Ft</strong>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button id="refreshPayments" class="secondary" type="button">Frissítés</button>
+  </div>
+
+  <h3>Fennálló tartozások</h3>
+  <div id="paymentJobList"></div>
+
+  <section id="paymentDetail" class="panel hidden">
+    <h2 id="paymentJobTitle">Munka fizetései</h2>
+    <div id="paymentJobSummary"></div>
+
+    <div id="completeWorkArea" class="actions hidden">
+      <button id="completeWork" type="button">Munka lezárása</button>
+    </div>
+
+    <h3>Befizetési előzmények</h3>
+    <div id="paymentHistory"></div>
+
+    <hr>
+    <h3>Új befizetés rögzítése</h3>
+
+    <form id="paymentForm">
+      <label for="paymentDate">Befizetés dátuma</label>
+      <input id="paymentDate" type="date" required>
+
+      <label for="paymentAmount">Befizetett összeg (Ft)</label>
+      <input id="paymentAmount" type="number" min="1" step="1" required placeholder="Például: 100000">
+
+      <label for="paymentNote">Megjegyzés (nem kötelező)</label>
+      <textarea id="paymentNote" placeholder="Például: előleg, második részlet..."></textarea>
+
+      <div class="actions">
+        <button id="addPayment" type="submit">Befizetés mentése</button>
+        <button id="closePaymentDetail" class="secondary" type="button">Bezárás</button>
       </div>
-    </section>
-
-    <section id="tab-active" class="tab-panel hidden">
-      <h2>Aktív munkák</h2>
-      <p class="muted">Az elfogadott, folyamatban lévő munkák.</p>
-      <div id="activeList"></div>
-    </section>
-
-    <section id="tab-completed" class="tab-panel hidden">
-      <h2>Elkészült munkák</h2>
-      <p class="muted">A lezárt munkák és korábbi fizetési adataik.</p>
-      <div id="completedList"></div>
-    </section>
-
-    <section id="tab-payments" class="tab-panel hidden">
-      <h2>Fizetések áttekintése</h2>
-      <div class="summary-grid">
-        <div class="summary"><span class="muted">Elfogadott összegek összesen</span><strong id="sumAccepted" class="money">0 Ft</strong></div>
-        <div class="summary"><span class="muted">Befizetve összesen</span><strong id="sumPaid" class="paid">0 Ft</strong></div>
-        <div class="summary"><span class="muted">Fennmaradó hátralék</span><strong id="sumDebt" class="debt">0 Ft</strong></div>
-      </div>
-      <div class="actions"><button id="refreshPayments" class="secondary" type="button">Frissítés</button></div>
-      <div id="paymentJobList"></div>
-      <section id="paymentDetail" class="panel hidden">
-        <h2 id="paymentJobTitle">Munka fizetései</h2>
-        <div id="paymentJobSummary"></div><div id="completeWorkArea" class="actions hidden">
-  <button id="completeWork" type="button">Munka lezárása</button>
-        </div>
-        <h3>Befizetési előzmények</h3>
-        <div id="paymentHistory"></div>
-        <hr>
-        <h3>Új befizetés rögzítése</h3>
-        <form id="paymentForm">
-          <label for="paymentDate">Befizetés dátuma</label>
-          <input id="paymentDate" type="date" required>
-          <label for="paymentAmount">Befizetett összeg (Ft)</label>
-          <input id="paymentAmount" type="number" min="1" step="1" required placeholder="Például: 100000">
-          <label for="paymentNote">Megjegyzés (nem kötelező)</label>
-          <textarea id="paymentNote" placeholder="Például: előleg, második részlet..."></textarea>
-          <div class="actions">
-            <button id="addPayment" type="submit">Befizetés mentése</button>
-            <button id="closePaymentDetail" class="secondary" type="button">Bezárás</button>
-          </div>
-        </form>
-      </section>
-    </section>
+    </form>
   </section>
+</section>
 </main>
 
 <script>
