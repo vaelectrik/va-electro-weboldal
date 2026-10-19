@@ -277,12 +277,25 @@ function setTab(name) {
   document.querySelectorAll("[data-tab]").forEach(button => {
     button.classList.toggle("active", button.dataset.tab === name);
   });
-  document.querySelectorAll(".tab-panel").forEach(panel => panel.classList.add("hidden"));
-  $("tab-" + name).classList.remove("hidden");
-  if (name !== "requests") $("requestDetail").classList.add("hidden");
-  if (name !== "payments") $("paymentDetail").classList.add("hidden");
-}
 
+  document.querySelectorAll(".tab-panel").forEach(panel => {
+    panel.classList.add("hidden");
+  });
+
+  const selectedPanel = $("tab-" + name);
+
+  if (selectedPanel) {
+    selectedPanel.classList.remove("hidden");
+  }
+
+  if ($("requestDetail")) {
+    $("requestDetail").classList.add("hidden");
+  }
+
+  if (name !== "payments" && $("paymentDetail")) {
+    $("paymentDetail").classList.add("hidden");
+  }
+}
 document.querySelectorAll("[data-tab]").forEach(button => {
   button.addEventListener("click", () => setTab(button.dataset.tab));
 });
