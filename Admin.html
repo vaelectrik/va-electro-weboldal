@@ -412,8 +412,9 @@ function getPaid(jobId) {
 }
 
 function renderWorkLists() {
-  renderJobList("activeList", requests.filter(item => item.status === "accepted"));
-  renderJobList("completedList", requests.filter(item => item.status === "completed"));
+  // Az aktív és elkészült munkákat a renderRequestList()
+  // már megjeleníti a megfelelő menüpontokban.
+  // Itt nem rajzoljuk ki újra őket, hogy ne írjuk felül a listákat.
 }
 
 function renderJobList(elementId, jobs) {
