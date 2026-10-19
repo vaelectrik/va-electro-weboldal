@@ -346,54 +346,63 @@ async function loadRequests() {
       payments = [];
     }
 
-    renderRequestList();
-    renderWorkLists();
-    renderPaymentOverview();
-    message("Adatok betöltve. Ajánlatkérések: " + requests.length);
-  } catch (error) {
-    message("Nem sikerült betölteni az adatokat: " + error.message);
-  }
-}
-
 
 function renderRequestList() {
-  const list = $("requestList");
+  const statuses = [
+    "new",
+    "contacted",
+    "offer_sent",
+    "accepted",
+    "completed",
+    "rejected",
+    "closed"
+  ];
 
-  // Csak a még intézendő ajánlatkérések jelenjenek meg itt.
-  const pendingRequests = requests.filter(item =>
-    ["new", "contacted", "offer_sent"].includes(item.status)
-  );
+  statuses.forEach(status => {
+    const list = $(
+      status === "completed" ? "completedList" : "list-" + status
+    );
 
-  if (!pendingRequests.length) {
-    list.innerHTML =
-      '<div class="item">Nincs függőben lévő ajánlatkérés.</div>';
-    return;
-  }
+    if (!list) return;
 
-  list.innerHTML = pendingRequests.map((item, index) => `
-    <div class="item" role="button" tabindex="0"
-         data-request-index="${index}">
-      <h3>${escapeHTML(item.customer_name || "Név nélkül")}</h3>
-      <p>${escapeHTML(item.service_type || "Szolgáltatás nincs megadva")}</p>
-      <p class="muted">${escapeHTML(formatDate(item.created_at))}</p>
-      <span class="tag">${escapeHTML(statusLabel(item.status))}</span>
-    </div>
-  `).join("");
+    const items = requests.filter(item => item.status === status);
 
-  list.querySelectorAll("[data-request-index]").forEach(card => {
-    const open = () =>
-      openRequest(pendingRequests[Number(card.dataset.requestIndex)]);
+    if (!items.length) {
+      list.innerHTML =
+        '<div class="item">Nincs megjeleníthető elem.</div>';
+      return;
+    }
 
-    card.addEventListener("click", open);
+    list.innerHTML = items.map((item, index) => `
+      <div class="item" role="button" tabindex="0"
+           data-request-id="${escapeHTML(item.id)}">
+        <h3>${escapeHTML(item.customer_name || "Név nélkül")}</h3>
+        <p>${escapeHTML(item.service_type || "Szolgáltatás nincs megadva")}</p>
+        <p class="muted">${escapeHTML(formatDate(item.created_at))}</p>
+        <span class="tag">${escapeHTML(statusLabel(item.status))}</span>
+      </div>
+    `).join("");
 
-    card.addEventListener("keydown", event => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        open();
-      }
+    list.querySelectorAll("[data-request-id]").forEach(card => {
+      const open = () => {
+        const item = requests.find(
+          request => request.id === card.dataset.requestId
+        );
+        if (item) openRequest(item);
+      };
+
+      card.addEventListener("click", open);
+
+      card.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          open();
+        }
+      });
     });
   });
 }
+
 
 
 function getPaid(jobId) {
