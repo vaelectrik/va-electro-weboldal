@@ -346,6 +346,15 @@ async function loadRequests() {
       payments = [];
     }
 
+    renderRequestList();
+    renderWorkLists();
+    renderPaymentOverview();
+    message("Adatok betöltve. Ajánlatkérések: " + requests.length);
+  } catch (error) {
+    message("Nem sikerült betölteni az adatokat: " + error.message);
+  }
+}
+
 
 function renderRequestList() {
   const statuses = [
