@@ -138,7 +138,9 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0}
       <div id="paymentJobList"></div>
       <section id="paymentDetail" class="panel hidden">
         <h2 id="paymentJobTitle">Munka fizetései</h2>
-        <div id="paymentJobSummary"></div>
+        <div id="paymentJobSummary"></div><div id="completeWorkArea" class="actions hidden">
+  <button id="completeWork" type="button">Munka lezárása</button>
+        </div>
         <h3>Befizetési előzmények</h3>
         <div id="paymentHistory"></div>
         <hr>
@@ -499,7 +501,17 @@ async function loadPaymentHistory() {
     const history = data || [];
     const accepted = Number(selectedPaymentJob.accepted_amount) || 0;
     const paid = history.reduce((sum,payment) => sum + Number(payment.amount || 0),0);
-    const debt = accepted - paid;
+    const debt = accepted - paid;const completeWorkArea = $("completeWorkArea");
+
+if (
+  selectedPaymentJob.status === "accepted" &&
+  debt <= 0 &&
+  accepted > 0
+) {
+  completeWorkArea.classList.remove("hidden");
+} else {
+  completeWorkArea.classList.add("hidden");
+}
     const percent = accepted > 0 ? Math.min(100,Math.max(0,paid / accepted * 100)) : 0;
 
     $("paymentJobSummary").innerHTML = `
@@ -521,6 +533,45 @@ async function loadPaymentHistory() {
     $("paymentHistory").textContent = "Nem sikerült betölteni a befizetéseket: " + error.message;
   }
 }
+
+$("completeWork").addEventListener("click", async () => {
+  if (!selectedPaymentJob) return;
+
+  const accepted = Number(selectedPaymentJob.accepted_amount) || 0;
+  const paid = getPaid(selectedPaymentJob.id);
+
+  if (accepted <= 0 || paid < accepted) {
+    alert("A munka csak a teljes összeg befizetése után zárható le.");
+    return;
+  }
+
+  if (!confirm("Biztosan lezárod ezt a munkát?")) return;
+
+  const button = $("completeWork");
+  button.disabled = true;
+
+  try {
+    await checkAdmin();
+
+    const { error } = await client
+      .from("inquiries")
+      .update({ status: "completed" })
+      .eq("id", selectedPaymentJob.id);
+
+    if (error) throw error;
+
+    message("A munka sikeresen lezárva.");
+    selectedPaymentJob = null;
+    $("paymentDetail").classList.add("hidden");
+
+    await loadRequests();
+    setTab("completed");
+  } catch (error) {
+    alert("Nem sikerült lezárni a munkát: " + error.message);
+  } finally {
+    button.disabled = false;
+  }
+});
 
 $("paymentForm").addEventListener("submit",async event => {
   event.preventDefault();
