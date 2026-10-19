@@ -367,6 +367,7 @@ async function loadRequests() {
     renderRequestList();
     renderWorkLists();
     renderPaymentOverview();
+    renderInformationList();
     message("Adatok betöltve. Ajánlatkérések: " + requests.length);
   } catch (error) {
     message("Nem sikerült betölteni az adatokat: " + error.message);
@@ -436,7 +437,77 @@ function renderRequestList() {
   });
 }
 
+function renderInformationList() {
+  const list = $("informationList");
+  const input = $("informationSearch");
+  if (!list || !input) return;
 
+  const query = input.value.trim().toLocaleLowerCase("hu-HU");
+
+  const jobs = requests.filter(item =>
+    ["accepted", "completed"].includes(item.status)
+  );
+
+  if (!query) {
+    list.innerHTML =
+      '<div class="item">Írj be egy munkaszámot vagy ügyfélnevet a kereséshez.</div>';
+    return;
+  }
+
+  const matches = jobs.filter(item =>
+    `${item.work_number || ""} ${item.customer_name || ""}`
+      .toLocaleLowerCase("hu-HU")
+      .includes(query)
+  );
+
+  if (!matches.length) {
+    list.innerHTML =
+      '<div class="item">Nincs találat az aktív vagy lezárt munkák között.</div>';
+    return;
+  }
+
+  list.innerHTML = matches.map(item => {
+    const amount = Number(item.accepted_amount) || 0;
+    const paid = getPaid(item.id);
+    const debt = Math.max(0, amount - paid);
+
+    return `
+      <div class="item" role="button" tabindex="0"
+           data-information-id="${escapeHTML(item.id)}">
+        <h3>${escapeHTML(item.customer_name || "Név nélkül")}</h3>
+        <p><strong>Munkaszám:</strong>
+          ${escapeHTML(item.work_number || "Nincs kiosztva")}
+        </p>
+        <p>${escapeHTML(item.service_type || "Szolgáltatás nincs megadva")}</p>
+        <p>Ajánlat: <strong>${money(amount)}</strong></p>
+        <p>Befizetve: <strong>${money(paid)}</strong></p>
+        <p>Hátralék: <strong>${money(debt)}</strong></p>
+        <span class="tag">${escapeHTML(statusLabel(item.status))}</span>
+        <p class="muted">Koppints a részletek megnyitásához.</p>
+      </div>
+    `;
+  }).join("");
+
+  list.querySelectorAll("[data-information-id]").forEach(card => {
+    const open = () => {
+      const item = requests.find(
+        request => request.id === card.dataset.informationId
+      );
+      if (item) openRequest(item);
+    };
+
+    card.addEventListener("click", open);
+
+    card.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        open();
+      }
+    });
+  });
+}
+
+$("informationSearch").addEventListener("input", renderInformationList);
 
 function getPaid(jobId) {
   return payments
