@@ -8,6 +8,13 @@
 <meta name="description" content="VA ELECTRO adminisztrációs felület">
 <title>VA ELECTRO – Admin</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+.documents-box{border:1px solid var(--line);border-radius:10px;padding:14px;margin:16px 0;background:#151412}
+.documents-box h3{margin-top:0}
+.documents-list{display:grid;gap:9px;margin-top:14px}
+.document-row{border:1px solid var(--line);border-radius:8px;padding:11px;overflow-wrap:anywhere}
+.document-row strong{display:block;margin-bottom:6px}
+.document-row .actions{margin-top:8px}
+.documents-hint{font-size:13px;color:var(--muted);line-height:1.5}
 <style>
 :root{--bg:#10100f;--panel:#1b1a18;--copper:#c58b58;--text:#f5f1eb;--muted:#b8b0a7;--line:#39342f;--green:#83c99a;--red:#e99b91}
 *{box-sizing:border-box}
@@ -129,6 +136,41 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0}
 <section id="requestDetail" class="panel hidden">
   <h2>Ajánlatkérés részletei</h2>
   <div id="requestInfo"></div>
+
+<div class="documents-box" id="documentsBox">
+  <h3>📁 A munkához tartozó dokumentumok</h3>
+  <p class="documents-hint">
+    Szerződések, aláírt dokumentumok, jegyzőkönyvek és egyéb beszkennelt iratok.
+    PDF, JPG, PNG vagy WebP formátum; legfeljebb 15 MB fájlonként.
+    A feltöltött dokumentumokhoz nem tartozik törlés- vagy felülírásgomb.
+  </p>
+
+  <label for="documentType">Dokumentum típusa</label>
+  <select id="documentType">
+    <option value="Szerződés">Aláírt szerződés</option>
+    <option value="Melléklet">Szerződés melléklete</option>
+    <option value="Teljesítésigazolás">Teljesítésigazolás</option>
+    <option value="Mérési jegyzőkönyv">Mérési jegyzőkönyv</option>
+    <option value="Egyéb dokumentum">Egyéb dokumentum</option>
+  </select>
+
+  <label for="documentFile">Fájl kiválasztása</label>
+  <input
+    id="documentFile"
+    type="file"
+    accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"
+  >
+
+  <div class="actions">
+    <button id="uploadDocument" type="button">Dokumentum feltöltése</button>
+    <button id="refreshDocuments" class="secondary" type="button">Lista frissítése</button>
+  </div>
+
+  <p id="documentMessage" class="documents-hint" role="status"></p>
+  <div id="documentsList" class="documents-list">
+    <p class="muted">Válassz ki egy munkát a dokumentumok megtekintéséhez.</p>
+  </div>
+</div>
 
   <label for="status">Státusz</label>
   <select id="status">
@@ -643,6 +685,215 @@ function renderPaymentOverview() {
     });
 }
 
+const DOCUMENT_BUCKET = "va-electro-documents";
+const MAX_DOCUMENT_SIZE = 15 * 1024 * 1024;
+
+const ALLOWED_DOCUMENT_TYPES = [
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/webp"
+];
+
+function documentMessage(text) {
+  $("documentMessage").textContent = text;
+}
+
+function safeDocumentFilename(filename) {
+  // A fájl eredeti neve a listában megmarad,
+  // a tárhelyen pedig biztonságos nevet használunk.
+  return String(filename || "dokumentum")
+    .normalize("NFKD")
+    .replace(/[^a-zA-Z0-9._-]/g, "_")
+    .replace(/_+/g, "_")
+    .slice(-100) || "dokumentum";
+}
+
+async function loadWorkDocuments() {
+  const job = selectedRequest;
+  const list = $("documentsList");
+
+  if (!job) {
+    list.innerHTML = '<p class="muted">Először nyiss meg egy munkát.</p>';
+    return;
+  }
+
+  list.innerHTML = '<p class="muted">Dokumentumok betöltése...</p>';
+  documentMessage("");
+
+  try {
+    await checkAdmin();
+
+    const { data, error } = await client
+      .from("work_documents")
+      .select("id, inquiry_id, storage_path, original_filename, document_type, uploaded_at")
+      .eq("inquiry_id", job.id)
+      .order("uploaded_at", { ascending: false });
+
+    if (error) throw error;
+
+    const documents = data || [];
+
+    if (!documents.length) {
+      list.innerHTML =
+        '<p class="muted">Ehhez a munkához még nincs feltöltött dokumentum.</p>';
+      return;
+    }
+
+    list.innerHTML = documents.map(doc => `
+      <div class="document-row">
+        <strong>${escapeHTML(doc.original_filename)}</strong>
+        <div class="muted">
+          Típus: ${escapeHTML(doc.document_type || "Nincs megadva")}
+        </div>
+        <div class="muted">
+          Feltöltve: ${escapeHTML(formatDate(doc.uploaded_at))}
+        </div>
+        <div class="actions">
+          <button
+            type="button"
+            class="secondary"
+            data-document-open="${escapeHTML(doc.id)}"
+          >Megnyitás</button>
+          <button
+            type="button"
+            class="secondary"
+            data-document-download="${escapeHTML(doc.id)}"
+          >Letöltés</button>
+        </div>
+      </div>
+    `).join("");
+
+    list.querySelectorAll("[data-document-open]").forEach(button => {
+      button.addEventListener("click", () => {
+        const doc = documents.find(item => item.id === button.dataset.documentOpen);
+        if (doc) openWorkDocument(doc, false);
+      });
+    });
+
+    list.querySelectorAll("[data-document-download]").forEach(button => {
+      button.addEventListener("click", () => {
+        const doc = documents.find(item => item.id === button.dataset.documentDownload);
+        if (doc) openWorkDocument(doc, true);
+      });
+    });
+  } catch (error) {
+    list.innerHTML = '<p class="muted">A dokumentumlista nem tölthető be.</p>';
+    documentMessage("Hiba: " + error.message);
+  }
+}
+
+async function openWorkDocument(doc, download) {
+  try {
+    await checkAdmin();
+
+    const options = download
+      ? { download: doc.original_filename }
+      : undefined;
+
+    const { data, error } = await client.storage
+      .from(DOCUMENT_BUCKET)
+      .createSignedUrl(doc.storage_path, 60, options);
+
+    if (error) throw error;
+    if (!data || !data.signedUrl) {
+      throw new Error("Nem sikerült létrehozni a biztonságos hivatkozást.");
+    }
+
+    if (download) {
+      // A letöltési link rövid ideig érvényes.
+      window.location.href = data.signedUrl;
+    } else {
+      // A dokumentumot külön lapon nyitjuk meg.
+      const link = document.createElement("a");
+      link.href = data.signedUrl;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.click();
+    }
+  } catch (error) {
+    documentMessage("A dokumentum nem nyitható meg: " + error.message);
+  }
+}
+
+$("uploadDocument").addEventListener("click", async () => {
+  if (!selectedRequest) {
+    documentMessage("Először nyiss meg egy munkát.");
+    return;
+  }
+
+  const fileInput = $("documentFile");
+  const file = fileInput.files && fileInput.files[0];
+
+  if (!file) {
+    documentMessage("Előbb válassz ki egy fájlt.");
+    return;
+  }
+
+  if (!ALLOWED_DOCUMENT_TYPES.includes(file.type)) {
+    documentMessage("Nem megfelelő formátum. PDF, JPG, PNG vagy WebP tölthető fel.");
+    return;
+  }
+
+  if (file.size <= 0 || file.size > MAX_DOCUMENT_SIZE) {
+    documentMessage("A fájl mérete legyen 15 MB-nál kisebb.");
+    return;
+  }
+
+  const button = $("uploadDocument");
+  button.disabled = true;
+  documentMessage("Feltöltés folyamatban...");
+
+  try {
+    await checkAdmin();
+
+    const jobId = selectedRequest.id;
+    const safeName = safeDocumentFilename(file.name);
+    const uniqueName = crypto.randomUUID() + "-" + safeName;
+    const storagePath = jobId + "/" + uniqueName;
+
+    // upsert:false: meglévő fájl felülírása nem engedélyezett.
+    const { error: uploadError } = await client.storage
+      .from(DOCUMENT_BUCKET)
+      .upload(storagePath, file, {
+        upsert: false,
+        contentType: file.type,
+        cacheControl: "3600"
+      });
+
+    if (uploadError) throw uploadError;
+
+    // Az adatbázisba a tárhelyen létrehozott fájl adatai kerülnek.
+    const { error: insertError } = await client
+      .from("work_documents")
+      .insert({
+        inquiry_id: jobId,
+        storage_path: storagePath,
+        original_filename: file.name,
+        document_type: $("documentType").value
+      });
+
+    if (insertError) {
+      // Szándékosan nem töröljük automatikusan a fájlt.
+      throw new Error(
+        "A fájl feltöltődött, de a nyilvántartás mentése hibát adott. " +
+        "Ne töltsd fel újra azonnal; ellenőrizd a dokumentumlistát és az adatbázist. " +
+        insertError.message
+      );
+    }
+
+    fileInput.value = "";
+    documentMessage("A dokumentum feltöltése sikerült.");
+    await loadWorkDocuments();
+  } catch (error) {
+    documentMessage("Nem sikerült feltölteni: " + error.message);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+$("refreshDocuments").addEventListener("click", loadWorkDocuments);
+
 function openRequest(item) {
   selectedRequest = item;
   const fields = [
@@ -669,7 +920,7 @@ function openRequest(item) {
   $("status").value = item.status || "new";
   $("acceptedAmount").value = item.accepted_amount ?? "";
   $("notes").value = item.admin_notes || "";
-  $("requestDetail").classList.remove("hidden");
+  $("requestDetail").classList.remove("hidden");loadWorkDocuments();
   $("requestDetail").scrollIntoView({behavior:"smooth",block:"start"});
 }
 
