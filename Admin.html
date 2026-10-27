@@ -231,6 +231,59 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0}
     <h3>Befizetési előzmények</h3>
     <div id="paymentHistory"></div>
 
+<hr>
+
+<h3>Anyagköltségek</h3>
+<p class="muted">
+  Az itt rögzített összegek külön anyagkiadásnak számítanak,
+  nem ügyfélbefizetésnek.
+</p>
+
+<div class="summary-grid">
+  <div class="summary">
+    <span class="muted">Összes anyagköltség</span>
+    <strong id="jobMaterialTotal" class="money">0 Ft</strong>
+  </div>
+  <div class="summary">
+    <span class="muted">Anyagköltség utáni maradvány</span>
+    <strong id="jobAfterMaterials" class="paid">0 Ft</strong>
+  </div>
+</div>
+
+<h3>Anyagbeszerzés rögzítése</h3>
+
+<form id="materialForm">
+  <label for="materialDate">Vásárlás dátuma</label>
+  <input id="materialDate" type="date" required>
+
+  <label for="materialAmount">Anyagköltség (Ft)</label>
+  <input
+    id="materialAmount"
+    type="number"
+    min="1"
+    step="1"
+    required
+    placeholder="Például: 235000"
+  >
+
+  <label for="materialNote">Megjegyzés</label>
+  <textarea
+    id="materialNote"
+    placeholder="Például: kábelek, védőcsövek, szerelvények"
+  ></textarea>
+
+  <div class="actions">
+    <button id="addMaterial" type="submit">
+      Anyagköltség mentése
+    </button>
+  </div>
+</form>
+
+<h3>Anyagbeszerzési előzmények</h3>
+<div id="materialHistory">
+  <p class="muted">Válassz ki egy munkát.</p>
+</div>
+
     <hr>
     <h3>Új befizetés rögzítése</h3>
 
@@ -281,7 +334,7 @@ let selectedRequest = null;
 let selectedPaymentJob = null;
 let requests = [];
 let payments = [];
-
+let materialCosts = [];
 function message(text) { $("message").textContent = text; }
 
 function escapeHTML(value) {
@@ -401,8 +454,17 @@ async function loadRequests() {
         .order("payment_date", {ascending:false});
       if (result.error) throw result.error;
       payments = result.data || [];
+      const materialResult = await client
+  .from("work_material_costs")
+  .select("*")
+  .in("inquiry_id", jobIds);
+
+if (materialResult.error) throw materialResult.error;
+
+materialCosts = materialResult.data || [];
     } else {
       payments = [];
+      materialCosts = [];
     }
 
     renderRequestList();
@@ -556,6 +618,40 @@ function getPaid(jobId) {
   return payments
     .filter(payment => payment.inquiry_id === jobId)
     .reduce((sum,payment) => sum + Number(payment.amount || 0),0);
+}
+
+function getMaterialCost(jobId) {
+  return materialCosts
+    .filter(item => item.inquiry_id === jobId)
+    .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+}
+
+function renderMaterialHistory(job) {
+  const history = materialCosts
+    .filter(item => item.inquiry_id === job.id)
+    .sort((a, b) =>
+      String(b.purchase_date).localeCompare(String(a.purchase_date))
+    );
+
+  const total = getMaterialCost(job.id);
+  const accepted = Number(job.accepted_amount) || 0;
+
+  $("jobMaterialTotal").textContent = money(total);
+  $("jobAfterMaterials").textContent = money(accepted - total);
+
+  $("materialHistory").innerHTML = history.length
+    ? history.map(item => `
+        <div class="payment-row">
+          <strong class="money">${money(item.amount)}</strong>
+          <p class="muted">
+            ${escapeHTML(formatDate(item.purchase_date))}
+          </p>
+          ${item.note
+            ? `<p>${escapeHTML(item.note)}</p>`
+            : ""}
+        </div>
+      `).join("")
+    : '<p class="muted">Még nincs anyagköltség rögzítve.</p>';
 }
 
 function renderWorkLists() {
@@ -957,6 +1053,7 @@ async function openPaymentJob(job) {
   $("paymentDetail").classList.remove("hidden");
   $("paymentJobTitle").textContent = (job.customer_name || "Név nélkül") + " – fizetések";
   $("paymentDate").value = new Date().toLocaleDateString("en-CA");
+  $("materialDate").value = new Date().toLocaleDateString("en-CA");
   $("paymentAmount").value = "";
   $("paymentNote").value = "";
   $("paymentHistory").innerHTML = '<p class="muted">Befizetések betöltése...</p>';
@@ -997,13 +1094,21 @@ if (
       </div>
       <div class="progress"><span style="width:${percent}%"></span></div>
       <p class="muted">${percent.toFixed(0)}% befizetve</p>`;
-
+<div class="summary">
+  <span class="muted">Anyagköltség</span>
+  <strong class="money">${money(getMaterialCost(selectedPaymentJob.id))}</strong>
+</div>
+<div class="summary">
+  <span class="muted">Anyagköltség utáni maradvány</span>
+  <strong class="paid">${money(accepted - getMaterialCost(selectedPaymentJob.id))}</strong>
+</div>
     $("paymentHistory").innerHTML = history.length ? history.map(payment => `
       <div class="payment-row">
         <strong class="paid">${money(payment.amount)}</strong>
         <p class="muted">${escapeHTML(formatDate(payment.payment_date))}</p>
         ${payment.note ? `<p>${escapeHTML(payment.note)}</p>` : ""}
       </div>`).join("") : '<p class="muted">Ehhez a munkához még nincs rögzített befizetés.</p>';
+    renderMaterialHistory(selectedPaymentJob);
   } catch(error) {
     $("paymentHistory").textContent = "Nem sikerült betölteni a befizetéseket: " + error.message;
   }
@@ -1075,6 +1180,59 @@ $("paymentForm").addEventListener("submit",async event => {
     $("paymentNote").value = "";
   } catch(error) {
     alert("Nem sikerült rögzíteni a befizetést: " + error.message);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+$("materialForm").addEventListener("submit", async event => {
+  event.preventDefault();
+
+  if (!selectedPaymentJob) {
+    alert("Először válassz ki egy munkát.");
+    return;
+  }
+
+  const amount = Number($("materialAmount").value);
+  const date = $("materialDate").value;
+
+  if (!Number.isFinite(amount) || amount <= 0 || !date) {
+    alert("Adj meg érvényes dátumot és pozitív összeget.");
+    return;
+  }
+
+  const button = $("addMaterial");
+  button.disabled = true;
+
+  try {
+    await checkAdmin();
+
+    const { error } = await client
+      .from("work_material_costs")
+      .insert({
+        inquiry_id: selectedPaymentJob.id,
+        purchase_date: date,
+        amount,
+        note: $("materialNote").value.trim() || null
+      });
+
+    if (error) throw error;
+
+    const jobId = selectedPaymentJob.id;
+
+    $("materialAmount").value = "";
+    $("materialNote").value = "";
+
+    message("Az anyagköltség mentése sikerült.");
+
+    await loadRequests();
+
+    selectedPaymentJob =
+      requests.find(item => item.id === jobId) || selectedPaymentJob;
+
+    await loadPaymentHistory();
+  } catch (error) {
+    alert("Nem sikerült menteni az anyagköltséget: " + error.message);
   } finally {
     button.disabled = false;
   }
