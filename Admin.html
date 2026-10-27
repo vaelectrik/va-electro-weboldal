@@ -384,7 +384,6 @@ $("loginForm").addEventListener("submit", async event => {
 });
 
 async function loadRequests() {
-  message("Adatok betöltése...");
   try {
     await checkAdmin();
     const { data, error } = await client
