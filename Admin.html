@@ -410,7 +410,7 @@ async function loadRequests() {
     renderWorkLists();
     renderPaymentOverview();
     renderInformationList();
-    message("Adatok betöltve. Ajánlatkérések: " + requests.length);
+    
   } catch (error) {
     message("Nem sikerült betölteni az adatokat: " + error.message);
   }
