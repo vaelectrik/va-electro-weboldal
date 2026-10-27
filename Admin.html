@@ -535,6 +535,7 @@ function renderRequestList() {
   });
 }
 
+
 function renderInformationList() {
   const list = $("informationList");
   const input = $("informationSearch");
@@ -542,8 +543,9 @@ function renderInformationList() {
 
   const query = input.value.trim().toLocaleLowerCase("hu-HU");
 
+  // Az aktív, elkészült, elutasított és lezárt munkák is kereshetők.
   const jobs = requests.filter(item =>
-    ["accepted", "completed"].includes(item.status)
+    ["accepted", "completed", "rejected", "closed"].includes(item.status)
   );
 
   if (!query) {
@@ -552,15 +554,23 @@ function renderInformationList() {
     return;
   }
 
-  const matches = jobs.filter(item =>
-    `${item.work_number || ""} ${item.customer_name || ""}`
-      .toLocaleLowerCase("hu-HU")
-      .includes(query)
-  );
+  const matches = jobs.filter(item => {
+    const searchable = [
+      item.work_number,
+      item.customer_name,
+      item.customer_phone,
+      item.customer_email,
+      item.city,
+      item.service_type,
+      item.id
+    ].filter(Boolean).join(" ").toLocaleLowerCase("hu-HU");
+
+    return searchable.includes(query);
+  });
 
   if (!matches.length) {
     list.innerHTML =
-      '<div class="item">Nincs találat az aktív vagy lezárt munkák között.</div>';
+      '<div class="item">Nincs találat. Ellenőrizd a nevet vagy a munkaszámot.</div>';
     return;
   }
 
@@ -575,6 +585,9 @@ function renderInformationList() {
         <h3>${escapeHTML(item.customer_name || "Név nélkül")}</h3>
         <p><strong>Munkaszám:</strong>
           ${escapeHTML(item.work_number || "Nincs kiosztva")}
+        </p>
+        <p><strong>Település:</strong>
+          ${escapeHTML(item.city || "Nincs megadva")}
         </p>
         <p>${escapeHTML(item.service_type || "Szolgáltatás nincs megadva")}</p>
         <p>Ajánlat: <strong>${money(amount)}</strong></p>
@@ -604,6 +617,7 @@ function renderInformationList() {
     });
   });
 }
+
 
 $("informationSearch").addEventListener("input", renderInformationList);
 
