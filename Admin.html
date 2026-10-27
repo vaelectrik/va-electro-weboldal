@@ -1061,81 +1061,103 @@ async function openPaymentJob(job) {
   $("paymentDetail").scrollIntoView({behavior:"smooth",block:"start"});
 }
 
+
 async function loadPaymentHistory() {
   if (!selectedPaymentJob) return;
+
   try {
     await checkAdmin();
-    const {data,error} = await client.from("work_payments")
-      .select("*").eq("inquiry_id",selectedPaymentJob.id)
-      .order("payment_date",{ascending:false});
+
+    const { data, error } = await client
+      .from("work_payments")
+      .select("*")
+      .eq("inquiry_id", selectedPaymentJob.id)
+      .order("payment_date", { ascending: false });
+
     if (error) throw error;
 
     const history = data || [];
     const accepted = Number(selectedPaymentJob.accepted_amount) || 0;
-    const paid = history.reduce((sum,payment) => sum + Number(payment.amount || 0),0);
-    const debt = accepted - paid;const completeWorkArea = $("completeWorkArea");
 
-if (
-  selectedPaymentJob.status === "accepted" &&
-  debt <= 0 &&
-  accepted > 0
-) {
-  completeWorkArea.classList.remove("hidden");
-} else {
-  completeWorkArea.classList.add("hidden");
-}
-    const percent = accepted > 0 ? Math.min(100,Math.max(0,paid / accepted * 100)) : 0;
+    const paid = history.reduce(
+      (sum, payment) => sum + Number(payment.amount || 0),
+      0
+    );
 
-    
+    const debt = accepted - paid;
+    const percent = accepted > 0
+      ? Math.min(100, Math.max(0, paid / accepted * 100))
+      : 0;
+
     const materialTotal = getMaterialCost(selectedPaymentJob.id);
     const afterMaterials = accepted - materialTotal;
 
-      $("paymentJobSummary").innerHTML = `
+    const completeWorkArea = $("completeWorkArea");
+
+    if (
+      selectedPaymentJob.status === "accepted" &&
+      debt <= 0 &&
+      accepted > 0
+    ) {
+      completeWorkArea.classList.remove("hidden");
+    } else {
+      completeWorkArea.classList.add("hidden");
+    }
+
+    $("paymentJobSummary").innerHTML = `
       <div class="summary-grid">
-        <div class="summary"><span class="muted">Ajánlat végösszege</span><strong class="money">${money(accepted)}</strong></div>
-        <div class="summary"><span class="muted">Összes befizetés</span><strong class="paid">${money(paid)}</strong></div>
-        <div class="summary"><span class="muted">Hátralék</span><strong class="${debt > 0 ? "debt" : "paid"}">${money(debt)}</strong></div>
-      </div>
-      <div class="progress"><span style="width:${percent}%"></span></div>
-      <p class="muted">${percent.toFixed(0)}% befizetve</p>`;
-<div class="summary">
-  <span class="muted">Anyagköltség</span>
-  <strong class="money">${money(getMaterialCost(selectedPaymentJob.id))}</strong>
-</div>
-<div class="summary">
-  <span class="muted">Anyagköltség utáni maradvány</span>
-  <strong class="paid">${money(accepted - getMaterialCost(selectedPaymentJob.id))}</strong>
-</div> <div class="summary">
+        <div class="summary">
+          <span class="muted">Ajánlat végösszege</span>
+          <strong class="money">${money(accepted)}</strong>
+        </div>
+
+        <div class="summary">
+          <span class="muted">Összes befizetés</span>
+          <strong class="paid">${money(paid)}</strong>
+        </div>
+
+        <div class="summary">
+          <span class="muted">Hátralék</span>
+          <strong class="${debt > 0 ? "debt" : "paid"}">${money(debt)}</strong>
+        </div>
+
+        <div class="summary">
           <span class="muted">Összes anyagköltség</span>
           <strong class="money">${money(materialTotal)}</strong>
         </div>
+
         <div class="summary">
-          <span class="muted">Anyagköltség utáni maradvány</span>
+          <span class="muted">Ajánlat mínusz anyagköltség</span>
           <strong class="${afterMaterials >= 0 ? "paid" : "debt"}">${money(afterMaterials)}</strong>
         </div>
       </div>
+
       <div class="progress">
         <span style="width:${percent}%"></span>
       </div>
-      <p class="muted">${percent.toFixed(0)}% befizetve</p>`;
 
-<div class="summary">
-  <span class="muted">Anyagköltség</span>
-  <strong class="money">${money(getMaterialCost(selectedPaymentJob.id))}</strong>
-</div>
-<div class="summary">
-  <span class="muted">Anyagköltség utáni maradvány</span>
-  <strong class="paid">${money(accepted - getMaterialCost(selectedPaymentJob.id))}</strong>
-</div>
-    $("paymentHistory").innerHTML = history.length ? history.map(payment => `
-      <div class="payment-row">
-        <strong class="paid">${money(payment.amount)}</strong>
-        <p class="muted">${escapeHTML(formatDate(payment.payment_date))}</p>
-        ${payment.note ? `<p>${escapeHTML(payment.note)}</p>` : ""}
-      </div>`).join("") : '<p class="muted">Ehhez a munkához még nincs rögzített befizetés.</p>';
+      <p class="muted">${percent.toFixed(0)}% befizetve</p>
+    `;
+
+    $("paymentHistory").innerHTML = history.length
+      ? history.map(payment => `
+          <div class="payment-row">
+            <strong class="paid">${money(payment.amount)}</strong>
+            <p class="muted">
+              ${escapeHTML(formatDate(payment.payment_date))}
+            </p>
+            ${payment.note
+              ? `<p>${escapeHTML(payment.note)}</p>`
+              : ""}
+          </div>
+        `).join("")
+      : '<p class="muted">Ehhez a munkához még nincs rögzített befizetés.</p>';
+
     renderMaterialHistory(selectedPaymentJob);
-  } catch(error) {
-    $("paymentHistory").textContent = "Nem sikerült betölteni a befizetéseket: " + error.message;
+
+  } catch (error) {
+    $("paymentHistory").textContent =
+      "Nem sikerült betölteni a befizetéseket: " + error.message;
   }
 }
 
