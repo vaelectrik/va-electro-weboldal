@@ -994,7 +994,30 @@ $("uploadDocument").addEventListener("click", async () => {
 });
 
 $("refreshDocuments").addEventListener("click", loadWorkDocuments);
+function translateTroubleshootingSummary(value) {
+  if (!value) return value;
 
+  const translations = [
+    [/Hibatípus: breaker/g, "Hibatípus: kismegszakító leoldása"],
+    [/Hibatípus: whole/g, "Hibatípus: teljes áramszünet"],
+    [/Hibatípus: part/g, "Hibatípus: részleges áramszünet"],
+    [/Hibatípus: device/g, "Hibatípus: készülékhez kapcsolódó hiba"],
+    [/Veszélyjel: no/g, "Veszélyjel: nem"],
+    [/Veszélyjel: yes/g, "Veszélyjel: igen"],
+    [/Veszélyjel: unsure/g, "Veszélyjel: nem biztos"],
+    [/Látható kapcsoló állapota: tripped/g, "Látható kapcsoló állapota: leoldott"],
+    [/Látható kapcsoló állapota: on/g, "Látható kapcsoló állapota: bekapcsolva"],
+    [/Látható kapcsoló állapota: unsure/g, "Látható kapcsoló állapota: nem állapítható meg"],
+    [/Leoldott eszköz: breaker/g, "Leoldott eszköz: kismegszakító"],
+    [/Leoldott eszköz: rcd/g, "Leoldott eszköz: FI-relé"],
+    [/Leoldott eszköz: unknown/g, "Leoldott eszköz: nem azonosítható"]
+  ];
+
+  return translations.reduce(
+    (text, [pattern, replacement]) => text.replace(pattern, replacement),
+    value
+  );
+}
 function openRequest(item) {
   selectedRequest = item;
   const fields = [
