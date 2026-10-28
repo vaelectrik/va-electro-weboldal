@@ -196,7 +196,7 @@
 <section id="ajanlat"><div class="wrap"><div class="section-head"><div class="eyebrow">Kezdjük az egyeztetést</div><h2>Kérj <span class="copper">személyre szabott ajánlatot.</span></h2><p>Válaszd ki a szolgáltatást, töltsd ki a hozzá tartozó kérdéseket, és ha segít, csatolj fényképet.</p></div><div class="grid grid2"><div class="card quote-contact"><h3>Kapcsolat</h3><p>Vörös Ákos · VA ELECTRO</p><p><strong>Telefon:</strong> <a href="tel:+36303933196">+36 30 393 3196</a></p><p><strong>E-mail:</strong> <a href="mailto:vaelectrik@gmail.com">vaelectrik@gmail.com</a></p><div class="notice">Az ajánlatkérés nem jelent automatikus megrendelést. A végleges műszaki tartalmat és árat egyeztetjük.</div><h3>Mit érdemes csatolni?</h3><ul class="muted"><li>Szolgáltatástól függően szükséges adatok.</li><li>Méret, darabszám vagy kábelhossz, ha releváns.</li><li>Település és tervezett időpont.</li></ul><p class="small">Ne bonts burkolatot és ne nyúlj villamos berendezéshez fényképezés miatt.</p></div>
 <div class="card quote-form-card"><form id="quoteForm" action="https://formsubmit.co/vaelectrik@gmail.com" method="POST" enctype="multipart/form-data" target="formSubmitFrame">
 <input type="hidden" name="_subject" value="Új VA ELECTRO ajánlatkérés"><input type="hidden" name="_template" value="table"><input type="hidden" name="_captcha" value="true"><input type="hidden" name="Előzetes kalkuláció" id="formEstimate" value=""><input type="hidden" name="Hibakereső összefoglaló" id="formFault" value=""><input type="hidden" name="Hibaellenőrző részletes adatok" id="formFaultSubmit" value=""><input type="hidden" name="Kérés típusa" id="requestKind" value="Általános ajánlatkérés">
-<div class="formgrid"><div class="field"><label for="name">Név *</label><input id="name" name="Név" autocomplete="name" required maxlength="100"></div><div class="field"><label for="phone">Telefonszám *</label><input id="phone" name="Telefonszám" type="tel" autocomplete="tel" required maxlength="40" placeholder="+36..."></div><div class="field full"><label for="email">E-mail-cím *</label><input id="email" name="E-mail" type="email" autocomplete="email" required maxlength="150"></div><div class="field full"><label for="town">Település *</label><input id="town" name="Település" required maxlength="100"></div>
+<div class="formgrid"><div class="field"><label for="name">Név *</label><input id="name" name="Név" autocomplete="name" required maxlength="100"></div><div class="field"><label for="phone">Telefonszám *</label><input id="phone" name="Telefonszám" type="tel" autocomplete="tel" required maxlength="40" placeholder="+36..."></div><input id="email" name="email" type="email" autocomplete="email" required maxlength="150"><div class="field full"><label for="email">E-mail-cím *</label></div><div class="field full"><label for="town">Település *</label><input id="town" name="Település" required maxlength="100"></div>
 <div class="field full"><label for="service">Milyen munkára kérsz ajánlatot? *</label><select id="service" name="Szolgáltatás" required><option value="">Válassz szolgáltatást</option><option>Új elektromos hálózat</option><option>Teljes hálózatfelújítás</option><option>Hibakeresés és hibaelhárítás</option><option>Elosztószekrény</option><option>Világítás, kapcsolók, dugaljak</option><option>Földkábel fektetése</option><option>Villamos biztonsági felülvizsgálat</option><option>Elektromosautó-töltő</option><option>Fogyasztásmérőhely</option><option>Kisebb villanyszerelési munkák</option><option>Egyéb</option></select></div>
 <div id="serviceQuestions" class="full subpanel"><p class="small">Válassz szolgáltatást a kapcsolódó kérdések megjelenítéséhez.</p></div>
 <div class="field full"><label for="description">A munka rövid leírása *</label><textarea id="description" name="Munka leírása" required maxlength="4000" placeholder="Írd le, mit szeretnél megvalósítani és milyen körülmények fontosak."></textarea></div>
@@ -417,7 +417,7 @@ function breakerStep(whole){
   addFault("Látható kapcsoló állapota: "+v);
   if(v==="unsure")showResult("Ne találgass","Ha a berendezés sérült, nedves vagy nem egyértelmű, ne nyúlj hozzá. Kérj villanyszerelőt.",true);
   else if(v==="on")showResult("Szakemberes hibakeresés javasolt","Ha minden kapcsoló bekapcsolt állásban van, de nincs áram, további vizsgálat szükséges. Ne bontsd meg az elosztót vagy mérőhelyet.");
-  else step("FI-relé vagy kismegszakító?","Csak akkor válaszd ki, ha egyértelműen felismerhető a zárt elosztón.",[["rcd","A FI-relé oldott le."],["breaker","Egy kismegszakító oldott le."],["unknown","Nem tudom biztosan."]],kind=>{
+  else step("FI-relé vagy kismegszakító?","Csak akkor válaszd ki, ha egyértelműen felismerhető a zárt elosztón.",[["rcd","A FI-relé oldott le. T test gomb, vagy 30mA felirat az ismertetője "],["breaker","Egy kismegszakító oldott le. Általában B16 vagy C16 felirat található rajta"],["unknown","Nem tudom biztosan."]],kind=>{
    addFault("Leoldott eszköz: "+kind);
    if(kind==="unknown")showResult("Kérj segítséget","Ne kapcsolgasd találomra az eszközöket, és ne bontsd meg az elosztó burkolatát.");
    else if(kind==="breaker")showResult("Ne kapcsold vissza újra és újra","Veszélyjel esetén ne nyúlj hozzá. Csak akkor próbálható egyszer visszakapcsolni, ha a zárt elosztó száraz, sértetlen, nincs veszélyjel és a kezelőkar egyértelmű. Ha újra leold, hagyd lekapcsolva és hívj villanyszerelőt.");
@@ -472,6 +472,40 @@ quoteForm.addEventListener("submit",async(event)=>{
   $("requestKind").value?"Kérés típusa: "+$("requestKind").value:"",
   $("formEstimate").value?"Előzetes kalkuláció: "+$("formEstimate").value:""
  ].filter(Boolean).join("\n\n");
+  // Automatikus ügyfél-visszaigazolás csak akkor,
+// ha az ügyfél kipipálta a jelölőnégyzetet.
+quoteForm.querySelector('[name="_autoresponse"]')?.remove();
+
+if ($("customerConfirmation")?.checked) {
+  const autoresponse = document.createElement("input");
+  autoresponse.type = "hidden";
+  autoresponse.name = "_autoresponse";
+
+  autoresponse.value = [
+    "Kedves " + $("name").value.trim() + "!",
+    "",
+    "Köszönjük, hogy a VA ELECTRO-tól kértél ajánlatot!",
+    "Ezzel a levéllel visszaigazoljuk az ajánlatkérésed beérkezését.",
+    "",
+    "AZ AJÁNLATKÉRÉS MÁSOLATA",
+    "",
+    "Név: " + $("name").value.trim(),
+    "Telefonszám: " + $("phone").value.trim(),
+    "E-mail-cím: " + $("email").value.trim(),
+    "Település: " + $("town").value.trim(),
+    "Szolgáltatás: " + service.value,
+    "",
+    "A kitöltött munkalap adatai:",
+    "",
+    fullDescription || $("description").value.trim(),
+    "",
+    "Üdvözlettel:",
+    "VA ELECTRO",
+    "Precizitás. Biztonság. Megbízhatóság."
+  ].join("\n");
+
+  quoteForm.appendChild(autoresponse);
+}
 
  const inquiry={
   customer_name:$("name").value.trim(),
