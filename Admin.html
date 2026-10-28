@@ -995,27 +995,29 @@ $("uploadDocument").addEventListener("click", async () => {
 
 $("refreshDocuments").addEventListener("click", loadWorkDocuments);
 function translateTroubleshootingSummary(value) {
-  if (!value) return value;
+  if (!value || !String(value).trim()) {
+    return "Ehhez az ajánlatkéréshez nem érkezett hibakeresési összefoglaló.";
+  }
 
   const translations = [
-    [/Hibatípus: breaker/g, "Hibatípus: kismegszakító leoldása"],
-    [/Hibatípus: whole/g, "Hibatípus: teljes áramszünet"],
-    [/Hibatípus: part/g, "Hibatípus: részleges áramszünet"],
-    [/Hibatípus: device/g, "Hibatípus: készülékhez kapcsolódó hiba"],
-    [/Veszélyjel: no/g, "Veszélyjel: nem"],
-    [/Veszélyjel: yes/g, "Veszélyjel: igen"],
-    [/Veszélyjel: unsure/g, "Veszélyjel: nem biztos"],
-    [/Látható kapcsoló állapota: tripped/g, "Látható kapcsoló állapota: leoldott"],
-    [/Látható kapcsoló állapota: on/g, "Látható kapcsoló állapota: bekapcsolva"],
-    [/Látható kapcsoló állapota: unsure/g, "Látható kapcsoló állapota: nem állapítható meg"],
-    [/Leoldott eszköz: breaker/g, "Leoldott eszköz: kismegszakító"],
-    [/Leoldott eszköz: rcd/g, "Leoldott eszköz: FI-relé"],
-    [/Leoldott eszköz: unknown/g, "Leoldott eszköz: nem azonosítható"]
+    [/Hibatípus:\s*breaker/gi, "Hibatípus: kismegszakító leoldása"],
+    [/Hibatípus:\s*whole/gi, "Hibatípus: teljes áramszünet"],
+    [/Hibatípus:\s*part/gi, "Hibatípus: részleges áramszünet"],
+    [/Hibatípus:\s*device/gi, "Hibatípus: készülékhez kapcsolódó hiba"],
+    [/Veszélyjel:\s*no/gi, "Veszélyjel: nem"],
+    [/Veszélyjel:\s*yes/gi, "Veszélyjel: igen"],
+    [/Veszélyjel:\s*unsure/gi, "Veszélyjel: nem biztos"],
+    [/Látható kapcsoló állapota:\s*tripped/gi, "Látható kapcsoló állapota: leoldott"],
+    [/Látható kapcsoló állapota:\s*on/gi, "Látható kapcsoló állapota: bekapcsolva"],
+    [/Látható kapcsoló állapota:\s*unsure/gi, "Látható kapcsoló állapota: nem állapítható meg"],
+    [/Leoldott eszköz:\s*breaker/gi, "Leoldott eszköz: kismegszakító"],
+    [/Leoldott eszköz:\s*rcd/gi, "Leoldott eszköz: FI-relé"],
+    [/Leoldott eszköz:\s*unknown/gi, "Leoldott eszköz: nem azonosítható"]
   ];
 
   return translations.reduce(
     (text, [pattern, replacement]) => text.replace(pattern, replacement),
-    value
+    String(value)
   );
 }
 function openRequest(item) {
@@ -1030,7 +1032,7 @@ function openRequest(item) {
     ["Kért időpont", item.preferred_date],
     ["Beérkezett", formatDate(item.created_at)],
     ["Leírás", item.description],
-    ["Hibakeresés összefoglalója", item.troubleshooting_summary],
+    ["Hibakeresés összefoglalója", translateTroubleshootingSummary(item.troubleshooting_summary)],
     ["Becsült ár", item.estimated_price == null ? "" : money(item.estimated_price)],
     ["Elfogadott ajánlat", item.accepted_amount == null ? "" : money(item.accepted_amount)],
     ["Összes befizetés", money(getPaid(item.id))],
