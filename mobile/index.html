@@ -1,1 +1,89 @@
-VA ELECTRO Mobile.
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#121212">
+  <meta name="description" content="VA ELECTRO Mobile – privát vállalkozáskezelő alkalmazás">
+  <title>VA ELECTRO Mobile</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="brand">
+      <div class="brand-mark">VA</div>
+      <div>
+        <div class="brand-name">VA ELECTRO</div>
+        <div class="brand-sub">MOBILE MANAGEMENT</div>
+      </div>
+    </header>
+
+    <section id="loginView">
+      <h1>Üdvözöllek!</h1>
+      <p class="muted">Lépj be a saját vállalkozáskezelő rendszeredbe.</p>
+
+      <form id="loginForm" class="panel">
+        <label class="field">
+          <span>E-mail cím</span>
+          <input id="email" type="email" autocomplete="username"
+            placeholder="E-mail cím" required>
+        </label>
+
+        <label class="field">
+          <span>Jelszó</span>
+          <input id="password" type="password"
+            autocomplete="current-password" placeholder="Jelszó" required>
+        </label>
+
+        <p id="loginError" class="error" role="alert"></p>
+        <button id="loginButton" class="primary" type="submit">
+          Biztonságos belépés
+        </button>
+      </form>
+
+      <p class="notice">Ez az alkalmazás kizárólag a VA ELECTRO adminisztrátora számára készült.</p>
+    </section>
+
+    <section id="dashboardView" class="hidden">
+      <div class="topline">
+        <div>
+          <h1>Vezérlőpult</h1>
+          <p class="muted">VA ELECTRO – Áttekintés</p>
+        </div>
+        <button id="logoutButton" class="secondary">Kilépés</button>
+      </div>
+
+      <div class="grid">
+        <div class="stat">
+          <span>Új megkeresések</span>
+          <strong id="newCount">–</strong>
+        </div>
+        <div class="stat">
+          <span>Aktív munkák</span>
+          <strong id="activeCount">–</strong>
+        </div>
+        <div class="stat">
+          <span>Elkészült munkák</span>
+          <strong id="completedCount">–</strong>
+        </div>
+      </div>
+
+      <section class="panel">
+        <h2>Aktuális munkák</h2>
+        <div id="jobList">
+          <p class="notice">Adatok betöltése…</p>
+        </div>
+      </section>
+
+      <p id="appMessage" class="notice" role="status"></p>
+    </section>
+
+    <footer>PRECIZITÁS. BIZTONSÁG. MEGBÍZHATÓSÁG.</footer>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
