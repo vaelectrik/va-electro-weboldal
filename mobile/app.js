@@ -8,7 +8,8 @@ const supabaseClient = window.supabase.createClient(
 );
 
 const $ = id => document.getElementById(id);
-
+const loginForm = $("loginForm");
+const jobsPanel = $("jobList").closest(".panel");
 let inquiries = [];
 
 function escapeHtml(value) {
@@ -81,7 +82,7 @@ function createDetailView() {
   $("backToJobs").addEventListener("click", () => {
     detail.classList.add("hidden");
     document.querySelector(".grid").classList.remove("hidden");
-    $("jobsPanel").classList.remove("hidden");
+    jobsPanel.classList.remove("hidden");
     showMessage("Munkalista");
   });
 }
@@ -151,7 +152,7 @@ function openJob(id) {
   `;
 
   document.querySelector(".grid").classList.add("hidden");
-  $("jobsPanel").classList.add("hidden");
+  jobsPanel.classList.add("hidden");
   $("detailView").classList.remove("hidden");
 
   showMessage("Munk adatlap megnyitva.");
