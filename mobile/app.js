@@ -1,4 +1,3 @@
-
 const SUPABASE_URL = "https://fxxhxnpirxpjqadrwyzf.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_Zpk6zDDtgqFpkDc38ms6_g_gjzvn-ZS";
 
@@ -10,7 +9,19 @@ const supabaseClient = window.supabase.createClient(
 const $ = id => document.getElementById(id);
 const loginForm = $("loginForm");
 const jobsPanel = $("jobList").closest(".panel");
+
 let inquiries = [];
+let currentJobId = null;
+
+const statuses = {
+  new: "Új megkeresés",
+  contacted: "Kapcsolatfelvétel",
+  offer_sent: "Ajánlat elküldve",
+  accepted: "Elfogadva – aktív munka",
+  completed: "Elkészült",
+  rejected: "Elutasítva",
+  closed: "Lezárva"
+};
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -23,7 +34,9 @@ function escapeHtml(value) {
 }
 
 function formatMoney(value) {
-  if (value === null || value === undefined || value === "") return "Nincs megadva";
+  if (value === null || value === undefined || value === "") {
+    return "Nincs megadva";
+  }
   return Number(value).toLocaleString("hu-HU") + " Ft";
 }
 
@@ -47,24 +60,16 @@ async function checkAdmin() {
   const { data, error } = await supabaseClient.rpc("is_va_electro_admin");
 
   if (error) throw error;
+
   if (data !== true) {
     throw new Error("Ehhez a fiókhoz nincs admin jogosultság.");
   }
 }
 
 function statusLabel(status) {
-  return ({
-    new: "Új megkeresés",
-    contacted: "Kapcsolatfelvétel",
-    offer_sent: "Ajánlat elküldve",
-    accepted: "Elfogadva – aktív munka",
-    completed: "Elkészült",
-    rejected: "Elutasítva",
-    closed: "Lezárva"
-  })[status] || status || "Nincs megadva";
+  return statuses[status] || status || "Nincs megadva";
 }
 
-// Részletes adatlap létrehozása
 function createDetailView() {
   if ($("detailView")) return;
 
@@ -73,7 +78,9 @@ function createDetailView() {
   detail.className = "panel hidden";
 
   detail.innerHTML = `
-    <button id="backToJobs" class="secondary">← Vissza a munkákhoz</button>
+    <button id="backToJobs" class="secondary">
+      ← Vissza a munkákhoz
+    </button>
     <div id="detailContent"></div>
   `;
 
@@ -83,6 +90,7 @@ function createDetailView() {
     detail.classList.add("hidden");
     document.querySelector(".grid").classList.remove("hidden");
     jobsPanel.classList.remove("hidden");
+    currentJobId = null;
     showMessage("Munkalista");
   });
 }
@@ -102,6 +110,7 @@ function openJob(id) {
   const job = inquiries.find(item => item.id === id);
   if (!job) return;
 
+  currentJobId = id;
   createDetailView();
 
   const phone = String(job.customer_phone || "");
@@ -115,6 +124,12 @@ function openJob(id) {
   const emailLink = email
     ? `<a class="contact-link" href="mailto:${encodeURIComponent(email)}">E-mail küldése</a>`
     : "";
+
+  const statusOptions = Object.entries(statuses).map(([value, label]) => `
+    <option value="${value}" ${job.status === value ? "selected" : ""}>
+      ${escapeHtml(label)}
+    </option>
+  `).join("");
 
   $("detailContent").innerHTML = `
     <h2>${escapeHtml(job.customer_name)}</h2>
@@ -136,6 +151,17 @@ function openJob(id) {
     ${detailRow("Kért időpont", job.preferred_date)}
     ${detailRow("Állapot", statusLabel(job.status))}
 
+    <h3>Munka állapotának módosítása</h3>
+    <label class="field">
+      <span>Új állapot</span>
+      <select id="newStatus">
+        ${statusOptions}
+      </select>
+    </label>
+    <button id="saveStatusButton" class="primary" type="button">
+      Állapot mentése
+    </button>
+
     <h3>Pénzügyi adatok</h3>
     ${detailRow("Becsült összeg", formatMoney(job.estimated_price))}
     ${detailRow("Ajánlati összeg", formatMoney(job.offer_amount))}
@@ -151,11 +177,57 @@ function openJob(id) {
     ${detailRow("Létrehozva", job.created_at ? new Date(job.created_at).toLocaleString("hu-HU") : "")}
   `;
 
+  $("saveStatusButton").addEventListener("click", saveJobStatus);
+
   document.querySelector(".grid").classList.add("hidden");
   jobsPanel.classList.add("hidden");
   $("detailView").classList.remove("hidden");
 
-  showMessage("Munk adatlap megnyitva.");
+  showMessage("Munka adatlap megnyitva.");
+}
+
+async function saveJobStatus() {
+  const newStatus = $("newStatus").value;
+  const button = $("saveStatusButton");
+
+  if (!currentJobId) return;
+
+  button.disabled = true;
+  button.textContent = "Mentés…";
+
+  try {
+    const { error } = await supabaseClient
+      .from("inquiries")
+      .update({ status: newStatus })
+      .eq("id", currentJobId);
+
+    if (error) throw error;
+
+    const job = inquiries.find(item => item.id === currentJobId);
+    if (job) job.status = newStatus;
+
+    updateCounters();
+    renderJobs();
+    openJob(currentJobId);
+
+    showMessage("A munka állapota sikeresen módosult.");
+
+  } catch (error) {
+    showMessage("Mentési hiba: " + error.message, true);
+    button.disabled = false;
+    button.textContent = "Állapot mentése";
+  }
+}
+
+function updateCounters() {
+  $("newCount").textContent =
+    inquiries.filter(x => x.status === "new").length;
+
+  $("activeCount").textContent =
+    inquiries.filter(x => x.status === "accepted").length;
+
+  $("completedCount").textContent =
+    inquiries.filter(x => x.status === "completed").length;
 }
 
 function renderJobs() {
@@ -201,20 +273,12 @@ async function loadDashboard() {
 
   inquiries = data || [];
 
-  $("newCount").textContent =
-    inquiries.filter(x => x.status === "new").length;
-
-  $("activeCount").textContent =
-    inquiries.filter(x => x.status === "accepted").length;
-
-  $("completedCount").textContent =
-    inquiries.filter(x => x.status === "completed").length;
-
+  updateCounters();
   renderJobs();
+
   showMessage("Kapcsolódva a VA ELECTRO adatbázishoz.");
 }
 
-// Munkára koppintás
 $("jobList").addEventListener("click", event => {
   const button = event.target.closest("[data-job-id]");
   if (!button) return;
