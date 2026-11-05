@@ -1,0 +1,21 @@
+
+{
+  "name": "VA ELECTRO Mobile",
+  "short_name": "VA ELECTRO",
+  "description": "Privát VA ELECTRO vállalkozáskezelő alkalmazás",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "lang": "hu",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
