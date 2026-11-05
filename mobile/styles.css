@@ -244,3 +244,66 @@ footer {
   }
 }
 
+
+.job-button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  color: var(--text);
+  font: inherit;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--line);
+  cursor: pointer;
+}
+
+.job-button:active {
+  background: #252019;
+}
+
+.open-hint {
+  color: var(--copper-light);
+  font-size: 12px;
+  margin-top: 10px;
+}
+
+.detail-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.detail-row span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.detail-row strong {
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+#detailContent h3 {
+  color: var(--copper-light);
+  font-size: 15px;
+  margin: 25px 0 8px;
+}
+
+.contact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.contact-link {
+  color: var(--copper-light);
+  border: 1px solid var(--copper);
+  border-radius: 10px;
+  padding: 10px 13px;
+  text-decoration: none;
+  font-size: 13px;
+}
