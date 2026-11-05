@@ -1,6 +1,6 @@
 
 const SUPABASE_URL = "https://fxxhxnpirxpjqadrwyzf.supabase.co";
-const SUPABASE_ANON_KEY = "IDE_MASOLD_A_MEGLEVO_SB_PUBLISHABLE_KULCSOT";
+const SUPABASE_ANON_KEY = "sb_publishable_Zpk6zDDtgqFpkDc38ms6_g_gjzvn-ZS";
 
 const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
