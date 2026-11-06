@@ -2220,12 +2220,26 @@ async function hasOfflineData() {
   return exists;
 }
 
+
 async function startApp() {
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./sw.js").catch(console.warn);
   }
 
   try {
+    // Offline állapotban nem próbálunk Supabase-belépést.
+    if (!navigator.onLine) {
+      const offlineDataExists = await hasOfflineData();
+
+      if (offlineDataExists) {
+        showPinLogin();
+      } else {
+        showLogin("Az első offline használathoz előbb online kell belépni.");
+      }
+
+      return;
+    }
+
     const {
       data: { session }
     } = await supabaseClient.auth.getSession();
@@ -2239,9 +2253,19 @@ async function startApp() {
     await loadDashboard();
 
   } catch (error) {
+    if (!navigator.onLine) {
+      const offlineDataExists = await hasOfflineData();
+
+      if (offlineDataExists) {
+        showPinLogin();
+        return;
+      }
+    }
+
     await supabaseClient.auth.signOut();
     showLogin(error.message || "A munkamenet ellenőrzése nem sikerült.");
   }
 }
+
 
 startApp();
