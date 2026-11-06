@@ -1285,6 +1285,18 @@ async function openDocument(id) {
     return;
   }
 
+  // Az üres lapot még a gombnyomás közvetlen hatására megnyitjuk,
+  // így kisebb eséllyel blokkolja a böngésző.
+  const newWindow = window.open("about:blank", "_blank");
+
+  if (!newWindow) {
+    showMessage(
+      "A böngésző blokkolta a megnyitást. Engedélyezd a felugróablakokat.",
+      true
+    );
+    return;
+  }
+
   try {
     showMessage("Dokumentum megnyitása…");
 
@@ -1299,11 +1311,13 @@ async function openDocument(id) {
       throw new Error("Nem sikerült létrehozni a dokumentum elérési linkjét.");
     }
 
-    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+    newWindow.location.href = data.signedUrl;
 
-    showMessage("A dokumentum megnyitási linkje elkészült.");
+    showMessage("A dokumentum megnyitása elindult.");
 
   } catch (error) {
+    newWindow.close();
+
     showMessage(
       "Dokumentummegnyitási hiba: " + error.message,
       true
