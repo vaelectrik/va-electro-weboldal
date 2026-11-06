@@ -1782,16 +1782,73 @@ async function saveAdminNotes() {
 
 /* STÁTUSZ MENTÉSE */
 
+// =========================================
+// OFFLINE MÓDOSÍTÁSI VÁRÓLISTA
+// =========================================
+
+let pendingOfflineChanges = [];
+
+async function persistOfflineSnapshot() {
+  await saveUnlockedOfflineData({
+    inquiries,
+    payments,
+    materialCosts,
+    pendingOfflineChanges,
+    savedAt: new Date().toISOString()
+  });
+}
+
+async function queueOfflineChange(change) {
+  if (!offlineCryptoKey) {
+    throw new Error("Az offline tárhely nincs feloldva PIN-kóddal.");
+  }
+
+  pendingOfflineChanges.push({
+    ...change,
+    operationId: crypto.randomUUID(),
+    createdAt: new Date().toISOString()
+  });
+
+  await persistOfflineSnapshot();
+}
+
 async function saveJobStatus() {
   const newStatus = $("newStatus").value;
   const button = $("saveStatusButton");
 
   if (!currentJobId) return;
 
+  const job = inquiries.find(item => item.id === currentJobId);
+
+  if (!job) return;
+
   button.disabled = true;
   button.textContent = "Mentés…";
 
   try {
+    if (!navigator.onLine) {
+      await queueOfflineChange({
+        type: "status",
+        inquiryId: currentJobId,
+        value: newStatus
+      });
+
+      job.status = newStatus;
+
+      if (currentFilter !== "all") {
+        currentFilter = newStatus;
+      }
+
+      updateCounters();
+      renderJobs();
+      renderDashboardFinance();
+      openJob(currentJobId);
+
+      showMessage("Offline mentés sikeres. Szinkronizálásra vár.");
+
+      return;
+    }
+
     const { error } = await supabaseClient
       .from("inquiries")
       .update({ status: newStatus })
@@ -1799,12 +1856,18 @@ async function saveJobStatus() {
 
     if (error) throw error;
 
-    const job = inquiries.find(item => item.id === currentJobId);
-
-    if (job) job.status = newStatus;
+    job.status = newStatus;
 
     if (currentFilter !== "all") {
       currentFilter = newStatus;
+    }
+
+    if (offlineCryptoKey) {
+      try {
+        await persistOfflineSnapshot();
+      } catch (storageError) {
+        console.error("Offline mentés frissítése sikertelen:", storageError);
+      }
     }
 
     updateCounters();
@@ -1817,10 +1880,12 @@ async function saveJobStatus() {
   } catch (error) {
     showMessage("Mentési hiba: " + error.message, true);
 
+  } finally {
     button.disabled = false;
     button.textContent = "Állapot mentése";
   }
 }
+
 
 /* VEZÉRLŐPULT */
 
@@ -2011,7 +2076,7 @@ $("pinForm").addEventListener("submit", async event => {
 
     inquiries = offlineData.inquiries || [];
     payments = offlineData.payments || [];
-    materialCosts = offlineData.materialCosts || [];
+    materialCosts = offlineData.materialCosts || [];pendingOfflineChanges = offlineData.pendingOfflineChanges || [];
     documents = [];
 
     showDashboard();
