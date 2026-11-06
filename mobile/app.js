@@ -1931,6 +1931,7 @@ async function loadDashboard() {
 
 /* BEJELENTKEZÉS */
 
+
 loginForm.addEventListener("submit", async event => {
   event.preventDefault();
 
@@ -1947,6 +1948,17 @@ loginForm.addEventListener("submit", async event => {
     if (error) throw error;
 
     await checkAdmin();
+
+    const offlineDataExists = await hasOfflineData();
+
+    if (!offlineDataExists) {
+      showPinLogin(
+        "Állítsd be az offline hozzáférés PIN-kódját.",
+        true
+      );
+      return;
+    }
+
     await loadDashboard();
 
   } catch (error) {
@@ -1958,6 +1970,7 @@ loginForm.addEventListener("submit", async event => {
     $("loginButton").textContent = "Biztonságos belépés";
   }
 });
+
 
 /* KIJELENTKEZÉS */
 
