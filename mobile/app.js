@@ -1950,6 +1950,169 @@ window.addEventListener("online", () => {
 
 /* INDÍTÁS */
 
+// =========================================
+// VA ELECTRO – TITKOSÍTOTT OFFLINE TÁROLÁS
+// =========================================
+
+const OFFLINE_DB_NAME = "va-electro-offline";
+const OFFLINE_STORE_NAME = "secure";
+const OFFLINE_DATA_KEY = "encrypted-data";
+
+function openOfflineDatabase() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(OFFLINE_DB_NAME, 1);
+
+    request.onupgradeneeded = () => {
+      const db = request.result;
+
+      if (!db.objectStoreNames.contains(OFFLINE_STORE_NAME)) {
+        db.createObjectStore(OFFLINE_STORE_NAME);
+      }
+    };
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function deriveOfflineKey(pin, salt) {
+  const encoder = new TextEncoder();
+
+  const material = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(pin),
+    "PBKDF2",
+    false,
+    ["deriveKey"]
+  );
+
+  return crypto.subtle.deriveKey(
+    {
+      name: "PBKDF2",
+      salt,
+      iterations: 310000,
+      hash: "SHA-256"
+    },
+    material,
+    {
+      name: "AES-GCM",
+      length: 256
+    },
+    false,
+    ["encrypt", "decrypt"]
+  );
+}
+
+async function saveOfflineData(pin, data) {
+  if (!pin || pin.length < 8) {
+    throw new Error("A PIN-kódnak legalább 8 karakteresnek kell lennie.");
+  }
+
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await deriveOfflineKey(pin, salt);
+
+  const encrypted = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    new TextEncoder().encode(JSON.stringify(data))
+  );
+
+  const record = {
+    salt: Array.from(salt),
+    iv: Array.from(iv),
+    encrypted: Array.from(new Uint8Array(encrypted)),
+    updatedAt: new Date().toISOString()
+  };
+
+  const db = await openOfflineDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(
+      OFFLINE_STORE_NAME,
+      "readwrite"
+    );
+
+    transaction.objectStore(OFFLINE_STORE_NAME).put(
+      record,
+      OFFLINE_DATA_KEY
+    );
+
+    transaction.oncomplete = () => {
+      db.close();
+      resolve(true);
+    };
+
+    transaction.onerror = () => {
+      db.close();
+      reject(transaction.error);
+    };
+  });
+}
+
+async function loadOfflineData(pin) {
+  const db = await openOfflineDatabase();
+
+  const record = await new Promise((resolve, reject) => {
+    const transaction = db.transaction(
+      OFFLINE_STORE_NAME,
+      "readonly"
+    );
+
+    const request = transaction.objectStore(
+      OFFLINE_STORE_NAME
+    ).get(OFFLINE_DATA_KEY);
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+
+  db.close();
+
+  if (!record) {
+    throw new Error("Még nincs mentett offline adat.");
+  }
+
+  const key = await deriveOfflineKey(
+    pin,
+    new Uint8Array(record.salt)
+  );
+
+  const decrypted = await crypto.subtle.decrypt(
+    {
+      name: "AES-GCM",
+      iv: new Uint8Array(record.iv)
+    },
+    key,
+    new Uint8Array(record.encrypted)
+  );
+
+  return JSON.parse(
+    new TextDecoder().decode(decrypted)
+  );
+}
+
+async function hasOfflineData() {
+  const db = await openOfflineDatabase();
+
+  const exists = await new Promise((resolve, reject) => {
+    const transaction = db.transaction(
+      OFFLINE_STORE_NAME,
+      "readonly"
+    );
+
+    const request = transaction.objectStore(
+      OFFLINE_STORE_NAME
+    ).get(OFFLINE_DATA_KEY);
+
+    request.onsuccess = () => resolve(!!request.result);
+    request.onerror = () => reject(request.error);
+  });
+
+  db.close();
+  return exists;
+}
+
 async function startApp() {
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./sw.js").catch(console.warn);
