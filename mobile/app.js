@@ -285,19 +285,20 @@ function renderJobs() {
     `;
 }
 
-$("jobTabs").addEventListener("click", event => {
-  const button = event.target.closest("[data-filter]");
-  if (!button) return;
+jobsPanel.addEventListener("click", event => {
+  const tab = event.target.closest("[data-filter]");
 
-  currentFilter = button.dataset.filter;
-  renderJobs();
-});
+  if (tab) {
+    currentFilter = tab.dataset.filter;
+    renderJobs();
+    return;
+  }
 
-$("jobList").addEventListener("click", event => {
-  const button = event.target.closest("[data-job-id]");
-  if (!button) return;
+  const jobButton = event.target.closest("[data-job-id]");
 
-  openJob(button.dataset.jobId);
+  if (jobButton) {
+    openJob(jobButton.dataset.jobId);
+  }
 });
 
 /* MUNKALAP */
