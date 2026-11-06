@@ -67,6 +67,19 @@
       >
     </label>
 
+<label class="field" id="pinConfirmField">
+  <span>PIN-kód megerősítése</span>
+  <input
+    id="offlinePinConfirm"
+    type="password"
+    inputmode="numeric"
+    pattern="[0-9]{8,}"
+    minlength="8"
+    autocomplete="off"
+    placeholder="PIN-kód ismét"
+  >
+</label>
+
     <p id="pinError" class="error" role="alert"></p>
 
     <button class="primary" type="submit">
