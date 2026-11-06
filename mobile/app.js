@@ -516,11 +516,24 @@ function showMessage(message = "", isError = false) {
   $("appMessage").className = isError ? "error" : "notice";
 }
 
+
 function showLogin(message = "") {
   $("loginView").classList.remove("hidden");
+  $("pinView").classList.add("hidden");
   $("dashboardView").classList.add("hidden");
+
   $("loginError").textContent = message;
 }
+
+function showPinLogin(message = "") {
+  $("loginView").classList.add("hidden");
+  $("pinView").classList.remove("hidden");
+  $("dashboardView").classList.add("hidden");
+
+  $("pinError").textContent = message;
+  $("offlinePin").value = "";
+}
+
 
 function showDashboard() {
   $("loginView").classList.add("hidden");
