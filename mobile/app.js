@@ -525,14 +525,29 @@ function showLogin(message = "") {
   $("loginError").textContent = message;
 }
 
-function showPinLogin(message = "") {
+
+let offlinePinSetupMode = false;
+
+function showPinLogin(message = "", setupMode = false) {
+  offlinePinSetupMode = setupMode;
+
   $("loginView").classList.add("hidden");
   $("pinView").classList.remove("hidden");
   $("dashboardView").classList.add("hidden");
 
   $("pinError").textContent = message;
   $("offlinePin").value = "";
+
+  $("pinConfirmField").classList.toggle("hidden", !setupMode);
+  $("offlinePinConfirm").value = "";
+
+  const button = $("pinForm").querySelector('button[type="submit"]');
+
+  button.textContent = setupMode
+    ? "PIN-kód beállítása"
+    : "Offline belépés";
 }
+
 
 
 function showDashboard() {
