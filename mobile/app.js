@@ -1972,6 +1972,72 @@ loginForm.addEventListener("submit", async event => {
 });
 
 
+$("pinForm").addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const pin = $("offlinePin").value;
+
+  try {
+    if (!/^[0-9]{8,}$/.test(pin)) {
+      throw new Error("Legalább 8 számjegyű PIN-kód szükséges.");
+    }
+
+    if (offlinePinSetupMode) {
+      const confirmation = $("offlinePinConfirm").value;
+
+      if (pin !== confirmation) {
+        throw new Error("A két PIN-kód nem egyezik.");
+      }
+
+      if (!navigator.onLine) {
+        throw new Error("A PIN első beállításához internetkapcsolat szükséges.");
+      }
+
+      await checkAdmin();
+      await loadDashboard();
+
+      await saveOfflineData(pin, {
+        inquiries,
+        payments,
+        materialCosts,
+        savedAt: new Date().toISOString()
+      });
+
+      showMessage("A titkosított offline mentés elkészült.");
+      return;
+    }
+
+    const offlineData = await loadOfflineData(pin);
+
+    inquiries = offlineData.inquiries || [];
+    payments = offlineData.payments || [];
+    materialCosts = offlineData.materialCosts || [];
+    documents = [];
+
+    showDashboard();
+    createDetailView();
+    createJobControls();
+    createDashboardFinance();
+    addAppStyles();
+
+    updateCounters();
+    renderJobs();
+    renderDashboardFinance();
+
+    showMessage("Offline mód – a korábban mentett adatok betöltve.");
+
+  } catch (error) {
+    $("pinError").textContent =
+      error.message === "The operation failed for an operation-specific reason"
+        ? "Hibás PIN-kód vagy sérült titkosított adat."
+        : error.message || "Nem sikerült a PIN-művelet.";
+  }
+});
+
+$("onlineLoginButton").addEventListener("click", () => {
+  showLogin();
+});
+
 /* KIJELENTKEZÉS */
 
 $("logoutButton").addEventListener("click", async () => {
