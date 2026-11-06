@@ -182,7 +182,9 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0}
     <option value="rejected">Elutasítva</option>
     <option value="closed">Lezárva</option>
   </select>
-
+  
+<label for="offerAmount">Kiküldött ajánlat összege (Ft)</label>
+<input id="offerAmount" type="number" min="0" step="1" placeholder="Például: 450000">
   <label for="acceptedAmount">Elfogadott ajánlat végösszege (Ft)</label>
   <input id="acceptedAmount" type="number" min="0" step="1" placeholder="Például: 450000">
 
@@ -709,8 +711,11 @@ function renderPaymentOverview() {
     ["accepted", "completed"].includes(item.status)
   );
 
-  const acceptedTotal = jobs.reduce(
-    (sum, job) => sum + (Number(job.accepted_amount) || 0), 0
+  const acceptedTotal = requests
+  .filter(item => item.status === "offer_sent")
+  .reduce(
+    (sum, item) => sum + (Number(item.offer_amount) || 0),
+    0
   );
 
   const paidTotal = jobs.reduce(
@@ -1044,16 +1049,25 @@ function openRequest(item) {
     .map(([label,value]) => `<p><strong>${escapeHTML(label)}:</strong><br>${escapeHTML(value)}</p>`)
     .join("");
   $("status").value = item.status || "new";
-  $("acceptedAmount").value = item.accepted_amount ?? "";
-  $("notes").value = item.admin_notes || "";
+$("offerAmount").value = item.offer_amount ?? "";
+$("acceptedAmount").value = item.accepted_amount ?? "";
+$("notes").value = item.admin_notes || "";
   $("requestDetail").classList.remove("hidden");loadWorkDocuments();
   $("requestDetail").scrollIntoView({behavior:"smooth",block:"start"});
 }
 
 $("save").addEventListener("click", async () => {
   if (!selectedRequest) return;
-  const rawAmount = $("acceptedAmount").value.trim();
-  const acceptedAmount = rawAmount === "" ? null : Number(rawAmount);
+  const rawOfferAmount = $("offerAmount").value.trim();
+const offerAmount = rawOfferAmount === "" ? null : Number(rawOfferAmount);
+
+const rawAmount = $("acceptedAmount").value.trim();
+const acceptedAmount = rawAmount === "" ? null : Number(rawAmount);
+
+if (offerAmount !== null && (!Number.isFinite(offerAmount) || offerAmount < 0)) {
+  alert("A kiküldött ajánlat összege nem lehet negatív szám.");
+  return;
+}
   if (acceptedAmount !== null && (!Number.isFinite(acceptedAmount) || acceptedAmount < 0)) {
     alert("Az ajánlati összeg nem lehet negatív szám.");
     return;
@@ -1062,10 +1076,11 @@ $("save").addEventListener("click", async () => {
   try {
     await checkAdmin();
     const {error} = await client.from("inquiries").update({
-      status:$("status").value,
-      accepted_amount:acceptedAmount,
-      admin_notes:$("notes").value
-    }).eq("id",selectedRequest.id);
+  status:$("status").value,
+  offer_amount:offerAmount,
+  accepted_amount:acceptedAmount,
+  admin_notes:$("notes").value
+}).eq("id",selectedRequest.id);
     if (error) throw error;
     const savedId = selectedRequest.id;
     message("A módosítások mentése sikerült.");
