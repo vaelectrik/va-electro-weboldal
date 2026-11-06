@@ -1,11 +1,29 @@
 /* =========================================
    VA ELECTRO MOBILE
    Munkakezelés + Pénzügyi modul
+   + Dokumentumkezelés
 ========================================= */
 
 const SUPABASE_URL = "https://fxxhxnpirxpjqadrwyzf.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_Zpk6zDDtgqFpkDc38ms6_g_gjzvn-ZS";
 
+const DOCUMENT_BUCKET = "va-electro-documents";
+const MAX_DOCUMENT_SIZE = 15 * 1024 * 1024;
+
+const ALLOWED_DOCUMENT_TYPES = [
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/webp"
+];
+
+const DOCUMENT_CATEGORIES = [
+  "Szerződés",
+  "Melléklet",
+  "Teljesítésigazolás",
+  "Mérési jegyzőkönyv",
+  "Egyéb dokumentum"
+];
 
 const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
@@ -20,6 +38,9 @@ const jobsPanel = $("jobList").closest(".panel");
 let inquiries = [];
 let payments = [];
 let materialCosts = [];
+let documents = [];
+
+let documentsError = "";
 
 let currentJobId = null;
 let currentFilter = "all";
@@ -335,6 +356,122 @@ function addAppStyles() {
       text-decoration: none;
       font-size: 13px;
     }
+
+    /* DOKUMENTUMKEZELÉS */
+
+    .documents-section {
+      margin-top: 25px;
+      padding-top: 18px;
+      border-top: 1px solid #51402f;
+    }
+
+    .document-form {
+      background: #191919;
+      border: 1px solid #51402f;
+      border-radius: 13px;
+      padding: 13px;
+      margin: 12px 0;
+    }
+
+    .document-form h4 {
+      margin: 0 0 12px;
+      color: #d49a64;
+    }
+
+    .document-input {
+      width: 100%;
+      min-height: 44px;
+      padding: 12px;
+      margin: 7px 0 13px;
+      box-sizing: border-box;
+      background: #101010;
+      color: #f4f1ed;
+      border: 1px solid #74502f;
+      border-radius: 11px;
+      font: inherit;
+    }
+
+    .document-file-input {
+      width: 100%;
+      padding: 12px;
+      margin: 7px 0 13px;
+      box-sizing: border-box;
+      background: #101010;
+      color: #f4f1ed;
+      border: 1px dashed #74502f;
+      border-radius: 11px;
+      font: inherit;
+      font-size: 12px;
+    }
+
+    .document-info {
+      color: #aaa39c;
+      font-size: 12px;
+      line-height: 1.6;
+      margin: 5px 0 13px;
+    }
+
+    .document-upload-button {
+      width: 100%;
+    }
+
+    .document-item {
+      background: #151515;
+      border: 1px solid #51402f;
+      border-radius: 12px;
+      padding: 13px;
+      margin: 9px 0;
+    }
+
+    .document-item strong {
+      display: block;
+      color: #d49a64;
+      overflow-wrap: anywhere;
+      margin-bottom: 6px;
+    }
+
+    .document-item small {
+      display: block;
+      color: #aaa39c;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .document-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .document-actions button {
+      flex: 1;
+      min-width: 0;
+      padding: 10px 6px;
+      border: 1px solid #705033;
+      border-radius: 9px;
+      background: transparent;
+      color: #d49a64;
+      font: inherit;
+      font-size: 12px;
+    }
+
+    .document-empty {
+      color: #aaa39c;
+      font-size: 13px;
+      padding: 12px 0;
+    }
+
+    .document-error {
+      color: #e08a82;
+      font-size: 13px;
+      padding: 10px 0;
+    }
+
+    .document-loading {
+      color: #aaa39c;
+      font-size: 13px;
+      padding: 10px 0;
+    }
   `;
 
   document.head.appendChild(style);
@@ -368,6 +505,7 @@ function numeric(value) {
 function today() {
   const date = new Date();
   const offset = date.getTimezoneOffset();
+
   return new Date(date.getTime() - offset * 60000)
     .toISOString()
     .slice(0, 10);
@@ -591,7 +729,10 @@ function createDetailView() {
   });
 
   $("detailContent").addEventListener("submit", handleFinanceSubmit);
+  $("detailContent").addEventListener("submit", handleDocumentSubmit);
+
   $("detailContent").addEventListener("click", handleFinanceClick);
+  $("detailContent").addEventListener("click", handleDocumentClick);
 }
 
 /* ELŐZŐ / KÖVETKEZŐ */
@@ -831,6 +972,389 @@ function renderFinance(job) {
   `;
 }
 
+/* =========================================
+   DOKUMENTUMKEZELÉS
+========================================= */
+
+/* Fájlnév biztonságos átalakítása */
+
+function sanitizeFilename(filename) {
+  const cleaned = String(filename || "dokumentum")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9._-]/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^[_\.]+|[_\.]+$/g, "")
+    .slice(0, 120);
+
+  return cleaned || "dokumentum";
+}
+
+/* Dokumentumok munkánként */
+
+function getJobDocuments(jobId) {
+  return documents
+    .filter(item => item.inquiry_id === jobId)
+    .sort((a, b) =>
+      String(b.uploaded_at || "").localeCompare(String(a.uploaded_at || ""))
+    );
+}
+
+function formatDocumentDate(value) {
+  if (!value) return "Nincs megadva";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Nincs megadva";
+  }
+
+  return date.toLocaleString("hu-HU");
+}
+
+/* Dokumentumlista megjelenítése */
+
+function renderDocumentItems(jobId) {
+  if (documentsError) {
+    return `
+      <div class="document-error">
+        A dokumentumlista betöltése nem sikerült:
+        ${escapeHtml(documentsError)}
+      </div>
+    `;
+  }
+
+  const items = getJobDocuments(jobId);
+
+  if (!items.length) {
+    return `
+      <div class="document-empty">
+        Ehhez a munkához még nincs feltöltött dokumentum.
+      </div>
+    `;
+  }
+
+  return items.map(item => `
+    <div class="document-item">
+      <strong>${escapeHtml(item.original_filename || "Dokumentum")}</strong>
+
+      <small>
+        Típus: ${escapeHtml(item.document_type || "Egyéb dokumentum")}
+      </small>
+
+      <small>
+        Feltöltve: ${escapeHtml(formatDocumentDate(item.uploaded_at))}
+      </small>
+
+      <div class="document-actions">
+        <button
+          type="button"
+          data-document-open="${escapeHtml(item.id)}"
+        >
+          Megnyitás
+        </button>
+
+        <button
+          type="button"
+          data-document-download="${escapeHtml(item.id)}"
+        >
+          Letöltés
+        </button>
+      </div>
+    </div>
+  `).join("");
+}
+
+/* Dokumentumkezelő felület */
+
+function renderDocuments(job) {
+  return `
+    <div class="documents-section">
+      <h3>Dokumentumok</h3>
+
+      <form id="documentForm" class="document-form">
+        <h4>Új dokumentum feltöltése</h4>
+
+        <label class="field">
+          <span>Dokumentum típusa</span>
+
+          <select
+            class="document-input"
+            name="document_type"
+            required
+          >
+            ${DOCUMENT_CATEGORIES.map(type => `
+              <option value="${escapeHtml(type)}">
+                ${escapeHtml(type)}
+              </option>
+            `).join("")}
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Fájl kiválasztása</span>
+
+          <input
+            class="document-file-input"
+            type="file"
+            name="document_file"
+            accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"
+            required
+          >
+        </label>
+
+        <div class="document-info">
+          Engedélyezett formátumok: PDF, JPG, PNG, WebP.
+          <br>
+          Maximális fájlméret: 15 MB.
+          <br>
+          A feltöltött dokumentumok nem törölhetők és nem írhatók felül.
+        </div>
+
+        <button
+          class="primary document-upload-button"
+          type="submit"
+        >
+          Dokumentum feltöltése
+        </button>
+      </form>
+
+      <h3>Feltöltött dokumentumok</h3>
+
+      <div id="documentList">
+        ${renderDocumentItems(job.id)}
+      </div>
+    </div>
+  `;
+}
+
+/* Dokumentumok betöltése adatbázisból */
+
+async function loadDocuments() {
+  const { data, error } = await supabaseClient
+    .from("work_documents")
+    .select("*")
+    .order("uploaded_at", { ascending: false });
+
+  if (error) throw error;
+
+  documents = data || [];
+  documentsError = "";
+}
+
+/* Dokumentum feltöltése */
+
+async function handleDocumentSubmit(event) {
+  const form = event.target;
+
+  if (!form.matches("#documentForm")) return;
+
+  event.preventDefault();
+
+  if (!currentJobId) return;
+
+  const fileInput = form.elements.document_file;
+  const file = fileInput.files?.[0];
+  const documentType = form.elements.document_type.value;
+
+  if (!file) {
+    showMessage("Válassz ki egy dokumentumot.", true);
+    return;
+  }
+
+  if (!DOCUMENT_CATEGORIES.includes(documentType)) {
+    showMessage("Érvénytelen dokumentumtípus.", true);
+    return;
+  }
+
+  if (!ALLOWED_DOCUMENT_TYPES.includes(file.type)) {
+    showMessage(
+      "Nem megfelelő fájlformátum. PDF, JPG, PNG vagy WebP tölthető fel.",
+      true
+    );
+    return;
+  }
+
+  if (file.size <= 0 || file.size > MAX_DOCUMENT_SIZE) {
+    showMessage("A fájl mérete nem lehet 15 MB-nál nagyobb.", true);
+    return;
+  }
+
+  const button = form.querySelector('button[type="submit"]');
+  const originalButtonText = button.textContent;
+
+  button.disabled = true;
+  button.textContent = "Feltöltés…";
+
+  try {
+    const safeName = sanitizeFilename(file.name);
+
+    const uniqueId = typeof crypto !== "undefined" &&
+      typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+    const storagePath =
+      `${currentJobId}/${uniqueId}-${safeName}`;
+
+    /*
+      1. Fájl feltöltése a privát tárhelyre.
+      upsert:false: meglévő fájlt nem írhat felül.
+    */
+
+    const { error: uploadError } = await supabaseClient
+      .storage
+      .from(DOCUMENT_BUCKET)
+      .upload(storagePath, file, {
+        cacheControl: "3600",
+        contentType: file.type,
+        upsert: false
+      });
+
+    if (uploadError) throw uploadError;
+
+    /*
+      2. Dokumentum adatainak rögzítése.
+    */
+
+    const { data, error: insertError } = await supabaseClient
+      .from("work_documents")
+      .insert({
+        inquiry_id: currentJobId,
+        storage_path: storagePath,
+        original_filename: file.name,
+        document_type: documentType
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      throw new Error(
+        "A fájl feltöltése megtörtént, de az adatbázisba mentés nem sikerült: " +
+        insertError.message
+      );
+    }
+
+    documents.unshift(data);
+
+    const job = inquiries.find(item => item.id === currentJobId);
+
+    if (job) {
+      openJob(currentJobId);
+    }
+
+    showMessage("A dokumentum sikeresen feltöltve.");
+
+  } catch (error) {
+    console.error("Dokumentumfeltöltési hiba:", error);
+
+    showMessage(
+      "Dokumentumfeltöltési hiba: " + error.message,
+      true
+    );
+
+    button.disabled = false;
+    button.textContent = originalButtonText;
+  }
+}
+
+/* Dokumentum megnyitása és letöltése */
+
+async function handleDocumentClick(event) {
+  const openButton = event.target.closest("[data-document-open]");
+
+  if (openButton) {
+    await openDocument(openButton.dataset.documentOpen);
+    return;
+  }
+
+  const downloadButton = event.target.closest("[data-document-download]");
+
+  if (downloadButton) {
+    await downloadDocument(downloadButton.dataset.documentDownload);
+  }
+}
+
+/* Privát dokumentum megnyitása */
+
+async function openDocument(id) {
+  const item = documents.find(doc => String(doc.id) === String(id));
+
+  if (!item) {
+    showMessage("A dokumentum nem található.", true);
+    return;
+  }
+
+  try {
+    showMessage("Dokumentum megnyitása…");
+
+    const { data, error } = await supabaseClient
+      .storage
+      .from(DOCUMENT_BUCKET)
+      .createSignedUrl(item.storage_path, 60);
+
+    if (error) throw error;
+
+    if (!data?.signedUrl) {
+      throw new Error("Nem sikerült létrehozni a dokumentum elérési linkjét.");
+    }
+
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+
+    showMessage("A dokumentum megnyitási linkje elkészült.");
+
+  } catch (error) {
+    showMessage(
+      "Dokumentummegnyitási hiba: " + error.message,
+      true
+    );
+  }
+}
+
+/* Dokumentum letöltése */
+
+async function downloadDocument(id) {
+  const item = documents.find(doc => String(doc.id) === String(id));
+
+  if (!item) {
+    showMessage("A dokumentum nem található.", true);
+    return;
+  }
+
+  try {
+    showMessage("Dokumentum letöltése…");
+
+    const { data, error } = await supabaseClient
+      .storage
+      .from(DOCUMENT_BUCKET)
+      .download(item.storage_path);
+
+    if (error) throw error;
+
+    const objectUrl = URL.createObjectURL(data);
+
+    const link = document.createElement("a");
+    link.href = objectUrl;
+    link.download = item.original_filename || "dokumentum";
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    setTimeout(() => {
+      URL.revokeObjectURL(objectUrl);
+    }, 60000);
+
+    showMessage("A dokumentum letöltése elindult.");
+
+  } catch (error) {
+    showMessage(
+      "Dokumentumletöltési hiba: " + error.message,
+      true
+    );
+  }
+}
+
 /* MUNKA MEGNYITÁSA */
 
 function openJob(id) {
@@ -902,6 +1426,8 @@ function openJob(id) {
     ${detailRow("Elfogadott összeg", formatMoney(job.accepted_amount))}
 
     ${renderFinance(job)}
+
+    ${renderDocuments(job)}
 
     <h3>Munka részletei</h3>
 
@@ -1340,6 +1866,19 @@ async function loadDashboard() {
   inquiries = data || [];
 
   await loadFinancialRecords();
+
+  /*
+    A dokumentumok betöltési hibája nem állítja le
+    a munkalista és a pénzügyi modul működését.
+  */
+
+  try {
+    await loadDocuments();
+  } catch (documentError) {
+    console.error("Dokumentumok betöltési hibája:", documentError);
+    documents = [];
+    documentsError = documentError.message;
+  }
 
   updateCounters();
   renderJobs();
