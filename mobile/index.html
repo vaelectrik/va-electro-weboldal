@@ -46,6 +46,39 @@
       <p class="notice">Ez az alkalmazás kizárólag a VA ELECTRO adminisztrátora számára készült.</p>
     </section>
 
+<section id="pinView" class="hidden">
+  <h1>Offline biztonságos belépés</h1>
+  <p class="muted">
+    Add meg a VA ELECTRO offline hozzáférési PIN-kódját.
+  </p>
+
+  <form id="pinForm" class="panel">
+    <label class="field">
+      <span>PIN-kód</span>
+      <input
+        id="offlinePin"
+        type="password"
+        inputmode="numeric"
+        pattern="[0-9]{8,}"
+        minlength="8"
+        autocomplete="off"
+        placeholder="Legalább 8 számjegy"
+        required
+      >
+    </label>
+
+    <p id="pinError" class="error" role="alert"></p>
+
+    <button class="primary" type="submit">
+      Offline belépés
+    </button>
+  </form>
+
+  <button id="onlineLoginButton" class="secondary" type="button">
+    Vissza az online belépéshez
+  </button>
+</section>
+
     <section id="dashboardView" class="hidden">
       <div class="topline">
         <div>
