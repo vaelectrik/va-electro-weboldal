@@ -1,12 +1,13 @@
 
 /* =========================================
    VA ELECTRO MOBILE
-   Munkakezelés – fülek, keresés, navigáció
+   Munkakezelés – teljes verzió
+   Fülek, keresés, navigáció,
+   státuszkezelés, admin megjegyzések
 ========================================= */
 
 const SUPABASE_URL = "https://fxxhxnpirxpjqadrwyzf.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_Zpk6zDDtgqFpkDc38ms6_g_gjzvn-ZS";
-
 
 const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
@@ -123,6 +124,32 @@ function addAppStyles() {
       color: #aaa39c;
       font-size: 13px;
     }
+
+    .admin-notes-area {
+      width: 100%;
+      min-height: 130px;
+      padding: 13px;
+      margin: 10px 0;
+      box-sizing: border-box;
+      resize: vertical;
+      background: #101010;
+      color: #f4f1ed;
+      border: 1px solid #74502f;
+      border-radius: 11px;
+      font: inherit;
+      line-height: 1.5;
+    }
+
+    .admin-notes-info {
+      color: #aaa39c;
+      font-size: 12px;
+      margin: 5px 0 12px;
+    }
+
+    .admin-notes-save {
+      width: 100%;
+      margin-bottom: 12px;
+    }
   `;
 
   document.head.appendChild(style);
@@ -167,6 +194,8 @@ function showDashboard() {
 function statusLabel(status) {
   return statuses[status] || status || "Nincs megadva";
 }
+
+/* ADMIN ELLENŐRZÉS */
 
 async function checkAdmin() {
   const { data, error } = await supabaseClient.rpc(
@@ -284,6 +313,8 @@ function renderJobs() {
       </div>
     `;
 }
+
+/* KATTINTÁSOK KEZELÉSE */
 
 jobsPanel.addEventListener("click", event => {
   const tab = event.target.closest("[data-filter]");
@@ -469,7 +500,28 @@ function openJob(id) {
 
     <h3>Adminisztráció</h3>
 
-    ${detailRow("Admin megjegyzés", job.admin_notes)}
+    <label class="field" for="adminNotesInput">
+      <span>Belső adminisztrációs megjegyzés</span>
+    </label>
+
+    <textarea
+      id="adminNotesInput"
+      class="admin-notes-area"
+      placeholder="Ide írhatod a munkával kapcsolatos belső megjegyzéseidet..."
+    >${escapeHtml(job.admin_notes || "")}</textarea>
+
+    <div class="admin-notes-info">
+      Ez a megjegyzés csak az adminisztrációban jelenik meg.
+    </div>
+
+    <button
+      id="saveAdminNotesButton"
+      class="primary admin-notes-save"
+      type="button"
+    >
+      Megjegyzés mentése
+    </button>
+
     ${detailRow("Ajánlat elküldve", job.offer_sent_at)}
     ${detailRow(
       "Létrehozva",
@@ -480,6 +532,7 @@ function openJob(id) {
   `;
 
   $("saveStatusButton").addEventListener("click", saveJobStatus);
+  $("saveAdminNotesButton").addEventListener("click", saveAdminNotes);
 
   document.querySelector(".grid").classList.add("hidden");
   jobsPanel.classList.add("hidden");
@@ -487,6 +540,47 @@ function openJob(id) {
 
   updateJobNavigation();
   showMessage("Munka adatlap megnyitva.");
+}
+
+/* ADMIN MEGJEGYZÉS MENTÉSE */
+
+async function saveAdminNotes() {
+  if (!currentJobId) return;
+
+  const button = $("saveAdminNotesButton");
+  const textarea = $("adminNotesInput");
+  const notes = textarea.value.trim();
+
+  button.disabled = true;
+  button.textContent = "Mentés…";
+
+  try {
+    const { error } = await supabaseClient
+      .from("inquiries")
+      .update({
+        admin_notes: notes
+      })
+      .eq("id", currentJobId);
+
+    if (error) throw error;
+
+    const job = inquiries.find(item => item.id === currentJobId);
+
+    if (job) {
+      job.admin_notes = notes;
+    }
+
+    button.disabled = false;
+    button.textContent = "Megjegyzés mentése";
+
+    showMessage("Az adminisztrációs megjegyzés sikeresen mentve.");
+
+  } catch (error) {
+    button.disabled = false;
+    button.textContent = "Megjegyzés mentése";
+
+    showMessage("Megjegyzés mentési hiba: " + error.message, true);
+  }
 }
 
 /* STÁTUSZ MENTÉSE */
@@ -514,8 +608,6 @@ async function saveJobStatus() {
       job.status = newStatus;
     }
 
-    // Ha egy konkrét státuszfülön vagyunk,
-    // a mentés után automatikusan az új fülre váltunk.
     if (currentFilter !== "all") {
       currentFilter = newStatus;
     }
