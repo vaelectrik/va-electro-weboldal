@@ -2112,13 +2112,83 @@ $("logoutButton").addEventListener("click", async () => {
 
 /* INTERNETKAPCSOLAT */
 
-window.addEventListener("online", () => {
-  if (!$("dashboardView").classList.contains("hidden")) {
-    loadDashboard().catch(error => {
-      showMessage(error.message, true);
-    });
+let offlineSyncRunning = false;
+
+async function syncOfflineChanges() {
+  if (!navigator.onLine || !offlineCryptoKey) return;
+
+  if (offlineSyncRunning) return;
+
+  offlineSyncRunning = true;
+
+  try {
+    const {
+      data: { session }
+    } = await supabaseClient.auth.getSession();
+
+    if (!session) {
+      throw new Error("A szinkronizáláshoz online bejelentkezés szükséges.");
+    }
+
+    await checkAdmin();
+
+    while (pendingOfflineChanges.length > 0) {
+      const change = pendingOfflineChanges[0];
+
+      if (change.type === "status") {
+        const { error } = await supabaseClient
+          .from("inquiries")
+          .update({ status: change.value })
+          .eq("id", change.inquiryId);
+
+        if (error) throw error;
+      } else {
+        throw new Error(
+          "Nem támogatott offline módosítás: " + change.type
+        );
+      }
+
+      // Csak sikeres feltöltés után töröljük a várólistából.
+      pendingOfflineChanges.shift();
+
+      await persistOfflineSnapshot();
+    }
+
+    return true;
+
+  } finally {
+    offlineSyncRunning = false;
+  }
+}
+
+
+window.addEventListener("online", async () => {
+  if ($("dashboardView").classList.contains("hidden")) return;
+
+  try {
+    showMessage("Internetkapcsolat helyreállt. Szinkronizálás…");
+
+    if (offlineCryptoKey && pendingOfflineChanges.length > 0) {
+      await syncOfflineChanges();
+    }
+
+    await loadDashboard();
+
+    if (offlineCryptoKey) {
+      await persistOfflineSnapshot();
+    }
+
+    showMessage("Az adatok szinkronizálása sikeres.");
+
+  } catch (error) {
+    showMessage(
+      "A szinkronizálás nem sikerült. A függő módosítások megmaradtak: " +
+      error.message,
+      true
+    );
   }
 });
+
 
 /* INDÍTÁS */
 
