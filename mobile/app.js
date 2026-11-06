@@ -1,5 +1,12 @@
+
+/* =========================================
+   VA ELECTRO MOBILE
+   Munkakezelés – fülek, keresés, navigáció
+========================================= */
+
 const SUPABASE_URL = "https://fxxhxnpirxpjqadrwyzf.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_Zpk6zDDtgqFpkDc38ms6_g_gjzvn-ZS";
+
 
 const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
@@ -12,6 +19,8 @@ const jobsPanel = $("jobList").closest(".panel");
 
 let inquiries = [];
 let currentJobId = null;
+let currentFilter = "all";
+let searchTerm = "";
 
 const statuses = {
   new: "Új megkeresés",
@@ -22,6 +31,104 @@ const statuses = {
   rejected: "Elutasítva",
   closed: "Lezárva"
 };
+
+const filters = [
+  { id: "all", label: "Összes munka" },
+  ...Object.entries(statuses).map(([id, label]) => ({
+    id,
+    label
+  }))
+];
+
+/* MEGJELENÉS */
+
+function addAppStyles() {
+  if ($("vaMobileExtraStyles")) return;
+
+  const style = document.createElement("style");
+  style.id = "vaMobileExtraStyles";
+
+  style.textContent = `
+    .job-toolbar {
+      margin-top: 16px;
+    }
+
+    .job-search {
+      width: 100%;
+      padding: 13px;
+      background: #101010;
+      color: #f4f1ed;
+      border: 1px solid #51402f;
+      border-radius: 11px;
+      margin-bottom: 13px;
+      font: inherit;
+    }
+
+    .job-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 3px 0 12px;
+      scrollbar-width: thin;
+    }
+
+    .job-tab {
+      flex: 0 0 auto;
+      padding: 9px 12px;
+      border: 1px solid #51402f;
+      border-radius: 10px;
+      background: #151515;
+      color: #c9c0b7;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .job-tab.active {
+      background: #b87333;
+      border-color: #b87333;
+      color: #160f09;
+      font-weight: 800;
+    }
+
+    .job-tab-count {
+      margin-left: 5px;
+      opacity: .8;
+    }
+
+    .job-navigation {
+      display: flex;
+      gap: 10px;
+      margin: 18px 0;
+    }
+
+    .job-navigation button {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .job-navigation button:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+    }
+
+    .job-position {
+      text-align: center;
+      color: #aaa39c;
+      font-size: 12px;
+      margin: 8px 0;
+    }
+
+    .job-empty {
+      padding: 18px 0;
+      color: #aaa39c;
+      font-size: 13px;
+    }
+  `;
+
+  document.head.appendChild(style);
+}
+
+/* SEGÉDFÜGGVÉNYEK */
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -37,6 +144,7 @@ function formatMoney(value) {
   if (value === null || value === undefined || value === "") {
     return "Nincs megadva";
   }
+
   return Number(value).toLocaleString("hu-HU") + " Ft";
 }
 
@@ -56,8 +164,14 @@ function showDashboard() {
   $("dashboardView").classList.remove("hidden");
 }
 
+function statusLabel(status) {
+  return statuses[status] || status || "Nincs megadva";
+}
+
 async function checkAdmin() {
-  const { data, error } = await supabaseClient.rpc("is_va_electro_admin");
+  const { data, error } = await supabaseClient.rpc(
+    "is_va_electro_admin"
+  );
 
   if (error) throw error;
 
@@ -66,9 +180,127 @@ async function checkAdmin() {
   }
 }
 
-function statusLabel(status) {
-  return statuses[status] || status || "Nincs megadva";
+/* MUNKAFÜLEK ÉS KERESŐ */
+
+function createJobControls() {
+  if ($("jobToolbar")) return;
+
+  const toolbar = document.createElement("div");
+  toolbar.id = "jobToolbar";
+  toolbar.className = "job-toolbar";
+
+  toolbar.innerHTML = `
+    <input
+      id="jobSearch"
+      class="job-search"
+      type="search"
+      placeholder="Keresés név, település vagy munkaszám alapján..."
+    >
+    <div id="jobTabs" class="job-tabs"></div>
+  `;
+
+  $("jobList").before(toolbar);
+
+  $("jobSearch").addEventListener("input", event => {
+    searchTerm = event.target.value.trim().toLocaleLowerCase("hu");
+    renderJobs();
+  });
 }
+
+function getVisibleJobs() {
+  return inquiries.filter(job => {
+    const matchesFilter =
+      currentFilter === "all" || job.status === currentFilter;
+
+    const searchable = [
+      job.customer_name,
+      job.city,
+      job.work_number,
+      job.service_type,
+      job.customer_phone
+    ].join(" ").toLocaleLowerCase("hu");
+
+    const matchesSearch =
+      !searchTerm || searchable.includes(searchTerm);
+
+    return matchesFilter && matchesSearch;
+  });
+}
+
+function renderTabs() {
+  $("jobTabs").innerHTML = filters.map(filter => {
+    const count = filter.id === "all"
+      ? inquiries.length
+      : inquiries.filter(job => job.status === filter.id).length;
+
+    return `
+      <button
+        type="button"
+        class="job-tab ${currentFilter === filter.id ? "active" : ""}"
+        data-filter="${filter.id}"
+      >
+        ${escapeHtml(filter.label)}
+        <span class="job-tab-count">${count}</span>
+      </button>
+    `;
+  }).join("");
+}
+
+function renderJobs() {
+  renderTabs();
+
+  const jobs = getVisibleJobs();
+
+  $("jobList").innerHTML = jobs.length
+    ? jobs.map(item => `
+      <button
+        class="job job-button"
+        type="button"
+        data-job-id="${escapeHtml(item.id)}"
+      >
+        <div class="job-title">
+          ${escapeHtml(item.customer_name)}
+        </div>
+
+        <div class="job-meta">
+          ${escapeHtml(item.work_number || "Még nincs munkaszám")}
+          · ${escapeHtml(item.city || "Nincs település")}
+          <br>
+          ${escapeHtml(item.service_type)}
+        </div>
+
+        <span class="status">
+          ${escapeHtml(statusLabel(item.status))}
+        </span>
+
+        <div class="open-hint">
+          Adatlap megnyitása →
+        </div>
+      </button>
+    `).join("")
+    : `
+      <div class="job-empty">
+        Ebben a fülben jelenleg nincs megjeleníthető munka.
+      </div>
+    `;
+}
+
+$("jobTabs").addEventListener("click", event => {
+  const button = event.target.closest("[data-filter]");
+  if (!button) return;
+
+  currentFilter = button.dataset.filter;
+  renderJobs();
+});
+
+$("jobList").addEventListener("click", event => {
+  const button = event.target.closest("[data-job-id]");
+  if (!button) return;
+
+  openJob(button.dataset.jobId);
+});
+
+/* MUNKALAP */
 
 function createDetailView() {
   if ($("detailView")) return;
@@ -81,6 +313,19 @@ function createDetailView() {
     <button id="backToJobs" class="secondary">
       ← Vissza a munkákhoz
     </button>
+
+    <div class="job-navigation">
+      <button id="previousJob" class="secondary" type="button">
+        ← Előző
+      </button>
+
+      <button id="nextJob" class="secondary" type="button">
+        Következő →
+      </button>
+    </div>
+
+    <div id="jobPosition" class="job-position"></div>
+
     <div id="detailContent"></div>
   `;
 
@@ -90,13 +335,24 @@ function createDetailView() {
     detail.classList.add("hidden");
     document.querySelector(".grid").classList.remove("hidden");
     jobsPanel.classList.remove("hidden");
+
     currentJobId = null;
     showMessage("Munkalista");
+  });
+
+  $("previousJob").addEventListener("click", () => {
+    moveBetweenJobs(-1);
+  });
+
+  $("nextJob").addEventListener("click", () => {
+    moveBetweenJobs(1);
   });
 }
 
 function detailRow(label, value) {
-  if (value === null || value === undefined || value === "") return "";
+  if (value === null || value === undefined || value === "") {
+    return "";
+  }
 
   return `
     <div class="detail-row">
@@ -106,11 +362,41 @@ function detailRow(label, value) {
   `;
 }
 
+/* ELŐZŐ / KÖVETKEZŐ MUNKA */
+
+function updateJobNavigation() {
+  const jobs = getVisibleJobs();
+  const index = jobs.findIndex(job => job.id === currentJobId);
+
+  $("previousJob").disabled = index <= 0;
+  $("nextJob").disabled = index < 0 || index >= jobs.length - 1;
+
+  $("jobPosition").textContent = index >= 0
+    ? `${index + 1} / ${jobs.length} munka`
+    : "A munka nem szerepel a jelenlegi szűrésben.";
+}
+
+function moveBetweenJobs(direction) {
+  const jobs = getVisibleJobs();
+  const index = jobs.findIndex(job => job.id === currentJobId);
+
+  if (index < 0) return;
+
+  const nextIndex = index + direction;
+
+  if (nextIndex < 0 || nextIndex >= jobs.length) return;
+
+  openJob(jobs[nextIndex].id);
+}
+
+/* MUNKA MEGNYITÁSA */
+
 function openJob(id) {
   const job = inquiries.find(item => item.id === id);
   if (!job) return;
 
   currentJobId = id;
+
   createDetailView();
 
   const phone = String(job.customer_phone || "");
@@ -133,9 +419,13 @@ function openJob(id) {
 
   $("detailContent").innerHTML = `
     <h2>${escapeHtml(job.customer_name)}</h2>
-    <span class="status">${escapeHtml(statusLabel(job.status))}</span>
+
+    <span class="status">
+      ${escapeHtml(statusLabel(job.status))}
+    </span>
 
     <h3>Ügyfél adatai</h3>
+
     ${detailRow("Telefonszám", job.customer_phone)}
     ${detailRow("E-mail", job.customer_email)}
     ${detailRow("Település", job.city)}
@@ -146,35 +436,46 @@ function openJob(id) {
     </div>
 
     <h3>Munka adatai</h3>
+
     ${detailRow("Munkaszám", job.work_number)}
     ${detailRow("Szolgáltatás", job.service_type)}
     ${detailRow("Kért időpont", job.preferred_date)}
     ${detailRow("Állapot", statusLabel(job.status))}
 
     <h3>Munka állapotának módosítása</h3>
+
     <label class="field">
       <span>Új állapot</span>
       <select id="newStatus">
         ${statusOptions}
       </select>
     </label>
+
     <button id="saveStatusButton" class="primary" type="button">
       Állapot mentése
     </button>
 
     <h3>Pénzügyi adatok</h3>
+
     ${detailRow("Becsült összeg", formatMoney(job.estimated_price))}
     ${detailRow("Ajánlati összeg", formatMoney(job.offer_amount))}
     ${detailRow("Elfogadott összeg", formatMoney(job.accepted_amount))}
 
     <h3>Munka részletei</h3>
+
     ${detailRow("Leírás", job.description)}
     ${detailRow("Hibakeresési összefoglaló", job.troubleshooting_summary)}
 
     <h3>Adminisztráció</h3>
+
     ${detailRow("Admin megjegyzés", job.admin_notes)}
     ${detailRow("Ajánlat elküldve", job.offer_sent_at)}
-    ${detailRow("Létrehozva", job.created_at ? new Date(job.created_at).toLocaleString("hu-HU") : "")}
+    ${detailRow(
+      "Létrehozva",
+      job.created_at
+        ? new Date(job.created_at).toLocaleString("hu-HU")
+        : ""
+    )}
   `;
 
   $("saveStatusButton").addEventListener("click", saveJobStatus);
@@ -183,8 +484,11 @@ function openJob(id) {
   jobsPanel.classList.add("hidden");
   $("detailView").classList.remove("hidden");
 
+  updateJobNavigation();
   showMessage("Munka adatlap megnyitva.");
 }
+
+/* STÁTUSZ MENTÉSE */
 
 async function saveJobStatus() {
   const newStatus = $("newStatus").value;
@@ -204,7 +508,16 @@ async function saveJobStatus() {
     if (error) throw error;
 
     const job = inquiries.find(item => item.id === currentJobId);
-    if (job) job.status = newStatus;
+
+    if (job) {
+      job.status = newStatus;
+    }
+
+    // Ha egy konkrét státuszfülön vagyunk,
+    // a mentés után automatikusan az új fülre váltunk.
+    if (currentFilter !== "all") {
+      currentFilter = newStatus;
+    }
 
     updateCounters();
     renderJobs();
@@ -214,10 +527,13 @@ async function saveJobStatus() {
 
   } catch (error) {
     showMessage("Mentési hiba: " + error.message, true);
+
     button.disabled = false;
     button.textContent = "Állapot mentése";
   }
 }
+
+/* VEZÉRLŐPULT */
 
 function updateCounters() {
   $("newCount").textContent =
@@ -230,31 +546,12 @@ function updateCounters() {
     inquiries.filter(x => x.status === "completed").length;
 }
 
-function renderJobs() {
-  const active = inquiries.filter(item =>
-    ["new", "contacted", "offer_sent", "accepted"].includes(item.status)
-  );
-
-  $("jobList").innerHTML = active.length
-    ? active.map(item => `
-      <button class="job job-button" type="button"
-        data-job-id="${escapeHtml(item.id)}">
-        <div class="job-title">${escapeHtml(item.customer_name)}</div>
-        <div class="job-meta">
-          ${escapeHtml(item.work_number || "Még nincs munkaszám")}
-          · ${escapeHtml(item.city || "Nincs település")}
-          <br>${escapeHtml(item.service_type)}
-        </div>
-        <span class="status">${escapeHtml(statusLabel(item.status))}</span>
-        <div class="open-hint">Adatlap megnyitása →</div>
-      </button>
-    `).join("")
-    : '<p class="notice">Jelenleg nincs aktív megkeresés vagy munka.</p>';
-}
-
 async function loadDashboard() {
   showDashboard();
+
   createDetailView();
+  createJobControls();
+  addAppStyles();
 
   if (!navigator.onLine) {
     showMessage("Offline állapot – az online adatok nem érhetők el.");
@@ -267,7 +564,7 @@ async function loadDashboard() {
     .from("inquiries")
     .select("*")
     .order("created_at", { ascending: false })
-    .limit(100);
+    .limit(500);
 
   if (error) throw error;
 
@@ -279,12 +576,7 @@ async function loadDashboard() {
   showMessage("Kapcsolódva a VA ELECTRO adatbázishoz.");
 }
 
-$("jobList").addEventListener("click", event => {
-  const button = event.target.closest("[data-job-id]");
-  if (!button) return;
-
-  openJob(button.dataset.jobId);
-});
+/* BEJELENTKEZÉS */
 
 loginForm.addEventListener("submit", async event => {
   event.preventDefault();
@@ -314,16 +606,24 @@ loginForm.addEventListener("submit", async event => {
   }
 });
 
+/* KIJELENTKEZÉS */
+
 $("logoutButton").addEventListener("click", async () => {
   await supabaseClient.auth.signOut();
   showLogin("Sikeres kijelentkezés.");
 });
 
+/* INTERNETKAPCSOLAT */
+
 window.addEventListener("online", () => {
   if (!$("dashboardView").classList.contains("hidden")) {
-    loadDashboard().catch(error => showMessage(error.message, true));
+    loadDashboard().catch(error => {
+      showMessage(error.message, true);
+    });
   }
 });
+
+/* INDÍTÁS */
 
 async function startApp() {
   if ("serviceWorker" in navigator) {
@@ -331,8 +631,9 @@ async function startApp() {
   }
 
   try {
-    const { data: { session } } =
-      await supabaseClient.auth.getSession();
+    const {
+      data: { session }
+    } = await supabaseClient.auth.getSession();
 
     if (!session) {
       showLogin();
