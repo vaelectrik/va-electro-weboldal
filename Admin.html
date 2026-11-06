@@ -706,7 +706,8 @@ function renderJobList(elementId, jobs) {
 }
 
 function renderPaymentOverview() {
-  // Az összesítő továbbra is minden aktív és elkészült munkát számol.
+  // A kiküldött ajánlatok összegét külön számoljuk.
+// A befizetéseket és hátralékokat az aktív és elkészült munkák alapján számoljuk.
   const jobs = requests.filter(item =>
     ["accepted", "completed"].includes(item.status)
   );
@@ -1069,7 +1070,7 @@ if (offerAmount !== null && (!Number.isFinite(offerAmount) || offerAmount < 0)) 
   return;
 }
   if (acceptedAmount !== null && (!Number.isFinite(acceptedAmount) || acceptedAmount < 0)) {
-    alert("Az ajánlati összeg nem lehet negatív szám.");
+    alert("Az elfogadott ajánlat összeg nem lehet negatív szám.");
     return;
   }
   $("save").disabled = true;
