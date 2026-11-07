@@ -2,6 +2,7 @@
    VA ELECTRO MOBILE
    Munkakezelés + Pénzügyi modul
    + Dokumentumkezelés
+   + Titkosított offline pénzügyi mentés
 ========================================= */
 
 const SUPABASE_URL = "https://fxxhxnpirxpjqadrwyzf.supabase.co";
@@ -45,6 +46,11 @@ let documentsError = "";
 let currentJobId = null;
 let currentFilter = "all";
 let searchTerm = "";
+
+let pendingOfflineChanges = [];
+let offlineSyncRunning = false;
+let offlineCryptoKey = null;
+let offlinePinSetupMode = false;
 
 const statuses = {
   new: "Új megkeresés",
@@ -516,7 +522,6 @@ function showMessage(message = "", isError = false) {
   $("appMessage").className = isError ? "error" : "notice";
 }
 
-
 function showLogin(message = "") {
   $("loginView").classList.remove("hidden");
   $("pinView").classList.add("hidden");
@@ -524,9 +529,6 @@ function showLogin(message = "") {
 
   $("loginError").textContent = message;
 }
-
-
-let offlinePinSetupMode = false;
 
 function showPinLogin(message = "", setupMode = false) {
   offlinePinSetupMode = setupMode;
@@ -548,10 +550,9 @@ function showPinLogin(message = "", setupMode = false) {
     : "Offline belépés";
 }
 
-
-
 function showDashboard() {
   $("loginView").classList.add("hidden");
+  $("pinView").classList.add("hidden");
   $("dashboardView").classList.remove("hidden");
 }
 
@@ -1004,8 +1005,6 @@ function renderFinance(job) {
    DOKUMENTUMKEZELÉS
 ========================================= */
 
-/* Fájlnév biztonságos átalakítása */
-
 function sanitizeFilename(filename) {
   const cleaned = String(filename || "dokumentum")
     .normalize("NFKD")
@@ -1017,8 +1016,6 @@ function sanitizeFilename(filename) {
 
   return cleaned || "dokumentum";
 }
-
-/* Dokumentumok munkánként */
 
 function getJobDocuments(jobId) {
   return documents
@@ -1039,8 +1036,6 @@ function formatDocumentDate(value) {
 
   return date.toLocaleString("hu-HU");
 }
-
-/* Dokumentumlista megjelenítése */
 
 function renderDocumentItems(jobId) {
   if (documentsError) {
@@ -1092,8 +1087,6 @@ function renderDocumentItems(jobId) {
     </div>
   `).join("");
 }
-
-/* Dokumentumkezelő felület */
 
 function renderDocuments(job) {
   return `
@@ -1156,8 +1149,6 @@ function renderDocuments(job) {
   `;
 }
 
-/* Dokumentumok betöltése adatbázisból */
-
 async function loadDocuments() {
   const { data, error } = await supabaseClient
     .from("work_documents")
@@ -1170,8 +1161,6 @@ async function loadDocuments() {
   documentsError = "";
 }
 
-/* Dokumentum feltöltése */
-
 async function handleDocumentSubmit(event) {
   const form = event.target;
 
@@ -1180,6 +1169,11 @@ async function handleDocumentSubmit(event) {
   event.preventDefault();
 
   if (!currentJobId) return;
+
+  if (!navigator.onLine) {
+    showMessage("Dokumentum feltöltéséhez internetkapcsolat szükséges.", true);
+    return;
+  }
 
   const fileInput = form.elements.document_file;
   const file = fileInput.files?.[0];
@@ -1225,11 +1219,6 @@ async function handleDocumentSubmit(event) {
     const storagePath =
       `${currentJobId}/${uniqueId}-${safeName}`;
 
-    /*
-      1. Fájl feltöltése a privát tárhelyre.
-      upsert:false: meglévő fájlt nem írhat felül.
-    */
-
     const { error: uploadError } = await supabaseClient
       .storage
       .from(DOCUMENT_BUCKET)
@@ -1240,10 +1229,6 @@ async function handleDocumentSubmit(event) {
       });
 
     if (uploadError) throw uploadError;
-
-    /*
-      2. Dokumentum adatainak rögzítése.
-    */
 
     const { data, error: insertError } = await supabaseClient
       .from("work_documents")
@@ -1286,8 +1271,6 @@ async function handleDocumentSubmit(event) {
   }
 }
 
-/* Dokumentum megnyitása és letöltése */
-
 async function handleDocumentClick(event) {
   const openButton = event.target.closest("[data-document-open]");
 
@@ -1303,8 +1286,6 @@ async function handleDocumentClick(event) {
   }
 }
 
-/* Privát dokumentum megnyitása */
-
 async function openDocument(id) {
   const item = documents.find(doc => String(doc.id) === String(id));
 
@@ -1313,8 +1294,11 @@ async function openDocument(id) {
     return;
   }
 
-  // Az üres lapot még a gombnyomás közvetlen hatására megnyitjuk,
-  // így kisebb eséllyel blokkolja a böngésző.
+  if (!navigator.onLine) {
+    showMessage("Dokumentum megnyitásához internetkapcsolat szükséges.", true);
+    return;
+  }
+
   const newWindow = window.open("about:blank", "_blank");
 
   if (!newWindow) {
@@ -1353,13 +1337,16 @@ async function openDocument(id) {
   }
 }
 
-/* Dokumentum letöltése */
-
 async function downloadDocument(id) {
   const item = documents.find(doc => String(doc.id) === String(id));
 
   if (!item) {
     showMessage("A dokumentum nem található.", true);
+    return;
+  }
+
+  if (!navigator.onLine) {
+    showMessage("Dokumentum letöltéséhez internetkapcsolat szükséges.", true);
     return;
   }
 
@@ -1521,7 +1508,53 @@ function openJob(id) {
   showMessage("Munka adatlap megnyitva.");
 }
 
-/* PÉNZÜGYI ŰRLAPOK */
+/* =========================================
+   OFFLINE MÓDOSÍTÁSI VÁRÓLISTA
+========================================= */
+
+async function persistOfflineSnapshot() {
+  await saveUnlockedOfflineData({
+    inquiries,
+    payments,
+    materialCosts,
+    pendingOfflineChanges,
+    savedAt: new Date().toISOString()
+  });
+}
+
+async function queueOfflineChange(change) {
+  if (!offlineCryptoKey) {
+    throw new Error("Az offline tárhely nincs feloldva PIN-kóddal.");
+  }
+
+  const queuedChange = {
+    ...change,
+    operationId: crypto.randomUUID(),
+    createdAt: new Date().toISOString()
+  };
+
+  pendingOfflineChanges.push(queuedChange);
+
+  try {
+    await persistOfflineSnapshot();
+
+    // A létrehozott várólistás elemet visszaadjuk.
+    return queuedChange;
+
+  } catch (error) {
+    pendingOfflineChanges =
+      pendingOfflineChanges.filter(
+        item => item.operationId !== queuedChange.operationId
+      );
+
+    throw error;
+  }
+}
+
+/* =========================================
+   PÉNZÜGYI ŰRLAPOK
+   ONLINE ÉS OFFLINE MENTÉS
+========================================= */
 
 async function handleFinanceSubmit(event) {
   const form = event.target;
@@ -1551,6 +1584,7 @@ async function handleFinanceSubmit(event) {
   }
 
   const button = form.querySelector('button[type="submit"]');
+
   button.disabled = true;
   button.textContent = "Mentés…";
 
@@ -1569,6 +1603,71 @@ async function handleFinanceSubmit(event) {
       };
 
   try {
+    /*
+      OFFLINE MENTÉS
+    */
+
+    if (!navigator.onLine) {
+      if (!offlineCryptoKey) {
+        throw new Error(
+          "Az offline tárhely nincs feloldva. Lépj be az offline PIN-kóddal."
+        );
+      }
+
+      if (editId) {
+        throw new Error(
+          "A már rögzített pénzügyi tételek módosítása jelenleg csak online lehetséges."
+        );
+      }
+
+      const localId = "offline-" + crypto.randomUUID();
+
+      const localItem = {
+        id: localId,
+        ...values
+      };
+
+      if (isPayment) {
+        payments.push(localItem);
+      } else {
+        materialCosts.push(localItem);
+      }
+
+      try {
+        await queueOfflineChange({
+          type: isPayment ? "payment_insert" : "material_insert",
+          localId,
+          values
+        });
+
+      } catch (storageError) {
+        // Ha a titkosított mentés nem sikerült,
+        // a helyi listából is eltávolítjuk a tételt.
+
+        if (isPayment) {
+          payments = payments.filter(item => item.id !== localId);
+        } else {
+          materialCosts = materialCosts.filter(item => item.id !== localId);
+        }
+
+        throw storageError;
+      }
+
+      openJob(currentJobId);
+
+      showMessage(
+        isPayment
+          ? "Offline részfizetés mentve. Internetkapcsolat esetén automatikusan szinkronizálódik."
+          : "Offline anyagköltség mentve. Internetkapcsolat esetén automatikusan szinkronizálódik."
+      );
+
+      return;
+    }
+
+    /*
+      ONLINE MÓDOSÍTÁS / ÚJ TÉTEL
+    */
+
     let response;
 
     if (editId) {
@@ -1588,7 +1687,21 @@ async function handleFinanceSubmit(event) {
     await loadFinancialRecords();
 
     const job = inquiries.find(item => item.id === currentJobId);
-    if (job) openJob(currentJobId);
+
+    if (job) {
+      openJob(currentJobId);
+    }
+
+    if (offlineCryptoKey) {
+      try {
+        await persistOfflineSnapshot();
+      } catch (storageError) {
+        console.error(
+          "Offline pénzügyi mentés frissítése sikertelen:",
+          storageError
+        );
+      }
+    }
 
     showMessage(
       isPayment
@@ -1598,10 +1711,13 @@ async function handleFinanceSubmit(event) {
 
   } catch (error) {
     showMessage("Pénzügyi mentési hiba: " + error.message, true);
-    button.disabled = false;
-    button.textContent = isPayment
-      ? "Részfizetés mentése"
-      : "Anyagköltség mentése";
+
+    if (button.isConnected) {
+      button.disabled = false;
+      button.textContent = isPayment
+        ? "Részfizetés mentése"
+        : "Anyagköltség mentése";
+    }
   }
 }
 
@@ -1638,6 +1754,14 @@ function handleFinanceClick(event) {
 }
 
 function editFinanceItem(type, id) {
+  if (!navigator.onLine) {
+    showMessage(
+      "Pénzügyi tételek szerkesztése jelenleg csak online lehetséges.",
+      true
+    );
+    return;
+  }
+
   const isPayment = type === "payment";
 
   const item = isPayment
@@ -1689,6 +1813,14 @@ function resetFinanceForm(formId) {
 }
 
 async function deleteFinanceItem(type, id) {
+  if (!navigator.onLine) {
+    showMessage(
+      "Pénzügyi tételek törlése jelenleg csak online lehetséges.",
+      true
+    );
+    return;
+  }
+
   const isPayment = type === "payment";
   const table = isPayment ? "work_payments" : "work_material_costs";
 
@@ -1710,7 +1842,12 @@ async function deleteFinanceItem(type, id) {
     if (error) throw error;
 
     await loadFinancialRecords();
+
     openJob(currentJobId);
+
+    if (offlineCryptoKey) {
+      await persistOfflineSnapshot();
+    }
 
     showMessage(
       isPayment
@@ -1748,6 +1885,14 @@ async function loadFinancialRecords() {
 async function saveAdminNotes() {
   if (!currentJobId) return;
 
+  if (!navigator.onLine) {
+    showMessage(
+      "Az adminisztrációs megjegyzés módosításához internetkapcsolat szükséges.",
+      true
+    );
+    return;
+  }
+
   const button = $("saveAdminNotesButton");
   const textarea = $("adminNotesInput");
   const notes = textarea.value.trim();
@@ -1767,6 +1912,10 @@ async function saveAdminNotes() {
 
     if (job) job.admin_notes = notes;
 
+    if (offlineCryptoKey) {
+      await persistOfflineSnapshot();
+    }
+
     button.disabled = false;
     button.textContent = "Megjegyzés mentése";
 
@@ -1781,47 +1930,6 @@ async function saveAdminNotes() {
 }
 
 /* STÁTUSZ MENTÉSE */
-
-// =========================================
-// OFFLINE MÓDOSÍTÁSI VÁRÓLISTA
-// =========================================
-
-let pendingOfflineChanges = [];
-
-async function persistOfflineSnapshot() {
-  await saveUnlockedOfflineData({
-    inquiries,
-    payments,
-    materialCosts,
-    pendingOfflineChanges,
-    savedAt: new Date().toISOString()
-  });
-}
-
-async function queueOfflineChange(change) {
-  if (!offlineCryptoKey) {
-    throw new Error("Az offline tárhely nincs feloldva PIN-kóddal.");
-  }
-
-  const queuedChange = {
-    ...change,
-    operationId: crypto.randomUUID(),
-    createdAt: new Date().toISOString()
-  };
-
-  pendingOfflineChanges.push(queuedChange);
-
-  try {
-    await persistOfflineSnapshot();
-  } catch (error) {
-    pendingOfflineChanges =
-      pendingOfflineChanges.filter(
-        item => item.operationId !== queuedChange.operationId
-      );
-
-    throw error;
-  }
-}
 
 async function saveJobStatus() {
   const newStatus = $("newStatus").value;
@@ -1839,18 +1947,15 @@ async function saveJobStatus() {
     if (!navigator.onLine) {
       const oldStatus = job.status;
 
-      // Először frissítjük a helyi állapotot.
       job.status = newStatus;
 
       try {
-        // Ezután a friss állapotot és a módosítási sort is mentjük.
         await queueOfflineChange({
           type: "status",
           inquiryId: currentJobId,
           value: newStatus
         });
       } catch (error) {
-        // Sikertelen mentés esetén visszaállítjuk az eredeti állapotot.
         job.status = oldStatus;
         throw error;
       }
@@ -1903,11 +2008,12 @@ async function saveJobStatus() {
     showMessage("Mentési hiba: " + error.message, true);
 
   } finally {
-    button.disabled = false;
-    button.textContent = "Állapot mentése";
+    if (button.isConnected) {
+      button.disabled = false;
+      button.textContent = "Állapot mentése";
+    }
   }
 }
-
 
 /* VEZÉRLŐPULT */
 
@@ -1996,11 +2102,6 @@ async function loadDashboard() {
 
   await loadFinancialRecords();
 
-  /*
-    A dokumentumok betöltési hibája nem állítja le
-    a munkalista és a pénzügyi modul működését.
-  */
-
   try {
     await loadDocuments();
   } catch (documentError) {
@@ -2016,8 +2117,9 @@ async function loadDashboard() {
   showMessage("Kapcsolódva a VA ELECTRO adatbázishoz.");
 }
 
-/* BEJELENTKEZÉS */
-
+/* =========================================
+   BEJELENTKEZÉS
+========================================= */
 
 loginForm.addEventListener("submit", async event => {
   event.preventDefault();
@@ -2043,14 +2145,33 @@ loginForm.addEventListener("submit", async event => {
         "Állítsd be az offline hozzáférés PIN-kódját.",
         true
       );
+
       return;
     }
 
-    await loadDashboard();
+    /*
+      Ha már létezik titkosított offline mentés,
+      mindig kérjük be a PIN-kódot.
+
+      Ezzel feloldjuk a korábbi adatokat,
+      és a várólistás módosításokat is szinkronizáljuk.
+    */
+
+    offlineCryptoKey = null;
+
+    showPinLogin(
+      "Add meg a meglévő offline PIN-kódot az adatok feloldásához és szinkronizálásához.",
+      false
+    );
 
   } catch (error) {
-    await supabaseClient.auth.signOut();
     showLogin(error.message || "Nem sikerült belépni.");
+
+    try {
+      await supabaseClient.auth.signOut();
+    } catch (signOutError) {
+      console.error("Kijelentkezési hiba:", signOutError);
+    }
 
   } finally {
     $("loginButton").disabled = false;
@@ -2058,6 +2179,9 @@ loginForm.addEventListener("submit", async event => {
   }
 });
 
+/* =========================================
+   PIN-KÓDOS BELÉPÉS
+========================================= */
 
 $("pinForm").addEventListener("submit", async event => {
   event.preventDefault();
@@ -2072,7 +2196,10 @@ $("pinForm").addEventListener("submit", async event => {
       throw new Error("Legalább 8 számjegyű PIN-kód szükséges.");
     }
 
-    // Első PIN-beállítás
+    /*
+      ELSŐ PIN-BEÁLLÍTÁS
+    */
+
     if (offlinePinSetupMode) {
       const confirmation = $("offlinePinConfirm").value;
 
@@ -2101,7 +2228,10 @@ $("pinForm").addEventListener("submit", async event => {
       return;
     }
 
-    // Titkosított adatok feloldása
+    /*
+      MEGLÉVŐ TITKOSÍTOTT ADATOK FELOLDÁSA
+    */
+
     const offlineData = await loadOfflineData(pin);
 
     inquiries = offlineData.inquiries || [];
@@ -2110,8 +2240,8 @@ $("pinForm").addEventListener("submit", async event => {
     pendingOfflineChanges = offlineData.pendingOfflineChanges || [];
     documents = [];
 
-    // Felület megjelenítése
     showDashboard();
+
     createDetailView();
     createJobControls();
     createDashboardFinance();
@@ -2120,6 +2250,14 @@ $("pinForm").addEventListener("submit", async event => {
     updateCounters();
     renderJobs();
     renderDashboardFinance();
+
+    /*
+      HA VAN INTERNET:
+      1. Admin ellenőrzés.
+      2. Függő offline módosítások szinkronizálása.
+      3. Friss szerveradatok letöltése.
+      4. Új titkosított offline mentés.
+    */
 
     if (navigator.onLine) {
       showMessage("PIN elfogadva. Szinkronizálás folyamatban…");
@@ -2134,6 +2272,7 @@ $("pinForm").addEventListener("submit", async event => {
       await persistOfflineSnapshot();
 
       showMessage("Az offline módosítások szinkronizálása sikeres.");
+
     } else {
       showMessage("Offline mód – a korábban mentett adatok betöltve.");
     }
@@ -2143,25 +2282,39 @@ $("pinForm").addEventListener("submit", async event => {
       error.message === "The operation failed for an operation-specific reason"
         ? "Hibás PIN-kód vagy sérült titkosított adat."
         : error.message || "Nem sikerült a PIN-művelet.";
+
   } finally {
     button.disabled = false;
   }
 });
 
 $("onlineLoginButton").addEventListener("click", () => {
+  offlineCryptoKey = null;
   showLogin();
 });
 
 /* KIJELENTKEZÉS */
 
 $("logoutButton").addEventListener("click", async () => {
-  await supabaseClient.auth.signOut();
-  showLogin("Sikeres kijelentkezés.");
+  try {
+    if (offlineCryptoKey) {
+      await persistOfflineSnapshot();
+    }
+
+    await supabaseClient.auth.signOut();
+
+    offlineCryptoKey = null;
+
+    showLogin("Sikeres kijelentkezés.");
+
+  } catch (error) {
+    showMessage("Kijelentkezési hiba: " + error.message, true);
+  }
 });
 
-/* INTERNETKAPCSOLAT */
-
-let offlineSyncRunning = false;
+/* =========================================
+   OFFLINE MÓDOSÍTÁSOK SZINKRONIZÁLÁSA
+========================================= */
 
 async function syncOfflineChanges() {
   if (!navigator.onLine || !offlineCryptoKey) return;
@@ -2184,6 +2337,10 @@ async function syncOfflineChanges() {
     while (pendingOfflineChanges.length > 0) {
       const change = pendingOfflineChanges[0];
 
+      /*
+        MUNKAÁLLAPOT SZINKRONIZÁLÁSA
+      */
+
       if (change.type === "status") {
         if (!change.inquiryId || !change.value) {
           throw new Error("Hiányos offline állapotmódosítás.");
@@ -2202,14 +2359,72 @@ async function syncOfflineChanges() {
             "A módosítandó munka nem található az adatbázisban."
           );
         }
+      }
 
-      } else {
+      /*
+        OFFLINE RÉSZFIZETÉS SZINKRONIZÁLÁSA
+      */
+
+      else if (change.type === "payment_insert") {
+        if (!change.values || !change.localId) {
+          throw new Error("Hiányos offline részfizetési adat.");
+        }
+
+        const { data, error } = await supabaseClient
+          .from("work_payments")
+          .insert(change.values)
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        /*
+          A helyi ideiglenes azonosítót
+          lecseréljük a szerver által adott azonosítóra.
+        */
+
+        payments = payments.map(item =>
+          String(item.id) === String(change.localId)
+            ? data
+            : item
+        );
+      }
+
+      /*
+        OFFLINE ANYAGKÖLTSÉG SZINKRONIZÁLÁSA
+      */
+
+      else if (change.type === "material_insert") {
+        if (!change.values || !change.localId) {
+          throw new Error("Hiányos offline anyagköltség-adat.");
+        }
+
+        const { data, error } = await supabaseClient
+          .from("work_material_costs")
+          .insert(change.values)
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        materialCosts = materialCosts.map(item =>
+          String(item.id) === String(change.localId)
+            ? data
+            : item
+        );
+      }
+
+      else {
         throw new Error(
           "Nem támogatott offline módosítás: " + change.type
         );
       }
 
-      // Csak sikeres szerverfrissítés után töröljük.
+      /*
+        Csak akkor vesszük ki a várólistából,
+        ha a szerveres művelet sikeresen lefutott.
+      */
+
       pendingOfflineChanges.shift();
 
       await persistOfflineSnapshot();
@@ -2221,6 +2436,8 @@ async function syncOfflineChanges() {
     offlineSyncRunning = false;
   }
 }
+
+/* INTERNETKAPCSOLAT VISSZATÉRÉSE */
 
 window.addEventListener("online", async () => {
   if ($("dashboardView").classList.contains("hidden")) return;
@@ -2249,12 +2466,9 @@ window.addEventListener("online", async () => {
   }
 });
 
-
-/* INDÍTÁS */
-
-// =========================================
-// VA ELECTRO – TITKOSÍTOTT OFFLINE TÁROLÁS
-// =========================================
+/* =========================================
+   TITKOSÍTOTT OFFLINE TÁROLÁS
+========================================= */
 
 const OFFLINE_DB_NAME = "va-electro-offline";
 const OFFLINE_STORE_NAME = "secure";
@@ -2276,13 +2490,6 @@ function openOfflineDatabase() {
     request.onerror = () => reject(request.error);
   });
 }
-
-
-// =========================================
-// VA ELECTRO – TITKOSÍTOTT OFFLINE TÁROLÁS
-// =========================================
-
-let offlineCryptoKey = null;
 
 async function deriveOfflineKey(pin, salt) {
   const material = await crypto.subtle.importKey(
@@ -2447,6 +2654,7 @@ async function loadOfflineData(pin) {
     offlineCryptoKey = key;
 
     return data;
+
   } catch (error) {
     offlineCryptoKey = null;
     throw new Error("Hibás PIN-kód vagy sérült offline adat.");
@@ -2458,6 +2666,9 @@ async function hasOfflineData() {
   return !!record;
 }
 
+/* =========================================
+   ALKALMAZÁS INDÍTÁSA
+========================================= */
 
 async function startApp() {
   if ("serviceWorker" in navigator) {
@@ -2465,12 +2676,13 @@ async function startApp() {
   }
 
   try {
-    // Offline állapotban nem próbálunk Supabase-belépést.
     if (!navigator.onLine) {
       const offlineDataExists = await hasOfflineData();
 
       if (offlineDataExists) {
-        showPinLogin();
+        showPinLogin(
+          "Add meg az offline PIN-kódodat a mentett adatok megnyitásához."
+        );
       } else {
         showLogin("Az első offline használathoz előbb online kell belépni.");
       }
@@ -2488,6 +2700,23 @@ async function startApp() {
     }
 
     await checkAdmin();
+
+    /*
+      Ha van már titkosított offline adat,
+      kérjük be a PIN-kódot akkor is,
+      ha a Supabase-munkamenet még aktív.
+    */
+
+    const offlineDataExists = await hasOfflineData();
+
+    if (offlineDataExists) {
+      showPinLogin(
+        "Add meg a meglévő offline PIN-kódot az adatok feloldásához."
+      );
+
+      return;
+    }
+
     await loadDashboard();
 
   } catch (error) {
@@ -2500,10 +2729,14 @@ async function startApp() {
       }
     }
 
-    await supabaseClient.auth.signOut();
+    try {
+      await supabaseClient.auth.signOut();
+    } catch (signOutError) {
+      console.error("Kijelentkezési hiba:", signOutError);
+    }
+
     showLogin(error.message || "A munkamenet ellenőrzése nem sikerült.");
   }
 }
-
 
 startApp();
