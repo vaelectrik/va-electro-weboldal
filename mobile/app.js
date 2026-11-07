@@ -1803,13 +1803,24 @@ async function queueOfflineChange(change) {
     throw new Error("Az offline tárhely nincs feloldva PIN-kóddal.");
   }
 
-  pendingOfflineChanges.push({
+  const queuedChange = {
     ...change,
     operationId: crypto.randomUUID(),
     createdAt: new Date().toISOString()
-  });
+  };
 
-  await persistOfflineSnapshot();
+  pendingOfflineChanges.push(queuedChange);
+
+  try {
+    await persistOfflineSnapshot();
+  } catch (error) {
+    pendingOfflineChanges =
+      pendingOfflineChanges.filter(
+        item => item.operationId !== queuedChange.operationId
+      );
+
+    throw error;
+  }
 }
 
 async function saveJobStatus() {
@@ -1819,7 +1830,6 @@ async function saveJobStatus() {
   if (!currentJobId) return;
 
   const job = inquiries.find(item => item.id === currentJobId);
-
   if (!job) return;
 
   button.disabled = true;
@@ -1827,13 +1837,23 @@ async function saveJobStatus() {
 
   try {
     if (!navigator.onLine) {
-      await queueOfflineChange({
-        type: "status",
-        inquiryId: currentJobId,
-        value: newStatus
-      });
+      const oldStatus = job.status;
 
+      // Először frissítjük a helyi állapotot.
       job.status = newStatus;
+
+      try {
+        // Ezután a friss állapotot és a módosítási sort is mentjük.
+        await queueOfflineChange({
+          type: "status",
+          inquiryId: currentJobId,
+          value: newStatus
+        });
+      } catch (error) {
+        // Sikertelen mentés esetén visszaállítjuk az eredeti állapotot.
+        job.status = oldStatus;
+        throw error;
+      }
 
       if (currentFilter !== "all") {
         currentFilter = newStatus;
@@ -1845,7 +1865,6 @@ async function saveJobStatus() {
       openJob(currentJobId);
 
       showMessage("Offline mentés sikeres. Szinkronizálásra vár.");
-
       return;
     }
 
@@ -1866,7 +1885,10 @@ async function saveJobStatus() {
       try {
         await persistOfflineSnapshot();
       } catch (storageError) {
-        console.error("Offline mentés frissítése sikertelen:", storageError);
+        console.error(
+          "Offline mentés frissítése sikertelen:",
+          storageError
+        );
       }
     }
 
@@ -2163,19 +2185,31 @@ async function syncOfflineChanges() {
       const change = pendingOfflineChanges[0];
 
       if (change.type === "status") {
-        const { error } = await supabaseClient
+        if (!change.inquiryId || !change.value) {
+          throw new Error("Hiányos offline állapotmódosítás.");
+        }
+
+        const { data, error } = await supabaseClient
           .from("inquiries")
           .update({ status: change.value })
-          .eq("id", change.inquiryId);
+          .eq("id", change.inquiryId)
+          .select("id");
 
         if (error) throw error;
+
+        if (!data || data.length === 0) {
+          throw new Error(
+            "A módosítandó munka nem található az adatbázisban."
+          );
+        }
+
       } else {
         throw new Error(
           "Nem támogatott offline módosítás: " + change.type
         );
       }
 
-      // Csak sikeres feltöltés után töröljük a várólistából.
+      // Csak sikeres szerverfrissítés után töröljük.
       pendingOfflineChanges.shift();
 
       await persistOfflineSnapshot();
@@ -2187,7 +2221,6 @@ async function syncOfflineChanges() {
     offlineSyncRunning = false;
   }
 }
-
 
 window.addEventListener("online", async () => {
   if ($("dashboardView").classList.contains("hidden")) return;
