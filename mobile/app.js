@@ -2041,12 +2041,16 @@ $("pinForm").addEventListener("submit", async event => {
   event.preventDefault();
 
   const pin = $("offlinePin").value;
+  const button = $("pinForm").querySelector('button[type="submit"]');
+
+  button.disabled = true;
 
   try {
     if (!/^[0-9]{8,}$/.test(pin)) {
       throw new Error("Legalább 8 számjegyű PIN-kód szükséges.");
     }
 
+    // Első PIN-beállítás
     if (offlinePinSetupMode) {
       const confirmation = $("offlinePinConfirm").value;
 
@@ -2061,10 +2065,13 @@ $("pinForm").addEventListener("submit", async event => {
       await checkAdmin();
       await loadDashboard();
 
+      pendingOfflineChanges = [];
+
       await saveOfflineData(pin, {
         inquiries,
         payments,
         materialCosts,
+        pendingOfflineChanges,
         savedAt: new Date().toISOString()
       });
 
@@ -2072,13 +2079,16 @@ $("pinForm").addEventListener("submit", async event => {
       return;
     }
 
+    // Titkosított adatok feloldása
     const offlineData = await loadOfflineData(pin);
 
     inquiries = offlineData.inquiries || [];
     payments = offlineData.payments || [];
-    materialCosts = offlineData.materialCosts || [];pendingOfflineChanges = offlineData.pendingOfflineChanges || [];
+    materialCosts = offlineData.materialCosts || [];
+    pendingOfflineChanges = offlineData.pendingOfflineChanges || [];
     documents = [];
 
+    // Felület megjelenítése
     showDashboard();
     createDetailView();
     createJobControls();
@@ -2089,13 +2099,30 @@ $("pinForm").addEventListener("submit", async event => {
     renderJobs();
     renderDashboardFinance();
 
-    showMessage("Offline mód – a korábban mentett adatok betöltve.");
+    if (navigator.onLine) {
+      showMessage("PIN elfogadva. Szinkronizálás folyamatban…");
+
+      await checkAdmin();
+
+      if (pendingOfflineChanges.length > 0) {
+        await syncOfflineChanges();
+      }
+
+      await loadDashboard();
+      await persistOfflineSnapshot();
+
+      showMessage("Az offline módosítások szinkronizálása sikeres.");
+    } else {
+      showMessage("Offline mód – a korábban mentett adatok betöltve.");
+    }
 
   } catch (error) {
     $("pinError").textContent =
       error.message === "The operation failed for an operation-specific reason"
         ? "Hibás PIN-kód vagy sérült titkosított adat."
         : error.message || "Nem sikerült a PIN-művelet.";
+  } finally {
+    button.disabled = false;
   }
 });
 
