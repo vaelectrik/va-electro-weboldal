@@ -46,84 +46,159 @@
       <p class="notice">Ez az alkalmazás kizárólag a VA ELECTRO adminisztrátora számára készült.</p>
     </section>
 
-<section id="pinView" class="hidden">
-  <h1>Offline biztonságos belépés</h1>
-  <p class="muted">
-    Add meg a VA ELECTRO offline hozzáférési PIN-kódját.
-  </p>
+    <section id="pinView" class="hidden">
+      <h1>Offline biztonságos belépés</h1>
+      <p class="muted">
+        Add meg a VA ELECTRO offline hozzáférési PIN-kódját.
+      </p>
 
-  <form id="pinForm" class="panel">
-    <label class="field">
-      <span>PIN-kód</span>
-      <input
-        id="offlinePin"
-        type="password"
-        inputmode="numeric"
-        pattern="[0-9]{8,}"
-        minlength="8"
-        autocomplete="off"
-        placeholder="Legalább 8 számjegy"
-        required
-      >
-    </label>
+      <form id="pinForm" class="panel">
+        <label class="field">
+          <span>PIN-kód</span>
+          <input id="offlinePin" type="password" inputmode="numeric"
+            pattern="[0-9]{8,}" minlength="8" autocomplete="off"
+            placeholder="Legalább 8 számjegy" required>
+        </label>
 
-<label class="field" id="pinConfirmField">
-  <span>PIN-kód megerősítése</span>
-  <input
-    id="offlinePinConfirm"
-    type="password"
-    inputmode="numeric"
-    pattern="[0-9]{8,}"
-    minlength="8"
-    autocomplete="off"
-    placeholder="PIN-kód ismét"
-  >
-</label>
+        <label class="field" id="pinConfirmField">
+          <span>PIN-kód megerősítése</span>
+          <input id="offlinePinConfirm" type="password"
+            inputmode="numeric" pattern="[0-9]{8,}" minlength="8"
+            autocomplete="off" placeholder="PIN-kód ismét">
+        </label>
 
-    <p id="pinError" class="error" role="alert"></p>
+        <p id="pinError" class="error" role="alert"></p>
 
-    <button class="primary" type="submit">
-      Offline belépés
-    </button>
-  </form>
+        <button class="primary" type="submit">Offline belépés</button>
+      </form>
 
-  <button id="onlineLoginButton" class="secondary" type="button">
-    Vissza az online belépéshez
-  </button>
-</section>
+      <button id="onlineLoginButton" class="secondary" type="button">
+        Vissza az online belépéshez
+      </button>
+    </section>
 
     <section id="dashboardView" class="hidden">
-      <div class="topline">
-        <div>
-          <h1>Vezérlőpult</h1>
-          <p class="muted">VA ELECTRO – Áttekintés</p>
-        </div>
-        <button id="logoutButton" class="secondary">Kilépés</button>
-      </div>
 
-      <div class="grid">
-        <div class="stat">
-          <span>Új megkeresések</span>
-          <strong id="newCount">–</strong>
+      <div class="mobile-topbar">
+        <div class="mobile-topbar-title">
+          <span class="eyebrow">VA ELECTRO / MANAGEMENT</span>
+          <h1 id="currentPageTitle">Kezdőképernyő</h1>
         </div>
-        <div class="stat">
-          <span>Aktív munkák</span>
-          <strong id="activeCount">–</strong>
-        </div>
-        <div class="stat">
-          <span>Elkészült munkák</span>
-          <strong id="completedCount">–</strong>
+
+        <div class="mobile-topbar-actions">
+          <button id="notificationButton" class="notification-button"
+            type="button" aria-label="Értesítések" aria-expanded="false">
+            <span class="notification-bell">♧</span>
+            <span id="notificationBadge" class="notification-badge hidden">0</span>
+          </button>
+
+          <button id="logoutButton" class="secondary" type="button">
+            Kilépés
+          </button>
         </div>
       </div>
 
-      <section class="panel">
-        <h2>Aktuális munkák</h2>
-        <div id="jobList">
-          <p class="notice">Adatok betöltése…</p>
+      <div id="notificationPanel" class="notification-panel hidden">
+        <div class="notification-panel-heading">
+          <h2>Értesítések</h2>
+          <button id="markNotificationsRead" type="button" class="text-button">
+            Olvasottak
+          </button>
         </div>
+        <div id="notificationList">
+          <p class="notice">Jelenleg nincs új értesítés.</p>
+        </div>
+      </div>
+
+      <section id="homePage" class="app-page">
+        <p class="muted">VA ELECTRO – Áttekintés</p>
+
+        <div class="grid">
+          <div class="stat">
+            <span>Új megkeresések</span>
+            <strong id="newCount">–</strong>
+          </div>
+          <div class="stat">
+            <span>Aktív munkák</span>
+            <strong id="activeCount">–</strong>
+          </div>
+          <div class="stat">
+            <span>Elkészült munkák</span>
+            <strong id="completedCount">–</strong>
+          </div>
+        </div>
+
+        <section class="panel">
+          <h2>Aktuális munkák</h2>
+          <div id="homeJobList">
+            <p class="notice">Adatok betöltése…</p>
+          </div>
+        </section>
+      </section>
+
+      <section id="jobsPage" class="app-page hidden">
+        <section class="panel">
+          <h2>Munkák kezelése</h2>
+          <div id="jobList">
+            <p class="notice">Adatok betöltése…</p>
+          </div>
+        </section>
+      </section>
+
+      <section id="financePage" class="app-page hidden">
+        <section id="financePageContent" class="panel">
+          <h2>Pénzügyek</h2>
+          <p class="notice">Pénzügyi adatok betöltése…</p>
+        </section>
+      </section>
+
+      <section id="searchPage" class="app-page hidden">
+        <section class="panel">
+          <h2>Keresés</h2>
+          <p class="muted">Ügyfelek, munkaszámok és munkák keresése.</p>
+          <input id="globalSearch" type="search"
+            placeholder="Keresés név, település vagy munkaszám alapján...">
+          <div id="searchResults">
+            <p class="notice">Kezdj el gépelni a kereséshez.</p>
+          </div>
+        </section>
+      </section>
+
+      <section id="calendarPage" class="app-page hidden">
+        <section class="panel">
+          <h2>Naptár</h2>
+          <p class="notice">
+            A rugalmas munkanaptár kialakítása következik.
+          </p>
+        </section>
       </section>
 
       <p id="appMessage" class="notice" role="status"></p>
+
+      <nav id="bottomNavigation" class="bottom-navigation"
+        aria-label="Fő navigáció">
+        <button type="button" class="nav-item active" data-page="home">
+          <span class="nav-icon">⌂</span>
+          <span>Kezdőképernyő</span>
+        </button>
+        <button type="button" class="nav-item" data-page="jobs">
+          <span class="nav-icon">▤</span>
+          <span>Munkák</span>
+        </button>
+        <button type="button" class="nav-item" data-page="finance">
+          <span class="nav-icon">▥</span>
+          <span>Pénzügyek</span>
+        </button>
+        <button type="button" class="nav-item" data-page="search">
+          <span class="nav-icon">⌕</span>
+          <span>Keresés</span>
+        </button>
+        <button type="button" class="nav-item" data-page="calendar">
+          <span class="nav-icon">▦</span>
+          <span>Naptár</span>
+        </button>
+      </nav>
+
     </section>
 
     <footer>PRECIZITÁS. BIZTONSÁG. MEGBÍZHATÓSÁG.</footer>
