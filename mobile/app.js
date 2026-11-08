@@ -562,6 +562,7 @@ function showDashboard() {
 let currentPage = "home";
 let navigationInitialized = false;
 let notificationItems = [];
+let notificationChannel = null;
 
 function showPage(page) {
   const pages = [
@@ -646,7 +647,25 @@ function setupNavigation() {
 
     renderNotifications();
   });
+$("notificationList").addEventListener("click", event => {
+  const button = event.target.closest("[data-notification-job]");
 
+  if (!button) return;
+
+  const jobId = button.dataset.notificationJob;
+
+  notificationItems = notificationItems.filter(
+    item => item.jobId !== jobId
+  );
+
+  renderNotifications();
+
+  $("notificationPanel").classList.add("hidden");
+  $("notificationButton").setAttribute("aria-expanded", "false");
+
+  openJob(jobId);
+});
+   
   $("homeJobList").addEventListener("click", event => {
     const button = event.target.closest("[data-job-id]");
 
@@ -762,13 +781,62 @@ function renderNotifications() {
 
   container.innerHTML = count
     ? notificationItems.map(item => `
-      <div class="notification-item">
+      <button
+        class="notification-item"
+        type="button"
+        data-notification-job="${escapeHtml(item.jobId)}"
+      >
         <strong>${escapeHtml(item.title)}</strong>
         <p>${escapeHtml(item.message)}</p>
-      </div>
+      </button>
     `).join("")
     : `<p class="notice">Jelenleg nincs új értesítés.</p>`;
 }
+function setupRealtimeNotifications() {
+  if (notificationChannel) return;
+
+  notificationChannel = supabaseClient
+    .channel("va-electro-live-notifications")
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "inquiries"
+      },
+      payload => {
+        const job = payload.new;
+
+        if (!job || !job.id) return;
+
+        inquiries = [
+          job,
+          ...inquiries.filter(item => item.id !== job.id)
+        ];
+
+        notificationItems.unshift({
+          jobId: job.id,
+          title: "Új ügyfélmegkeresés",
+          message:
+            (job.customer_name || "Új ügyfél") +
+            " – " +
+            (job.service_type || "Szolgáltatás nincs megadva")
+        });
+
+        updateCounters();
+        renderJobs();
+        renderHomeJobs();
+        renderSearchResults();
+        renderNotifications();
+      }
+    )
+    .subscribe(status => {
+      if (status === "CHANNEL_ERROR") {
+        console.warn("Az élő értesítések kapcsolata nem elérhető.");
+      }
+    });
+}
+
 function statusLabel(status) {
   return statuses[status] || status || "Nincs megadva";
 }
@@ -2340,7 +2408,8 @@ renderJobs();
 renderHomeJobs();
 renderSearchResults();
 renderDashboardFinance();
-
+renderNotifications();
+setupRealtimeNotifications();
   showMessage("Kapcsolódva a VA ELECTRO adatbázishoz.");
 }
 
