@@ -2368,13 +2368,20 @@ function renderDashboardFinance() {
 async function loadDashboard() {
   showDashboard();
 
-  setupNavigation();
-  showPage("home");
+setupNavigation();
+showPage("home");
 
-  createDetailView();
-  createJobControls();
-  createDashboardFinance();
-  addAppStyles();
+createDetailView();
+createJobControls();
+createDashboardFinance();
+addAppStyles();
+
+updateCounters();
+renderJobs();
+renderHomeJobs();
+renderSearchResults();
+renderNotifications();
+renderDashboardFinance();
 
   if (!navigator.onLine) {
     showMessage("Offline állapot – az online adatok nem érhetők el.");
