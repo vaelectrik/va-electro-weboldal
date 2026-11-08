@@ -555,7 +555,220 @@ function showDashboard() {
   $("pinView").classList.add("hidden");
   $("dashboardView").classList.remove("hidden");
 }
+/* =========================================
+   VA ELECTRO MOBILE – ÚJ NAVIGÁCIÓ
+========================================= */
 
+let currentPage = "home";
+let navigationInitialized = false;
+let notificationItems = [];
+
+function showPage(page) {
+  const pages = [
+    "home",
+    "jobs",
+    "finance",
+    "search",
+    "calendar"
+  ];
+
+  if (!pages.includes(page)) return;
+
+  currentPage = page;
+
+  pages.forEach(name => {
+    const element = $(name + "Page");
+
+    if (element) {
+      element.classList.toggle("hidden", name !== page);
+    }
+  });
+
+  if ($("detailView")) {
+    $("detailView").classList.add("hidden");
+  }
+
+  document.querySelectorAll("#bottomNavigation [data-page]")
+    .forEach(button => {
+      button.classList.toggle(
+        "active",
+        button.dataset.page === page
+      );
+    });
+
+  const titles = {
+    home: "Kezdőképernyő",
+    jobs: "Munkák",
+    finance: "Pénzügyek",
+    search: "Keresés",
+    calendar: "Naptár"
+  };
+
+  $("currentPageTitle").textContent = titles[page];
+
+  if (page === "home") renderHomeJobs();
+  if (page === "finance") renderDashboardFinance();
+  if (page === "search") renderSearchResults();
+}
+
+function setupNavigation() {
+  if (navigationInitialized) return;
+
+  const navigation = $("bottomNavigation");
+
+  if (!navigation) return;
+
+  navigation.addEventListener("click", event => {
+    const button = event.target.closest("[data-page]");
+
+    if (!button) return;
+
+    currentJobId = null;
+    showPage(button.dataset.page);
+  });
+
+  $("globalSearch").addEventListener("input", renderSearchResults);
+
+  $("notificationButton").addEventListener("click", () => {
+    const panel = $("notificationPanel");
+    const opening = panel.classList.contains("hidden");
+
+    panel.classList.toggle("hidden", !opening);
+
+    $("notificationButton").setAttribute(
+      "aria-expanded",
+      String(opening)
+    );
+  });
+
+  $("markNotificationsRead").addEventListener("click", () => {
+    notificationItems = [];
+
+    renderNotifications();
+  });
+
+  $("homeJobList").addEventListener("click", event => {
+    const button = event.target.closest("[data-job-id]");
+
+    if (button) {
+      openJob(button.dataset.jobId);
+    }
+  });
+
+  navigationInitialized = true;
+}
+
+function renderHomeJobs() {
+  const container = $("homeJobList");
+
+  if (!container) return;
+
+  const jobs = inquiries.slice(0, 5);
+
+  container.innerHTML = jobs.length
+    ? jobs.map(job => `
+      <button
+        class="job job-button"
+        type="button"
+        data-job-id="${escapeHtml(job.id)}"
+      >
+        <div class="job-title">
+          ${escapeHtml(job.customer_name || "Névtelen ügyfél")}
+        </div>
+
+        <div class="job-meta">
+          ${escapeHtml(job.work_number || "Még nincs munkaszám")}
+          · ${escapeHtml(job.city || "Nincs település")}
+          <br>
+          ${escapeHtml(job.service_type || "")}
+        </div>
+
+        <span class="status">
+          ${escapeHtml(statusLabel(job.status))}
+        </span>
+
+        <div class="open-hint">Adatlap megnyitása →</div>
+      </button>
+    `).join("")
+    : `<p class="notice">Jelenleg nincs megjeleníthető munka.</p>`;
+}
+
+function renderSearchResults() {
+  const container = $("searchResults");
+
+  if (!container) return;
+
+  const term = $("globalSearch").value
+    .trim()
+    .toLocaleLowerCase("hu");
+
+  if (!term) {
+    container.innerHTML =
+      `<p class="notice">Kezdj el gépelni a kereséshez.</p>`;
+    return;
+  }
+
+  const results = inquiries.filter(job => {
+    const searchable = [
+      job.customer_name,
+      job.city,
+      job.work_number,
+      job.service_type,
+      job.customer_phone,
+      job.customer_email
+    ].join(" ").toLocaleLowerCase("hu");
+
+    return searchable.includes(term);
+  });
+
+  container.innerHTML = results.length
+    ? results.map(job => `
+      <button
+        class="job job-button"
+        type="button"
+        data-job-id="${escapeHtml(job.id)}"
+      >
+        <div class="job-title">
+          ${escapeHtml(job.customer_name || "Névtelen ügyfél")}
+        </div>
+        <div class="job-meta">
+          ${escapeHtml(job.work_number || "Még nincs munkaszám")}
+          · ${escapeHtml(job.city || "")}
+        </div>
+        <span class="status">
+          ${escapeHtml(statusLabel(job.status))}
+        </span>
+      </button>
+    `).join("")
+    : `<p class="notice">Nincs találat.</p>`;
+
+  container.querySelectorAll("[data-job-id]").forEach(button => {
+    button.addEventListener("click", () => {
+      openJob(button.dataset.jobId);
+    });
+  });
+}
+
+function renderNotifications() {
+  const container = $("notificationList");
+  const badge = $("notificationBadge");
+
+  if (!container || !badge) return;
+
+  const count = notificationItems.length;
+
+  badge.textContent = count;
+  badge.classList.toggle("hidden", count === 0);
+
+  container.innerHTML = count
+    ? notificationItems.map(item => `
+      <div class="notification-item">
+        <strong>${escapeHtml(item.title)}</strong>
+        <p>${escapeHtml(item.message)}</p>
+      </div>
+    `).join("")
+    : `<p class="notice">Jelenleg nincs új értesítés.</p>`;
+}
 function statusLabel(status) {
   return statuses[status] || status || "Nincs megadva";
 }
@@ -740,14 +953,13 @@ function createDetailView() {
   $("dashboardView").appendChild(detail);
 
   $("backToJobs").addEventListener("click", () => {
-    detail.classList.add("hidden");
-    document.querySelector(".grid").classList.remove("hidden");
-    $("dashboardFinance").classList.remove("hidden");
-    jobsPanel.classList.remove("hidden");
+  detail.classList.add("hidden");
 
-    currentJobId = null;
-    showMessage("Munkalista");
-  });
+  currentJobId = null;
+
+  showPage("jobs");
+  showMessage("Munkalista");
+});
 
   $("previousJob").addEventListener("click", () => {
     moveBetweenJobs(-1);
@@ -1499,13 +1711,24 @@ function openJob(id) {
   $("saveStatusButton").addEventListener("click", saveJobStatus);
   $("saveAdminNotesButton").addEventListener("click", saveAdminNotes);
 
-  document.querySelector(".grid").classList.add("hidden");
-  $("dashboardFinance").classList.add("hidden");
-  jobsPanel.classList.add("hidden");
-  $("detailView").classList.remove("hidden");
+  document.querySelectorAll(".app-page").forEach(page => {
+  page.classList.add("hidden");
+});
 
-  updateJobNavigation();
-  showMessage("Munka adatlap megnyitva.");
+$("detailView").classList.remove("hidden");
+
+document.querySelectorAll("#bottomNavigation [data-page]")
+  .forEach(button => {
+    button.classList.toggle(
+      "active",
+      button.dataset.page === "jobs"
+    );
+  });
+
+$("currentPageTitle").textContent = "Munka adatlap";
+
+updateJobNavigation();
+showMessage("Munka adatlap megnyitva.");
 }
 
 /* =========================================
@@ -2029,20 +2252,19 @@ function updateCounters() {
 }
 
 function createDashboardFinance() {
-  if ($("dashboardFinance")) return;
+  const container = $("financePageContent");
 
-  const section = document.createElement("section");
-  section.id = "dashboardFinance";
-  section.className = "panel dashboard-finance";
+  if (!container) return;
 
-  section.innerHTML = `
+  if ($("dashboardFinanceContent")) return;
+
+  container.innerHTML = `
     <h2>Pénzügyi áttekintés</h2>
+
     <div id="dashboardFinanceContent">
       <p class="notice">Pénzügyi adatok betöltése…</p>
     </div>
   `;
-
-  $("dashboardView").insertBefore(section, $("appMessage"));
 }
 
 function renderDashboardFinance() {
@@ -2078,6 +2300,9 @@ function renderDashboardFinance() {
 async function loadDashboard() {
   showDashboard();
 
+  setupNavigation();
+  showPage("home");
+
   createDetailView();
   createJobControls();
   createDashboardFinance();
@@ -2111,8 +2336,10 @@ async function loadDashboard() {
   }
 
   updateCounters();
-  renderJobs();
-  renderDashboardFinance();
+renderJobs();
+renderHomeJobs();
+renderSearchResults();
+renderDashboardFinance();
 
   showMessage("Kapcsolódva a VA ELECTRO adatbázishoz.");
 }
