@@ -1,5 +1,5 @@
 
-const CACHE_NAME = "va-electro-mobile-v3";
+const CACHE_NAME = "va-electro-mobile-v4";
 
 const APP_FILES = [
   "./",
