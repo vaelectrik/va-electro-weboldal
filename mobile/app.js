@@ -816,6 +816,42 @@ async function loadCalendarEvents() {
     );
   }
 }
+async function toggleCalendarEventCompleted(eventId) {
+  const calendarEvent = calendarEvents.find(
+    item => item.id === eventId
+  );
+
+  if (!calendarEvent) return;
+
+  if (!navigator.onLine) {
+    showMessage("Ehhez a művelethez internetkapcsolat szükséges.", true);
+    return;
+  }
+
+  try {
+    const { error } = await supabaseClient
+      .from("calendar_events")
+      .update({
+        is_completed: !calendarEvent.is_completed,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", eventId);
+
+    if (error) throw error;
+
+    await loadCalendarEvents();
+
+    showMessage(
+      calendarEvent.is_completed
+        ? "Esemény visszaállítva."
+        : "Esemény elvégzettként megjelölve."
+    );
+
+  } catch (error) {
+    console.error("Naptáresemény módosítási hiba:", error);
+    showMessage("Az esemény módosítása nem sikerült.", true);
+  }
+}
 async function saveCalendarEvent() {
   const eventId = $("calendarEventId").value;
 
