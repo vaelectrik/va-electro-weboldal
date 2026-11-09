@@ -1291,7 +1291,49 @@ function renderSearchResults() {
     });
   });
 }
+async function checkCalendarReminders() {
+  if (!navigator.onLine) return;
 
+  const { data, error } = await supabaseClient
+    .from("calendar_events")
+    .select("id, title, description, event_date, reminder_at")
+    .eq("is_completed", false)
+    .not("reminder_at", "is", null)
+    .lte("reminder_at", new Date().toISOString());
+
+  if (error) {
+    console.error("Emlékeztetők ellenőrzési hibája:", error);
+    return;
+  }
+
+  let added = false;
+
+  (data || []).forEach(event => {
+    if (calendarReminderNotifiedIds.has(event.id)) return;
+
+    notificationItems.unshift({
+      type: "calendar",
+      id: event.id,
+      eventDate: event.event_date,
+      title: "Naptári emlékeztető",
+      message: event.title + (
+        event.description ? " – " + event.description : ""
+      )
+    });
+
+    calendarReminderNotifiedIds.add(event.id);
+    added = true;
+  });
+
+  if (added) {
+    localStorage.setItem(
+      "vaElectroCalendarReminderNotified",
+      JSON.stringify([...calendarReminderNotifiedIds])
+    );
+
+    renderNotifications();
+  }
+                         }
 function renderNotifications() {
   const container = $("notificationList");
   const badge = $("notificationBadge");
