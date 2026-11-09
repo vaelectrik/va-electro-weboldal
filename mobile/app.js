@@ -1069,7 +1069,32 @@ $("notificationList").addEventListener("click", event => {
 
       renderCalendar();
     });
+    $("calendarDayEvents").addEventListener("click", event => {
+      const button = event.target.closest("[data-calendar-action]");
 
+      if (!button) return;
+
+      const eventId = button.dataset.eventId;
+      const action = button.dataset.calendarAction;
+
+      const calendarEvent = calendarEvents.find(
+        item => item.id === eventId
+      );
+
+      if (!calendarEvent) return;
+
+      if (action === "edit") {
+        openCalendarEventForm(calendarEvent);
+      }
+
+      if (action === "complete") {
+        toggleCalendarEventCompleted(eventId);
+      }
+
+      if (action === "delete") {
+        deleteCalendarEvent(eventId);
+      }
+    });
     calendarInitialized = true;
   }
   navigationInitialized = true;
