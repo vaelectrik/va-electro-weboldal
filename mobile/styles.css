@@ -1153,3 +1153,79 @@ footer {
   color: #e7bd96;
   font-size: 16px;
 }
+/* =========================================
+   VA ELECTRO – PREMIUM HOME DASHBOARD
+========================================= */
+
+#homePage > .muted {
+  position: relative;
+  margin: 8px 0 22px;
+  padding: 18px 16px 18px 19px;
+  border-left: 3px solid #b87333;
+  border-radius: 0 14px 14px 0;
+  background: linear-gradient(
+    100deg,
+    rgba(184,115,51,.15),
+    rgba(184,115,51,.025) 75%,
+    transparent
+  );
+  color: #e7bd96;
+  font-size: 17px;
+  font-weight: 850;
+  letter-spacing: .3px;
+}
+
+#homePage > .muted::after {
+  display: block;
+  margin-top: 6px;
+  content: "MUNKAVEZÉRLŐ KÖZPONT";
+  color: #92877c;
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 2px;
+}
+
+#homePage > .grid {
+  gap: 9px;
+  margin: 18px 0 25px;
+}
+
+#homePage .stat {
+  min-height: 112px;
+  padding: 15px 11px;
+  border-color: rgba(212,154,100,.2);
+  border-radius: 17px;
+  background: linear-gradient(145deg, #242321, #151718);
+  box-shadow:
+    0 9px 22px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+#homePage .stat span {
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+#homePage .stat strong {
+  display: block;
+  margin-top: 13px;
+  color: #e7bd96;
+  font-size: 29px;
+  font-weight: 850;
+  letter-spacing: -.8px;
+}
+
+#homePage > .panel {
+  margin-top: 22px;
+  padding: 19px 15px;
+  border-color: rgba(212,154,100,.22);
+  border-radius: 20px;
+  background: linear-gradient(145deg, #202220, #141617);
+}
+
+#homePage > .panel h2 {
+  margin: 0 0 17px;
+  color: #e7bd96;
+  font-size: 17px;
+  font-weight: 800;
+}
