@@ -564,7 +564,7 @@ let navigationInitialized = false;
 let notificationItems = [];
 let notificationChannel = null;
 let calendarEvents = [];
-
+let calendarReminderNotifiedIds = new Set();
 let calendarCurrentDate = new Date();
 let calendarSelectedDate = today();
 let calendarViewMode = "month";
