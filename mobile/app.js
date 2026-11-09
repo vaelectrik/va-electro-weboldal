@@ -732,6 +732,62 @@ function renderCalendarDayEvents() {
     `;
   }).join("");
 }
+function openCalendarEventForm(event = null) {
+  const panel = $("calendarEventFormPanel");
+  const form = $("calendarEventForm");
+
+  if (!panel || !form) return;
+
+  form.reset();
+
+  $("calendarEventId").value = event?.id || "";
+  $("calendarEventName").value = event?.title || "";
+  $("calendarEventType").value = event?.event_type || "reminder";
+  $("calendarEventDate").value =
+    event?.event_date || calendarSelectedDate;
+
+  $("calendarEventTime").value =
+    event?.event_time?.slice(0, 5) || "";
+
+  $("calendarEventEndTime").value =
+    event?.end_time?.slice(0, 5) || "";
+
+  $("calendarEventDescription").value =
+    event?.description || "";
+
+  $("calendarEventJob").value =
+    event?.inquiry_id || "";
+
+  $("calendarReminderAt").value =
+    event?.reminder_at
+      ? new Date(event.reminder_at).toISOString().slice(0, 16)
+      : "";
+
+  $("calendarFormTitle").textContent =
+    event ? "Esemény szerkesztése" : "Új esemény";
+
+  panel.classList.remove("hidden");
+
+  panel.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+
+function closeCalendarEventForm() {
+  const panel = $("calendarEventFormPanel");
+  const form = $("calendarEventForm");
+
+  if (form) form.reset();
+
+  if ($("calendarEventId")) {
+    $("calendarEventId").value = "";
+  }
+
+  if (panel) {
+    panel.classList.add("hidden");
+  }
+}
 function showPage(page) {
   const pages = [
     "home",
