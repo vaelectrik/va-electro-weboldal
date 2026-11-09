@@ -569,6 +569,91 @@ let calendarCurrentDate = new Date();
 let calendarSelectedDate = today();
 let calendarViewMode = "month";
 let calendarInitialized = false;
+function formatCalendarDate(date) {
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, "0"),
+    String(date.getDate()).padStart(2, "0")
+  ].join("-");
+}
+
+function renderCalendar() {
+  const grid = $("calendarGrid");
+  const title = $("calendarCurrentTitle");
+
+  if (!grid || !title) return;
+
+  const year = calendarCurrentDate.getFullYear();
+  const month = calendarCurrentDate.getMonth();
+
+  title.textContent = calendarCurrentDate.toLocaleDateString(
+    "hu-HU",
+    { year: "numeric", month: "long" }
+  );
+
+  let startDate;
+  let endDate;
+
+  if (calendarViewMode === "month") {
+    startDate = new Date(year, month, 1);
+    const weekday = (startDate.getDay() + 6) % 7;
+    startDate.setDate(startDate.getDate() - weekday);
+
+    endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + 41);
+  } else {
+    startDate = new Date(calendarSelectedDate + "T12:00:00");
+    const weekday = (startDate.getDay() + 6) % 7;
+    startDate.setDate(startDate.getDate() - weekday);
+
+    endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + 6);
+  }
+
+  const days = [];
+  const cursor = new Date(startDate);
+
+  while (cursor <= endDate) {
+    days.push(new Date(cursor));
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  grid.innerHTML = days.map(date => {
+    const dateKey = formatCalendarDate(date);
+
+    const events = calendarEvents.filter(
+      event => event.event_date === dateKey
+    );
+
+    const outsideMonth = date.getMonth() !== month;
+
+    return `
+      <button
+        type="button"
+        class="calendar-day
+          ${outsideMonth && calendarViewMode === "month" ? "outside-month" : ""}
+          ${dateKey === calendarSelectedDate ? "selected" : ""}
+          ${dateKey === today() ? "today" : ""}"
+        data-calendar-date="${dateKey}"
+      >
+        <span>${date.getDate()}</span>
+        ${events.length
+          ? `<small>${events.length} esemény</small>`
+          : ""}
+      </button>
+    `;
+  }).join("");
+
+  $("calendarSelectedDate").textContent =
+    new Date(calendarSelectedDate + "T12:00:00")
+      .toLocaleDateString("hu-HU", {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      });
+
+  renderCalendarDayEvents();
+}
 function showPage(page) {
   const pages = [
     "home",
