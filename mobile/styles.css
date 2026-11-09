@@ -1066,3 +1066,90 @@ footer {
 #dashboardView {
   padding-bottom: 110px;
 }
+/* =========================================
+   VA ELECTRO – PREMIUM NOTIFICATIONS
+========================================= */
+
+.mobile-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mobile-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.notification-button {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(212,154,100,.5);
+  border-radius: 50%;
+  background: linear-gradient(145deg, #24211e, #121313);
+  color: #d49a64;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 7px 18px rgba(0,0,0,.4);
+}
+
+.notification-bell {
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -4px;
+  right: -3px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  display: grid;
+  place-items: center;
+  border-radius: 99px;
+  background: #b87333;
+  color: #140e08;
+  border: 2px solid #151718;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.notification-panel {
+  position: absolute;
+  z-index: 1100;
+  top: 90px;
+  right: 14px;
+  width: min(360px, calc(100vw - 28px));
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 16px;
+  border: 1px solid rgba(212,154,100,.4);
+  border-radius: 18px;
+  background: linear-gradient(145deg, #20201e, #111212);
+  color: #f4f1ed;
+  box-shadow: 0 15px 40px rgba(0,0,0,.7);
+}
+
+.notification-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.notification-panel-heading h2 {
+  margin: 0;
+  color: #e7bd96;
+  font-size: 16px;
+}
