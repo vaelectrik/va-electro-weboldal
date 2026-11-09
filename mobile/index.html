@@ -164,13 +164,120 @@
         </section>
       </section>
 
-      <section id="calendarPage" class="app-page hidden">
-        <section class="panel">
-          <h2>Naptár</h2>
-          <p class="notice">
-            A rugalmas munkanaptár kialakítása következik.
-          </p>
-        </section>
+      
+<section id="calendarPage" class="app-page hidden">
+
+  <section class="panel calendar-panel">
+
+    <div class="calendar-header">
+      <div>
+        <h2>Naptár</h2>
+        <p class="notice">VA ELECTRO munkatervező</p>
+      </div>
+
+      <button id="addCalendarEvent" class="primary-button" type="button">
+        + Új esemény
+      </button>
+    </div>
+
+    <div class="calendar-toolbar">
+
+      <button id="calendarPrevious" type="button">‹</button>
+
+      <h3 id="calendarCurrentTitle">2026. november</h3>
+
+      <button id="calendarNext" type="button">›</button>
+
+      <button id="calendarToday" type="button">Ma</button>
+
+    </div>
+
+    <div class="calendar-view-switch">
+      <button type="button" data-calendar-view="month" class="active">
+        Havi
+      </button>
+
+      <button type="button" data-calendar-view="week">
+        Heti
+      </button>
+    </div>
+
+    <div class="calendar-weekdays">
+      <span>H</span>
+      <span>K</span>
+      <span>Sze</span>
+      <span>Cs</span>
+      <span>P</span>
+      <span>Szo</span>
+      <span>V</span>
+    </div>
+
+    <div id="calendarGrid" class="calendar-grid">
+      <p class="notice">Naptár betöltése…</p>
+    </div>
+
+  </section>
+
+  <section class="panel calendar-events-panel">
+    <h3 id="calendarSelectedDate">Kiválasztott nap</h3>
+
+    <div id="calendarDayEvents">
+      <p class="notice">Válassz ki egy napot!</p>
+    </div>
+  </section>
+
+  <section id="calendarEventFormPanel" class="panel hidden">
+
+    <h3 id="calendarFormTitle">Új esemény</h3>
+
+    <form id="calendarEventForm">
+
+      <input type="hidden" id="calendarEventId">
+
+      <label for="calendarEventName">Esemény neve</label>
+      <input id="calendarEventName" type="text" required>
+
+      <label for="calendarEventType">Esemény típusa</label>
+      <select id="calendarEventType" required>
+        <option value="planned_work">Tervezett munka</option>
+        <option value="reminder">Emlékeztető</option>
+        <option value="personal">Saját esemény</option>
+      </select>
+
+      <label for="calendarEventDate">Dátum</label>
+      <input id="calendarEventDate" type="date" required>
+
+      <label for="calendarEventTime">Kezdési idő (opcionális)</label>
+      <input id="calendarEventTime" type="time">
+
+      <label for="calendarEventEndTime">Befejezési idő (opcionális)</label>
+      <input id="calendarEventEndTime" type="time">
+
+      <label for="calendarEventDescription">Megjegyzés</label>
+      <textarea id="calendarEventDescription" rows="3"></textarea>
+
+      <label for="calendarEventJob">Kapcsolódó munka</label>
+      <select id="calendarEventJob">
+        <option value="">Nincs kapcsolódó munka</option>
+      </select>
+
+      <label for="calendarReminderAt">Emlékeztető időpontja (opcionális)</label>
+      <input id="calendarReminderAt" type="datetime-local">
+
+      <div class="calendar-form-actions">
+        <button type="submit" class="primary-button">
+          Mentés
+        </button>
+
+        <button id="cancelCalendarEvent" type="button">
+          Mégse
+        </button>
+      </div>
+
+    </form>
+
+  </section>
+
       </section>
 
       <p id="appMessage" class="notice" role="status"></p>
