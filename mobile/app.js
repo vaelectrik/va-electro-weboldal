@@ -816,6 +816,67 @@ async function loadCalendarEvents() {
     );
   }
 }
+async function saveCalendarEvent() {
+  const eventId = $("calendarEventId").value;
+
+  const title = $("calendarEventName").value.trim();
+  const eventDate = $("calendarEventDate").value;
+
+  if (!title || !eventDate) {
+    showMessage("Add meg az esemény nevét és dátumát!", true);
+    return;
+  }
+
+  const eventData = {
+    title: title,
+    event_type: $("calendarEventType").value,
+    event_date: eventDate,
+    event_time: $("calendarEventTime").value || null,
+    end_time: $("calendarEventEndTime").value || null,
+    description: $("calendarEventDescription").value.trim() || null,
+    inquiry_id: $("calendarEventJob").value || null,
+    reminder_at: $("calendarReminderAt").value
+      ? new Date($("calendarReminderAt").value).toISOString()
+      : null,
+    updated_at: new Date().toISOString()
+  };
+
+  try {
+    showMessage("Esemény mentése…");
+
+    let result;
+
+    if (eventId) {
+      result = await supabaseClient
+        .from("calendar_events")
+        .update(eventData)
+        .eq("id", eventId);
+    } else {
+      result = await supabaseClient
+        .from("calendar_events")
+        .insert(eventData);
+    }
+
+    if (result.error) throw result.error;
+
+    calendarSelectedDate = eventDate;
+    calendarCurrentDate = new Date(eventDate + "T12:00:00");
+
+    closeCalendarEventForm();
+
+    await loadCalendarEvents();
+
+    showMessage(
+      eventId
+        ? "Esemény sikeresen módosítva."
+        : "Új esemény sikeresen mentve."
+    );
+
+  } catch (error) {
+    console.error("Naptáresemény mentési hiba:", error);
+    showMessage("Az esemény mentése nem sikerült.", true);
+  }
+}
 function showPage(page) {
   const pages = [
     "home",
