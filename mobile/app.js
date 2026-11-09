@@ -563,7 +563,12 @@ let currentPage = "home";
 let navigationInitialized = false;
 let notificationItems = [];
 let notificationChannel = null;
+let calendarEvents = [];
 
+let calendarCurrentDate = new Date();
+let calendarSelectedDate = today();
+let calendarViewMode = "month";
+let calendarInitialized = false;
 function showPage(page) {
   const pages = [
     "home",
