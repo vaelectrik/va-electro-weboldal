@@ -1346,11 +1346,12 @@ function renderNotifications() {
   badge.classList.toggle("hidden", count === 0);
 
   container.innerHTML = count
-    ? notificationItems.map(item => `
+            ? notificationItems.map(item => `
       <button
         class="notification-item"
         type="button"
-        data-notification-job="${escapeHtml(item.jobId)}"
+        data-notification-type="${escapeHtml(item.type || "job")}"
+        data-notification-id="${escapeHtml(item.id || item.jobId || "")}"
       >
         <strong>${escapeHtml(item.title)}</strong>
         <p>${escapeHtml(item.message)}</p>
