@@ -2544,15 +2544,19 @@ $("pinForm").addEventListener("submit", async event => {
     documents = [];
 
     showDashboard();
-
+    setupNavigation();
+    showPage("home");
     createDetailView();
     createJobControls();
     createDashboardFinance();
     addAppStyles();
 
     updateCounters();
-    renderJobs();
-    renderDashboardFinance();
+renderJobs();
+renderHomeJobs();
+renderSearchResults();
+renderNotifications();
+renderDashboardFinance();
 
     /*
       HA VAN INTERNET:
