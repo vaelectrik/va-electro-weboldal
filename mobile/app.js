@@ -565,6 +565,16 @@ let notificationItems = [];
 let notificationChannel = null;
 let calendarEvents = [];
 let calendarReminderNotifiedIds = new Set();
+
+try {
+  const savedCalendarReminderIds = JSON.parse(
+    localStorage.getItem("vaElectroCalendarReminderNotified") || "[]"
+  );
+
+  calendarReminderNotifiedIds = new Set(savedCalendarReminderIds);
+} catch (error) {
+  console.warn("A korábbi emlékeztetők betöltése nem sikerült.");
+}
 let calendarCurrentDate = new Date();
 let calendarSelectedDate = today();
 let calendarViewMode = "month";
