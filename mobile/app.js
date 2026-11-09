@@ -862,6 +862,7 @@ function showPage(page) {
   if (page === "home") renderHomeJobs();
   if (page === "finance") renderDashboardFinance();
   if (page === "search") renderSearchResults();
+  if (page === "calendar") loadCalendarEvents();
 }
 
 function setupNavigation() {
