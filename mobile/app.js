@@ -763,7 +763,7 @@ function openCalendarEventForm(event = null) {
   const form = $("calendarEventForm");
 
   if (!panel || !form) return;
-
+populateCalendarJobOptions();
   form.reset();
 
   $("calendarEventId").value = event?.id || "";
