@@ -3001,6 +3001,7 @@ renderSearchResults();
 renderDashboardFinance();
 renderNotifications();
 setupRealtimeNotifications();
+await checkCalendarReminders();
   showMessage("Kapcsolódva a VA ELECTRO adatbázishoz.");
 }
 
