@@ -987,7 +987,91 @@ $("notificationList").addEventListener("click", event => {
       openJob(button.dataset.jobId);
     }
   });
+  // NAPTÁR VEZÉRLŐGOMBOK
 
+  if (!calendarInitialized) {
+    $("addCalendarEvent").addEventListener("click", () => {
+      openCalendarEventForm();
+    });
+
+    $("cancelCalendarEvent").addEventListener("click", () => {
+      closeCalendarEventForm();
+    });
+
+    $("calendarEventForm").addEventListener("submit", event => {
+      event.preventDefault();
+      saveCalendarEvent();
+    });
+
+    $("calendarPrevious").addEventListener("click", () => {
+      if (calendarViewMode === "month") {
+        calendarCurrentDate.setMonth(
+          calendarCurrentDate.getMonth() - 1
+        );
+      } else {
+        calendarSelectedDate = formatCalendarDate(
+          new Date(
+            new Date(calendarSelectedDate + "T12:00:00").getTime()
+            - 7 * 24 * 60 * 60 * 1000
+          )
+        );
+      }
+
+      renderCalendar();
+    });
+
+    $("calendarNext").addEventListener("click", () => {
+      if (calendarViewMode === "month") {
+        calendarCurrentDate.setMonth(
+          calendarCurrentDate.getMonth() + 1
+        );
+      } else {
+        calendarSelectedDate = formatCalendarDate(
+          new Date(
+            new Date(calendarSelectedDate + "T12:00:00").getTime()
+            + 7 * 24 * 60 * 60 * 1000
+          )
+        );
+      }
+
+      renderCalendar();
+    });
+
+    $("calendarToday").addEventListener("click", () => {
+      calendarCurrentDate = new Date();
+      calendarSelectedDate = today();
+      renderCalendar();
+    });
+
+    document.querySelectorAll("[data-calendar-view]")
+      .forEach(button => {
+        button.addEventListener("click", () => {
+          calendarViewMode = button.dataset.calendarView;
+
+          document.querySelectorAll("[data-calendar-view]")
+            .forEach(item => {
+              item.classList.toggle("active", item === button);
+            });
+
+          renderCalendar();
+        });
+      });
+
+    $("calendarGrid").addEventListener("click", event => {
+      const button = event.target.closest("[data-calendar-date]");
+
+      if (!button) return;
+
+      calendarSelectedDate = button.dataset.calendarDate;
+      calendarCurrentDate = new Date(
+        calendarSelectedDate + "T12:00:00"
+      );
+
+      renderCalendar();
+    });
+
+    calendarInitialized = true;
+  }
   navigationInitialized = true;
 }
 
