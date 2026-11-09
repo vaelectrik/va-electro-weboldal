@@ -788,6 +788,34 @@ function closeCalendarEventForm() {
     panel.classList.add("hidden");
   }
 }
+async function loadCalendarEvents() {
+  if (!navigator.onLine) {
+    renderCalendar();
+    return;
+  }
+
+  try {
+    const { data, error } = await supabaseClient
+      .from("calendar_events")
+      .select("*")
+      .order("event_date", { ascending: true })
+      .order("event_time", { ascending: true });
+
+    if (error) throw error;
+
+    calendarEvents = data || [];
+
+    renderCalendar();
+
+  } catch (error) {
+    console.error("Naptár betöltési hiba:", error);
+
+    showMessage(
+      "A naptáresemények betöltése nem sikerült.",
+      true
+    );
+  }
+}
 function showPage(page) {
   const pages = [
     "home",
