@@ -1063,14 +1063,19 @@ function setupNavigation() {
     renderNotifications();
   });
 $("notificationList").addEventListener("click", event => {
-  const button = event.target.closest("[data-notification-job]");
+  const button = event.target.closest("[data-notification-type]");
 
   if (!button) return;
 
-  const jobId = button.dataset.notificationJob;
+  const type = button.dataset.notificationType;
+  const id = button.dataset.notificationId;
+
+  const selectedNotification = notificationItems.find(
+    item => (item.id || item.jobId) === id
+  );
 
   notificationItems = notificationItems.filter(
-    item => item.jobId !== jobId
+    item => (item.id || item.jobId) !== id
   );
 
   renderNotifications();
@@ -1078,7 +1083,19 @@ $("notificationList").addEventListener("click", event => {
   $("notificationPanel").classList.add("hidden");
   $("notificationButton").setAttribute("aria-expanded", "false");
 
-  openJob(jobId);
+  if (type === "calendar") {
+    if (selectedNotification?.eventDate) {
+      calendarSelectedDate = selectedNotification.eventDate;
+      calendarCurrentDate = new Date(
+        selectedNotification.eventDate + "T12:00:00"
+      );
+    }
+
+    showPage("calendar");
+    return;
+  }
+
+  openJob(id);
 });
    
   $("homeJobList").addEventListener("click", event => {
