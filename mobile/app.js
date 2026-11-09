@@ -638,7 +638,7 @@ function renderCalendar() {
       >
         <span>${date.getDate()}</span>
         ${events.length
-          ? `<small>${events.length} esemény</small>`
+          ? `<span class="calendar-event-count">${events.length} esemény</span>`
           : ""}
       </button>
     `;
