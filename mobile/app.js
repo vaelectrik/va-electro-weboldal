@@ -1045,7 +1045,7 @@ function setupNavigation() {
 
   $("globalSearch").addEventListener("input", renderSearchResults);
 
-  $("notificationButton").addEventListener("click", () => {
+    $("notificationButton").addEventListener("click", () => {
     const panel = $("notificationPanel");
     const opening = panel.classList.contains("hidden");
 
@@ -1055,6 +1055,27 @@ function setupNavigation() {
       "aria-expanded",
       String(opening)
     );
+  });
+
+  document.addEventListener("click", event => {
+    const panel = $("notificationPanel");
+    const bell = $("notificationButton");
+
+    if (
+      !panel.classList.contains("hidden") &&
+      !panel.contains(event.target) &&
+      !bell.contains(event.target)
+    ) {
+      panel.classList.add("hidden");
+      bell.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      $("notificationPanel").classList.add("hidden");
+      $("notificationButton").setAttribute("aria-expanded", "false");
+    }
   });
 
   $("markNotificationsRead").addEventListener("click", () => {
