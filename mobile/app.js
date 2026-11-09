@@ -631,7 +631,7 @@ function renderCalendar() {
       <button
         type="button"
         class="calendar-day
-          ${outsideMonth && calendarViewMode === "month" ? "outside-month" : ""}
+          ${outsideMonth && calendarViewMode === "month" ? "other-month" : ""}
           ${dateKey === calendarSelectedDate ? "selected" : ""}
           ${dateKey === today() ? "today" : ""}"
         data-calendar-date="${dateKey}"
