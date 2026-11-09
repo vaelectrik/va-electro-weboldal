@@ -710,3 +710,281 @@ footer {
     animation-iteration-count: 1 !important;
   }
 }
+/* =========================================
+   VA ELECTRO – NAPTÁR
+   PROFESSIONAL INDUSTRIAL
+========================================= */
+
+.calendar-panel,
+.calendar-events-panel {
+  border: 1px solid rgba(190, 125, 75, 0.25);
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.calendar-header h2 {
+  margin-bottom: 5px;
+}
+
+.calendar-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.calendar-toolbar h3 {
+  flex: 1;
+  text-align: center;
+  color: #c58b62;
+  margin: 0;
+}
+
+.calendar-toolbar button,
+.calendar-view-switch button {
+  background: #202020;
+  color: #eee;
+  border: 1px solid #454545;
+  border-radius: 8px;
+  padding: 9px 13px;
+  cursor: pointer;
+}
+
+.calendar-toolbar button:hover,
+.calendar-view-switch button:hover {
+  border-color: #bd8057;
+}
+
+.calendar-view-switch {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.calendar-view-switch button.active {
+  background: #a96f48;
+  color: #fff;
+  border-color: #c58b62;
+}
+
+.calendar-weekdays,
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.calendar-weekdays {
+  margin-bottom: 8px;
+  text-align: center;
+  color: #c58b62;
+  font-weight: 700;
+}
+
+.calendar-grid {
+  grid-auto-rows: minmax(75px, auto);
+}
+
+.calendar-day {
+  position: relative;
+  min-width: 0;
+  padding: 9px 5px;
+  background: #191919;
+  border: 1px solid #333;
+  border-radius: 9px;
+  color: #eee;
+  text-align: center;
+  cursor: pointer;
+}
+
+.calendar-day:hover {
+  border-color: #bd8057;
+}
+
+.calendar-day.today {
+  border: 1px solid #c58b62;
+}
+
+.calendar-day.selected {
+  background: rgba(169, 111, 72, 0.25);
+  border: 2px solid #c58b62;
+}
+
+.calendar-day.other-month {
+  opacity: 0.35;
+}
+
+.calendar-day-number {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 7px;
+}
+
+.calendar-event-count {
+  display: inline-block;
+  color: #e6b18a;
+  font-size: 11px;
+}
+
+.calendar-events-panel {
+  margin-top: 20px;
+}
+
+.calendar-events-panel h3 {
+  color: #c58b62;
+  margin-bottom: 15px;
+}
+
+.calendar-event-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 15px;
+  padding: 15px;
+  margin-bottom: 12px;
+  background: #191919;
+  border: 1px solid #383838;
+  border-left: 3px solid #bd8057;
+  border-radius: 9px;
+}
+
+.calendar-event-card.completed {
+  opacity: 0.6;
+  border-left-color: #668b70;
+}
+
+.calendar-event-info {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.calendar-event-info strong {
+  color: #f0c09b;
+}
+
+.calendar-event-type {
+  color: #aaa;
+  font-size: 12px;
+}
+
+.calendar-event-info p {
+  margin: 0;
+  color: #ccc;
+  overflow-wrap: anywhere;
+}
+
+.calendar-event-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.calendar-event-actions button {
+  background: #252525;
+  color: #eee;
+  border: 1px solid #555;
+  border-radius: 7px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.calendar-event-actions button:hover {
+  border-color: #c58b62;
+}
+
+#calendarEventFormPanel {
+  border: 1px solid rgba(190, 125, 75, 0.4);
+}
+
+#calendarEventForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#calendarEventForm input,
+#calendarEventForm select,
+#calendarEventForm textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: #191919;
+  color: #eee;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 11px;
+}
+
+#calendarEventForm input:focus,
+#calendarEventForm select:focus,
+#calendarEventForm textarea:focus {
+  outline: none;
+  border-color: #c58b62;
+}
+
+#calendarEventForm label {
+  color: #c58b62;
+  font-weight: 600;
+}
+
+.calendar-form-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.calendar-form-actions button {
+  flex: 1;
+  min-width: 110px;
+}
+
+@media (max-width: 600px) {
+  .calendar-header {
+    align-items: stretch;
+  }
+
+  .calendar-header .primary-button {
+    width: 100%;
+  }
+
+  .calendar-grid {
+    gap: 3px;
+    grid-auto-rows: minmax(58px, auto);
+  }
+
+  .calendar-day {
+    padding: 7px 2px;
+    border-radius: 6px;
+    font-size: 12px;
+  }
+
+  .calendar-event-card {
+    flex-direction: column;
+  }
+
+  .calendar-event-actions {
+    width: 100%;
+  }
+
+  .calendar-event-actions button {
+    flex: 1;
+  }
+
+  .calendar-toolbar {
+    gap: 5px;
+  }
+
+  .calendar-toolbar button {
+    padding: 8px 9px;
+  }
+}
