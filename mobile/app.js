@@ -732,6 +732,32 @@ function renderCalendarDayEvents() {
     `;
   }).join("");
 }
+function populateCalendarJobOptions() {
+  const select = $("calendarEventJob");
+
+  if (!select) return;
+
+  const selectedValue = select.value;
+
+  select.innerHTML = `
+    <option value="">Nincs kapcsolódó munka</option>
+  `;
+
+  inquiries.forEach(job => {
+    const option = document.createElement("option");
+
+    option.value = job.id;
+
+    option.textContent =
+      `${job.work_number || "Munkaszám nélkül"} – ` +
+      `${job.customer_name || "Névtelen ügyfél"} – ` +
+      `${job.city || "Település nélkül"}`;
+
+    select.appendChild(option);
+  });
+
+  select.value = selectedValue;
+}
 function openCalendarEventForm(event = null) {
   const panel = $("calendarEventFormPanel");
   const form = $("calendarEventForm");
