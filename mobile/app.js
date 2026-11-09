@@ -654,6 +654,84 @@ function renderCalendar() {
 
   renderCalendarDayEvents();
 }
+function renderCalendarDayEvents() {
+  const container = $("calendarDayEvents");
+
+  if (!container) return;
+
+  const events = calendarEvents
+    .filter(event => event.event_date === calendarSelectedDate)
+    .sort((a, b) => {
+      return (a.event_time || "").localeCompare(b.event_time || "");
+    });
+
+  if (!events.length) {
+    container.innerHTML = `
+      <p class="notice">
+        Erre a napra még nincs esemény.
+      </p>
+    `;
+    return;
+  }
+
+  container.innerHTML = events.map(event => {
+    const typeLabels = {
+      planned_work: "Tervezett munka",
+      reminder: "Emlékeztető",
+      personal: "Saját esemény"
+    };
+
+    return `
+      <div class="calendar-event-card ${event.is_completed ? "completed" : ""}">
+        <div class="calendar-event-info">
+          <strong>${escapeHtml(event.title)}</strong>
+
+          <span class="calendar-event-type">
+            ${typeLabels[event.event_type] || "Esemény"}
+          </span>
+
+          ${event.event_time
+            ? `<span>🕒 ${event.event_time.slice(0, 5)}</span>`
+            : ""}
+
+          ${event.description
+            ? `<p>${escapeHtml(event.description)}</p>`
+            : ""}
+
+          ${event.is_completed
+            ? `<span>✓ Elvégezve</span>`
+            : ""}
+        </div>
+
+        <div class="calendar-event-actions">
+          <button
+            type="button"
+            data-calendar-action="edit"
+            data-event-id="${event.id}"
+          >
+            Szerkesztés
+          </button>
+
+          <button
+            type="button"
+            data-calendar-action="complete"
+            data-event-id="${event.id}"
+          >
+            ${event.is_completed ? "Visszaállítás" : "Elvégezve"}
+          </button>
+
+          <button
+            type="button"
+            data-calendar-action="delete"
+            data-event-id="${event.id}"
+          >
+            Törlés
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
 function showPage(page) {
   const pages = [
     "home",
