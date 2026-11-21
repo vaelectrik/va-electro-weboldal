@@ -1,0 +1,748 @@
+<!doctype html><html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>VA ELECTRO – Elosztótervező v1.0.8</title><style>
+:root{font-family:system-ui,Arial;background:#101112;color:#f3f1ee}*{box-sizing:border-box}body{margin:0}header{background:#191b1c;border-bottom:1px solid #514032;padding:16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}h1{font-size:22px;margin:0}h2{font-size:17px;margin:0 0 12px}small,.hint{color:#aaa}main{display:grid;grid-template-columns:minmax(280px,340px) minmax(0,1fr);gap:16px;padding:16px;max-width:1500px;margin:auto}.panel{background:#1c1e20;border:1px solid #383b3e;border-radius:12px;padding:16px;margin-bottom:14px}label{display:block;font-size:13px;color:#d1cbc5;margin:10px 0 4px}input,select,button{font:inherit;border-radius:7px}input,select{width:100%;background:#292c2f;color:white;border:1px solid #555;padding:9px}button{background:#b87333;color:#101112;border:0;padding:10px 12px;font-weight:700;cursor:pointer}button.alt{background:#34383b;color:#eee;border:1px solid #565b60}button:disabled{opacity:.45;cursor:not-allowed}.actions{display:flex;gap:8px;flex-wrap:wrap}.actions>*{flex:1}.board{background:#b8bdc1;padding:16px;border-radius:9px;overflow-x:auto;color:#222}.rail{display:flex;align-items:stretch;background:linear-gradient(#8c9298 0 14%,#d7dade 14% 88%,#8c9298 88%);min-width:610px;min-height:105px;border:2px solid #747b82;margin:12px 0;padding:9px 5px;gap:1px}.device{flex:none;position:relative;background:linear-gradient(90deg,#f7f7f5,#e6e9eb);border:1px solid #89919a;border-radius:3px;width:calc(var(--m)*49px);min-height:83px;padding:5px;cursor:grab;font-size:10px;overflow:hidden}.device.selected{outline:3px solid #b87333;z-index:1}.brand{font-weight:800;font-size:10px;color:#333}.brand.schneider{color:#168345}.brand.legrand{color:#e4453f}.brand.hager{color:#246ca8}.brand.eaton{color:#2667ad}.device .type{font-size:11px;font-weight:700;margin:3px 0}.lever{background:#41474e;width:14px;height:21px;border-radius:2px;margin:3px auto}.device .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.slot{flex:1;min-width:25px;opacity:.3;border-left:1px dashed #333}.stat{margin:10px 0;color:#bdb7b1}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.line{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #393b3d}.warning{font-size:12px;color:#e0b88e}.muted{color:#aaa;font-size:13px}#selectedPanel[hidden]{display:none}@media(max-width:850px){main{grid-template-columns:1fr}header{padding:12px}main{padding:10px}.panel{padding:12px}}@media print{body{background:white;color:black}header button,aside,.actions,.noprint{display:none!important}main{display:block;padding:0}.panel{background:white;border:0;color:black}.board{print-color-adjust:exact;-webkit-print-color-adjust:exact}.rail{break-inside:avoid}h1{color:black}small,.hint,.stat{color:#333}}
+
+.tabs{display:flex;gap:8px;margin-bottom:12px}.tabs button{flex:1}.tabs button.active{background:#b87333;color:#111}.tabs button:not(.active){background:#303336;color:#eee}.schematic{background:#fff;color:#222;border-radius:8px;padding:12px;overflow:auto}.schematic svg{min-width:650px;width:100%;height:auto}.terminal{font-size:10px;color:#444;background:#f7dcae;border:1px solid #b87333;border-radius:3px;padding:2px 3px;display:inline-block;margin:1px}.wirebadge{border-left:5px solid #b87333;padding-left:8px}.notice{background:#342c22;border:1px solid #745438;border-radius:7px;padding:10px;color:#f0d5b5;font-size:12px}#viewSchematic[hidden],#viewFront[hidden]{display:none}.device .terminals{display:flex;justify-content:space-around;margin:2px 0}.device .terminals span{width:7px;height:7px;background:#8b8f92;border:1px solid #555;border-radius:50%} .device .lever{border-top:3px solid #222}.device .type{min-height:13px} @media print{.tabs,.notice,.noprint{display:none!important}#viewSchematic[hidden]{display:block!important}#viewFront[hidden]{display:block!important}.schematic{break-before:page}.panel{break-inside:avoid}}
+
+.busbars{display:grid;gap:7px;min-width:610px;margin:0 0 16px}.bus{display:flex;align-items:center;gap:14px;padding:9px 12px;border:2px solid #527fae;border-radius:7px;background:#e6f0fa;color:#164e82;cursor:pointer;font-size:12px}.bus strong{font-size:18px;border:2px solid currentColor;border-radius:50%;width:30px;height:30px;display:grid;place-items:center}.bus-pe{border-color:#52914f;background:#e4f1dc;color:#356b30}.busdots{margin-left:auto;letter-spacing:7px}.device{overflow:visible;min-height:110px;padding-top:22px;padding-bottom:23px}.terminal-numbers{position:absolute;left:1px;right:1px;display:flex;justify-content:space-around;gap:1px}.terminal-numbers.top{top:1px}.terminal-numbers.bottom{bottom:1px}.terminal-point{font-size:9px;line-height:13px;min-width:14px;padding:1px;background:#f0c88c;color:#171717;border:1px solid #b87333;border-radius:3px;cursor:pointer}.terminal-point:hover{background:#f4a64e}.rail{min-height:132px}.device .terminals{display:none}@media print{.terminal-point{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+</style></head><body><header><div><h1>⚡ VA ELECTRO <span style="color:#b87333">Elosztótervező</span></h1><small>v1.0.8 – tervezési prototípus, nem hitelesített kivitelezési dokumentáció</small></div><div class="actions"><button onclick="save()">Projekt mentése</button><button class="alt" onclick="document.getElementById('file').click()">Megnyitás</button><button class="alt" onclick="window.print()">Nyomtatás / PDF</button><input id="file" type="file" accept=".json,application/json" hidden onchange="loadFile(event)"></div></header><main><aside><section class="panel"><h2>Projekt</h2><label>Projekt neve</label><input id="project" value="Új lakáselosztó"><label>Sorok száma</label><select id="rows"></select><label>Modulhely / sor</label><select id="capacity"><option>12</option><option selected>18</option><option>24</option></select><label>Aktív sor</label><select id="activeRow"></select><p class="hint">Az adatok ezen a készüléken automatikusan mentődnek. Másik készülékre JSON-exporttal viheted át.</p></section><section class="panel"><h2>Készülék hozzáadása</h2><label>Gyártó</label><select id="manufacturer"><option>Schneider Electric</option><option>Legrand</option><option>Hager</option><option>Eaton</option></select><label>Készülék</label><select id="kind"></select><label>Áramkör megnevezése</label><input id="circuit" placeholder="pl. Nappali dugaljak"><label>Gyártói cikkszám (opcionális)</label><input id="sku" placeholder="Csak ellenőrzött cikkszámot adj meg"><button style="width:100%;margin-top:12px" onclick="add()">+ Készülék hozzáadása</button></section><section class="panel" id="selectedPanel" hidden><h2>Kijelölt készülék</h2><div id="selectedInfo" class="muted"></div><label>Áramkör neve</label><input id="editCircuit"><label>Cikkszám</label><input id="editSku"><div class="actions" style="margin-top:10px"><button onclick="updateDevice()">Módosítás</button><button class="alt" onclick="move(-1)">← Balra</button><button class="alt" onclick="move(1)">Jobbra →</button><button class="alt" onclick="removeDevice()">Törlés</button></div><label>Áthelyezés másik sorba</label><select id="moveRow" onchange="changeRow(this.value)"></select></section><section class="panel"><h2>Kapocsszintű kapcsolatok (v0.5.1)</h2><p class="warning">A kapcsok sematikusak. A pontos gyártói bekötést adatlap alapján ellenőrizd!</p><label>Forrás</label><select id="from"></select><label>Forráskapocs</label><select id="fromTerminal"></select><label>Cél</label><select id="to"></select><label>Célkapocs</label><select id="toTerminal"></select><label>Vezető</label><select id="wire"><option>L1</option><option>L2</option><option>L3</option><option>N</option><option>PE</option></select><button style="margin-top:10px" onclick="addConnection()">Kapcsolat felvétele</button><div id="connections"></div></section></aside><article><section class="panel"><h2 id="boardtitle">Új lakáselosztó</h2><div class="stat" id="status"></div><div class="tabs noprint"><button id="tabFront" class="active" onclick="switchView('front')">Elölnézet</button><button id="tabSchematic" onclick="switchView('schematic')">Kapcsolási rajz</button></div><div id="viewFront"><div class="board" id="board"></div><div id="frontConnections" class="muted"></div></div><div id="viewSchematic" hidden><div class="schematic" id="schematic"></div></div><p class="hint noprint">Kattints egy készülékre a szerkesztéshez. Számítógépen azonos soron belül húzással is átrendezheted.</p></section><section class="panel"><h2>Áramköri jegyzék</h2><div id="circuits"></div></section><section class="panel"><h2>Anyaglista – árak nélkül</h2><div id="bom"></div></section><section class="panel"><h2>Vezetékjegyzék</h2><div id="wirelist"></div></section><section class="panel"><h2>Dokumentációs megjegyzés</h2><p class="muted">Ez a prototípus nem ellenőrzi az áramütés elleni védelmet, zárlati szilárdságot, szelektivitást, vezetékméretezést, gyártói kompatibilitást vagy szabványmegfelelőséget. A készülékek grafikus képei sem pontos gyártói termékrajzok. Ügyfélnek átadott megvalósulási dokumentációhoz helyszíni ellenőrzés és szükség szerint mérési jegyzőkönyv szükséges.</p></section></article></main><script>
+const catalog=[['MCB B10','Kismegszakító B10',1],['MCB B16','Kismegszakító B16',1],['MCB C16','Kismegszakító C16',1],['RCD 2P','ÁVK 2P',2],['RCD 4P','ÁVK 4P',4],['RCBO 1P+N','RCBO 1P+N',2],['SPD 4P','Túlfeszültség-védelem 4P',4],['CONTACTOR','Mágneskapcsoló',2],['MAIN 4P','Főkapcsoló 4P',4],['TERMINAL 5P','Régi 5P fővezetéki sorkapocs',5],['HENSEL L1','Hensel fővezetéki sorkapocs – L1',1],['HENSEL L2','Hensel fővezetéki sorkapocs – L2',1],['HENSEL L3','Hensel fővezetéki sorkapocs – L3',1],['HENSEL N','Hensel fővezetéki sorkapocs – N',1],['HENSEL PE','Hensel fővezetéki sorkapocs – PE',1]].map(([type,label,width])=>({type,label,width}));
+let devices=[],connections=[],selected=null,nextId=1;const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const cap=()=>+$('capacity').value;const rowUsed=r=>devices.filter(d=>d.row===r).reduce((a,d)=>a+d.width,0);const current=()=>devices.find(d=>d.id===selected);
+function persist(){try{localStorage.setItem('va-electro-board-v04',JSON.stringify(snapshot()))}catch(e){}}
+function snapshot(){return {version:2,project:$('project').value,rows:+$('rows').value,capacity:cap(),devices,connections}}
+function add(){const c=catalog.find(x=>x.type===$('kind').value),row=+$('activeRow').value;if(rowUsed(row)+c.width>cap())return alert('Nincs elegendő szabad modulhely ebben a sorban.');devices.push({...c,id:nextId++,row,manufacturer:$('manufacturer').value,circuit:$('circuit').value.trim(),sku:$('sku').value.trim()});$('circuit').value='';$('sku').value='';render()}
+function render(){const rows=+$('rows').value;devices=devices.filter(d=>d.row<rows);$('boardtitle').textContent=$('project').value||'Névtelen projekt';const old=$('activeRow').value;$('activeRow').innerHTML=Array.from({length:rows},(_,i)=>`<option value="${i}">${i+1}. sor</option>`).join('');$('activeRow').value=Math.min(+(old||0),rows-1);$('moveRow').innerHTML=$('activeRow').innerHTML;$('board').innerHTML=Array.from({length:rows},(_,r)=>{const ds=devices.filter(d=>d.row===r);return `<div><b>${r+1}. DIN-sín – ${rowUsed(r)}/${cap()} M</b><div class="rail">${ds.map(d=>`<div class="device ${selected===d.id?'selected':''}" style="--m:${d.width}" draggable="true" ondragstart="drag(event,${d.id})" ondragover="event.preventDefault()" ondrop="drop(event,${d.id})" onclick="selectDevice(${d.id})" title="${esc(d.manufacturer+' / '+d.type+' / '+d.circuit)}"><div class="brand ${d.manufacturer.split(' ')[0].toLowerCase()}">${esc(d.manufacturer)}</div><div class="type">${esc(d.type)}</div><div class="lever"></div><div class="name">${esc(d.circuit||'#'+d.id)}</div></div>`).join('')}<div class="slot"></div></div></div>`}).join('');const opts=[...devices,{id:-1,type:'N-sín',circuit:'N-sín'},{id:-2,type:'PE-sín',circuit:'PE-sín'}].map(d=>`<option value="${d.id}">#${d.id} ${esc(d.circuit||d.type)}</option>`).join('');for(const id of ['from','to']){const old=$(id).value;$(id).innerHTML=opts;if(devices.some(d=>String(d.id)===old))$(id).value=old}const d=current();$('selectedPanel').hidden=!d;if(d){$('selectedInfo').textContent=`#${d.id} • ${d.manufacturer} • ${d.type} • ${d.width} M`; $('editCircuit').value=d.circuit||'';$('editSku').value=d.sku||'';$('moveRow').value=d.row} $('connections').innerHTML=connections.map((c,i)=>`<div class="line"><span>#${c.from} → #${c.to} (${esc(c.wire)})</span><button class="alt" onclick="connections.splice(${i},1);render()">×</button></div>`).join('');$('circuits').innerHTML=devices.map(d=>`<div class="line"><span><b>F${d.id}</b> – ${esc(d.circuit||'Nincs megnevezve')} <small>(${esc(d.type)}, ${d.row+1}. sor)</small></span></div>`).join('')||'<p class="muted">Még nincs áramkör.</p>';const counts=new Map();devices.forEach(d=>{const k=[d.manufacturer,d.type,d.sku||''].join(' • ');counts.set(k,(counts.get(k)||0)+1)});$('bom').innerHTML=[...counts].map(([k,n])=>`<div class="line"><span>${esc(k)}</span><b>${n} db</b></div>`).join('')||'<p class="muted">Nincs készülék.</p>';$('status').textContent=`${devices.length} készülék • ${devices.reduce((a,d)=>a+d.width,0)} / ${rows*cap()} modul foglalt • ${connections.length} logikai kapcsolat`;persist()}
+function selectDevice(id){selected=id;render()}
+function updateDevice(){const d=current();if(!d)return;d.circuit=$('editCircuit').value.trim();d.sku=$('editSku').value.trim();render()}
+function move(delta){const d=current();if(!d)return;const same=devices.filter(x=>x.row===d.row),i=same.findIndex(x=>x.id===d.id),n=same[i+delta];if(!n)return;const a=devices.indexOf(d),b=devices.indexOf(n);[devices[a],devices[b]]=[devices[b],devices[a]];render()}
+function changeRow(v){const d=current(),r=+v;if(!d||d.row===r)return;if(rowUsed(r)+d.width>cap()){alert('A célsorban nincs elég hely.');render();return}d.row=r;render()}
+function removeDevice(){if(selected==null)return;devices=devices.filter(d=>d.id!==selected);connections=connections.filter(c=>c.from!==selected&&c.to!==selected);selected=null;render()}
+let dragged=null;function drag(e,id){dragged=id;e.dataTransfer.effectAllowed='move'}function drop(e,target){e.preventDefault();const a=devices.find(d=>d.id===dragged),b=devices.find(d=>d.id===target);if(!a||!b||a.row!==b.row)return;const i=devices.indexOf(a),j=devices.indexOf(b);[devices[i],devices[j]]=[devices[j],devices[i]];render()}
+function addConnection(){const from=+$('from').value,to=+$('to').value;if(!from||!to||from===to)return alert('Két különböző készüléket válassz.');connections.push({from,to,wire:$('wire').value});render()}
+function save(){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([JSON.stringify(snapshot(),null,2)],{type:'application/json'}));a.href=url;a.download='va-electro-eloszto-terv.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function importData(obj){if(!Array.isArray(obj.devices)||!Array.isArray(obj.connections)||!Number.isInteger(obj.rows)||obj.rows<1||obj.rows>6)throw Error('Érvénytelen projekt');const capacity=[12,18,24].includes(+obj.capacity)?+obj.capacity:12;let incoming=obj.devices.map(d=>{const c=catalog.find(c=>c.type===d.type);if(!c||!Number.isInteger(d.row)||d.row<0||d.row>=obj.rows||!Number.isInteger(d.id)||d.id<1)throw Error('Érvénytelen készülék');return {...c,id:d.id,row:d.row,manufacturer:['Schneider Electric','Legrand','Hager','Eaton'].includes(d.manufacturer)?d.manufacturer:'Schneider Electric',circuit:String(d.circuit||'').slice(0,150),sku:String(d.sku||'').slice(0,100)}});if(new Set(incoming.map(d=>d.id)).size!==incoming.length)throw Error('Ismétlődő készülékazonosító');for(let r=0;r<obj.rows;r++)if(incoming.filter(d=>d.row===r).reduce((a,d)=>a+d.width,0)>capacity)throw Error('Túl sok készülék egy sorban');devices=incoming;connections=obj.connections.filter(c=>(incoming.some(d=>d.id===c.from)||[-1,-2].includes(c.from))&&(incoming.some(d=>d.id===c.to)||[-1,-2].includes(c.to))&&['L1','L2','L3','N','PE'].includes(c.wire)).map(c=>({...c,fromTerminal:String(c.fromTerminal||''),toTerminal:String(c.toTerminal||'')}));$('rows').value=obj.rows;$('capacity').value=capacity;$('project').value=String(obj.project||'Betöltött terv').slice(0,200);nextId=Math.max(0,...devices.map(d=>d.id))+1;selected=null;render()}
+async function loadFile(e){try{if(!e.target.files[0])return;importData(JSON.parse(await e.target.files[0].text()))}catch(err){alert('Nem sikerült megnyitni: '+err.message)}e.target.value=''}
+$('rows').innerHTML=Array.from({length:6},(_,i)=>`<option value="${i+1}" ${i===1?'selected':''}>${i+1}</option>`).join('');$('kind').innerHTML=catalog.map(c=>`<option value="${esc(c.type)}">${esc(c.label)} (${c.width} M)</option>`).join('');for(const id of ['rows','capacity','project'])$(id).addEventListener('change',()=>{if(id==='capacity'&&devices.some(d=>rowUsed(d.row)>cap())){alert('A meglévő készülékek nem férnek el.');$('capacity').value=24;return}render()});$('project').addEventListener('input',render);try{const raw=localStorage.getItem('va-electro-board-v04');if(raw)importData(JSON.parse(raw));else render()}catch(e){render()}
+
+// v0.4: sematikus kapocskiosztás, nem gyártói bekötési adat.
+const terminalMap={
+ 'MCB B10':['1','2'],'MCB B16':['1','2'],'MCB C16':['1','2'],
+ 'RCD 2P':['1','N','2','N2'],
+ 'RCD 4P':['1','3','5','N','2','4','6','N2'],
+ 'RCBO 1P+N':['1','N','2','N2'],
+ 'SPD 4P':['L1','L2','L3','N','PE'],
+ 'CONTACTOR':['1','3','2','4','A1','A2'],
+ 'MAIN 4P':['1','3','5','7','2','4','6','8'], 'HENSEL L1':['1','2','3','4'],'HENSEL L2':['1','2','3','4'],'HENSEL L3':['1','2','3','4'],'HENSEL N':['1','2','3','4'],'HENSEL PE':['1','2','3','4'], 'TERMINAL 5P':['L1','L2','L3','N','PE']};
+const terminals=d=>d?.id===-1?['N']:d?.id===-2?['PE']:terminalMap[d?.type]||[];
+const wireColors={L1:'#7c4a30',L2:'#222222',L3:'#777777',N:'#2368bf',PE:'#398a42'};
+let view='front';
+function switchView(v){view=v;$('viewFront').hidden=v!=='front';$('viewSchematic').hidden=v!=='schematic';$('tabFront').classList.toggle('active',v==='front');$('tabSchematic').classList.toggle('active',v==='schematic');drawSchematic()}
+function fillTerminal(deviceSelect,terminalSelect,old){const d=devices.find(x=>x.id===+$(deviceSelect).value)||(+$(deviceSelect).value===-1?{id:-1}:+$(deviceSelect).value===-2?{id:-2}:null);$(terminalSelect).innerHTML=terminals(d).map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');if(old&&terminals(d).includes(old))$(terminalSelect).value=old}
+function addConnection(){const from=+$('from').value,to=+$('to').value,fromTerminal=$('fromTerminal').value,toTerminal=$('toTerminal').value,wire=$('wire').value;if(from===to||(!devices.some(d=>d.id===from)&&from!==-1&&from!==-2)||(!devices.some(d=>d.id===to)&&to!==-1&&to!==-2))return alert('Két különböző érvényes csatlakozási pontot válassz.');if(!fromTerminal||!toTerminal)return alert('Válassz kapcsokat.');if(connections.some(c=>c.from===from&&c.to===to&&c.fromTerminal===fromTerminal&&c.toTerminal===toTerminal&&c.wire===wire))return alert('Ez a kapcsolat már létezik.');if((from===-1||to===-1)&&wire!=='N')return alert('Az N-sínhez csak N jelölésű vezetőt rendelj.');if((from===-2||to===-2)&&wire!=='PE')return alert('A PE-sínhez csak PE jelölésű vezetőt rendelj.');connections.push({from,to,fromTerminal,toTerminal,wire});render()}
+function drawSchematic(){const ds=[{id:-1,type:'N-sín',manufacturer:'Gyűjtősín',circuit:'Nulla sín'},{id:-2,type:'PE-sín',manufacturer:'Gyűjtősín',circuit:'Védővezető sín'},...devices].sort((a,b)=>(a.row??-1)-(b.row??-1)||devices.indexOf(a)-devices.indexOf(b));const w=Math.max(700,ds.length*140+70),h=Math.max(240,190+connections.length*30);const pos=new Map(ds.map((d,i)=>[d.id,{x:60+i*140,y:80}]));const safe=esc;
+const nodes=ds.map(d=>{const p=pos.get(d.id);return `<g><rect x="${p.x-30}" y="${p.y-28}" width="110" height="95" rx="6" fill="#f6f6f6" stroke="#444" stroke-width="1.5"/><text x="${p.x-23}" y="${p.y-8}" font-size="11" font-weight="bold">F${d.id} ${safe(d.type)}</text><text x="${p.x-23}" y="${p.y+10}" font-size="9">${safe(d.manufacturer.slice(0,16))}</text><text x="${p.x-23}" y="${p.y+28}" font-size="9">${safe((d.circuit||'').slice(0,17))}</text><text x="${p.x-23}" y="${p.y+48}" font-size="9">${safe(terminals(d).join(', ').slice(0,22))}</text></g>`}).join('');
+const wires=connections.map((c,i)=>{const a=pos.get(c.from),b=pos.get(c.to);if(!a||!b)return '';const y=195+i*30,ax=a.x+25,bx=b.x+25,color=wireColors[c.wire]||'#444';return `<g><path d="M${ax} ${a.y+67} V${y} H${bx} V${b.y+67}" fill="none" stroke="${color}" stroke-width="2.5"/><rect x="${Math.min(ax,bx)+5}" y="${y-15}" width="${Math.max(90,Math.abs(bx-ax)-10)}" height="14" fill="white" opacity=".95"/><text x="${Math.min(ax,bx)+8}" y="${y-4}" fill="#222" font-size="10">${safe(c.wire)}: F${c.from}/${safe(c.fromTerminal||'?')} → F${c.to}/${safe(c.toTerminal||'?')}</text></g>`}).join('');$('schematic').innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" role="img" aria-label="Sematikus kapcsolati rajz"><text x="18" y="22" font-size="15" font-weight="bold">${safe($('project').value)}</text><text x="18" y="42" font-size="11">Kapcsolati vázlat – nem szabványos kapcsolási rajz</text>${wires}${nodes}</svg>`}
+function terminalLayout(d){const t=terminals(d);if(d.type==='TERMINAL 5P')return [t,[]];if(t.length===2)return [[t[0]],[t[1]]];if(t.length===4)return [[t[0],t[1]],[t[2],t[3]]];if(t.length===8)return [t.slice(0,4),t.slice(4)];return [t,[]]}
+function drawTerminals(){
+  const board=$('board');
+  if(!board)return;
+  let bars=board.querySelector('.busbars');
+  if(!bars){bars=document.createElement('div');bars.className='busbars';board.prepend(bars)}
+  bars.innerHTML=`<div class="bus bus-n" data-bus="-1" onclick="chooseBus(-1)"><strong>N</strong><span>NULLASÍN</span><span class="busdots">● ● ● ● ● ● ● ●</span></div><div class="bus bus-pe" data-bus="-2" onclick="chooseBus(-2)"><strong>⏚</strong><span>PE – VÉDŐVEZETŐ SÍN</span><span class="busdots">● ● ● ● ● ● ● ●</span></div>`;
+  const els=board.querySelectorAll('.device');
+  els.forEach((el,i)=>{const d=[...devices].sort((a,b)=>a.row-b.row)[i];if(!d)return;const [top,bottom]=terminalLayout(d);el.querySelectorAll('.terminal-numbers').forEach(n=>n.remove());const make=(items,side)=>{const row=document.createElement('div');row.className='terminal-numbers '+side;items.forEach(t=>{const b=document.createElement('button');b.type='button';b.className='terminal-point';b.textContent=t;b.title='F'+d.id+' / '+t;b.onclick=e=>{e.stopPropagation();chooseTerminal(d.id,t)};row.appendChild(b)});return row};el.prepend(make(top,'top'));el.appendChild(make(bottom,'bottom'));
+  });
+}
+function chooseTerminal(id,t){const from=$('from'),to=$('to');if(!window.pendingWire){from.value=String(id);fillTerminal('from','fromTerminal');$('fromTerminal').value=t;window.pendingWire=true;showWireHint('Forrás: '+(id<0?(id===-1?'N-sín':'PE-sín'):'F'+id)+' / '+t+' – válaszd a célkapcsot');}else{to.value=String(id);fillTerminal('to','toTerminal');$('toTerminal').value=t;window.pendingWire=false;showWireHint('Kapcsok kiválasztva. Ellenőrizd a vezető típusát, majd kattints a Kapcsolat felvétele gombra.')}}
+function chooseBus(id){chooseTerminal(id,id===-1?'N':'PE')}
+function showWireHint(t){let e=$('wireHint');if(!e){e=document.createElement('p');e.id='wireHint';e.className='notice';$('connections').before(e)}e.textContent=t}
+function decorate(){drawTerminals();const oldFrom=$('fromTerminal').value,oldTo=$('toTerminal').value;fillTerminal('from','fromTerminal',oldFrom);fillTerminal('to','toTerminal',oldTo);$('connections').innerHTML=connections.map((c,i)=>`<div class="line"><span class="wirebadge" style="border-color:${wireColors[c.wire]}">F${c.from}/${esc(c.fromTerminal||'?')} → F${c.to}/${esc(c.toTerminal||'?')} (${esc(c.wire)})</span><button class="alt" onclick="connections.splice(${i},1);render()">×</button></div>`).join('');$('wirelist').innerHTML=connections.map((c,i)=>`<div class="line"><span>${i+1}. ${esc(c.wire)}: F${c.from} / ${esc(c.fromTerminal||'nem megadott')} → F${c.to} / ${esc(c.toTerminal||'nem megadott')}</span></div>`).join('')||'<p class="muted">Még nincs kapcsolat.</p>';$('frontConnections').innerHTML='<p class="notice">A készülékek elölnézete sematikus; a kapocskapcsolatok a vezetékezési jegyzékben és a kapcsolati vázlaton láthatók. Valós vezetékút-rajzolás még nincs.</p>';drawSchematic()}
+const originalRender=render;render=function(){originalRender();decorate()};
+for(const id of ['from','to'])$(id).addEventListener('change',()=>fillTerminal(id,id+'Terminal'));
+// v0.2 projektek beolvasása változatlanul lehetséges; a régi kapcsolatok kapcsai ismeretlenek.
+try{if(!localStorage.getItem('va-electro-board-v04')){const previous=localStorage.getItem('va-electro-board-v03');if(previous)importData(JSON.parse(previous))}}catch(e){}
+render();
+
+// v0.5: standalone Hensel poles, automatic conductor identification, visible front wiring.
+const v05style=document.createElement('style');v05style.textContent=`
+.board{position:relative;padding-right:165px;padding-bottom:65px}.rail{position:relative;margin:78px 0 78px}.rail+.rail{margin-top:78px}.device{z-index:2}.device.hensel{background:linear-gradient(90deg,#e6e8e9,#fafafa 35%,#d2d5d7);border:2px solid #848b90;border-radius:5px;min-height:125px}.device.hensel .lever{display:none}.device.hensel .type{font-size:10px;word-break:break-word}.device.hensel .brand{color:#2c3b48}.device.hensel::after{content:'●  ●';display:block;position:absolute;top:53%;left:5px;right:5px;text-align:center;color:#5d6670;background:#d4d8db;border-radius:3px}.device.hensel[data-phase="N"]{border-top:9px solid #2468b7}.device.hensel[data-phase="PE"]{border-top:9px solid #499344}.device.hensel[data-phase="L1"]{border-top:9px solid #79513b}.device.hensel[data-phase="L2"]{border-top:9px solid #333}.device.hensel[data-phase="L3"]{border-top:9px solid #888}.terminal-point{position:relative;z-index:4;min-width:18px;min-height:18px}.terminal-point.pending{background:#ff9e34;outline:2px solid #fff}.wire-overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3;overflow:visible}.wire-overlay path{fill:none;stroke-width:3;stroke-linejoin:round;stroke-linecap:round}.wire-overlay path.darkwire{stroke:#20252b;filter:drop-shadow(0 0 1px white)}.v05hint{font-size:12px;color:#f2c18a}.bus{position:relative;z-index:2}.wire-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.wire-controls button{font-size:12px}
+@media print{.wire-overlay{print-color-adjust:exact;-webkit-print-color-adjust:exact}.wire-controls{display:none!important}}
+`;document.head.appendChild(v05style);
+const oldTerminalLayout=terminalLayout;
+terminalLayout=function(d){if(d.type?.startsWith('HENSEL '))return [['1','2'],['3','4']];return oldTerminalLayout(d)};
+const oldDrawTerminals=drawTerminals;
+drawTerminals=function(){oldDrawTerminals();const board=$('board');board.querySelectorAll('.device').forEach(el=>{const m=(el.getAttribute('onclick')||'').match(/selectDevice\((\d+)\)/);const d=devices.find(x=>x.id===Number(m?.[1]));if(d?.type.startsWith('HENSEL ')){el.classList.add('hensel');el.dataset.phase=d.type.split(' ')[1];const b=el.querySelector('.brand');if(b)b.textContent='HENSEL';}});};
+const phaseOf=(id,t)=>{if(id===-1)return 'N';if(id===-2)return 'PE';const d=devices.find(x=>x.id===id);if(!d)return null;if(d.type.startsWith('HENSEL '))return d.type.split(' ')[1];if(t==='PE')return 'PE';if(t==='N'||t==='N2')return 'N';if(d.type==='RCD 4P'||d.type==='MAIN 4P'){return ({'1':'L1','2':'L1','3':'L2','4':'L2','5':'L3','6':'L3','7':'N','8':'N'})[t]||null}if(d.type==='RCD 2P'||d.type==='RCBO 1P+N')return 'L1';if(d.type==='SPD 4P')return ['L1','L2','L3'].includes(t)?t:null;return null};
+function autoWire(from,ft,to,tt){const a=phaseOf(from,ft),b=phaseOf(to,tt);if(a&&b&&a!==b)throw Error('Eltérő vezetőazonosítók: '+a+' és '+b+'. Ellenőrizd a kapcsokat!');return a||b||null}
+const oldAddConnection=addConnection;
+addConnection=function(){const from=+$('from').value,to=+$('to').value,ft=$('fromTerminal').value,tt=$('toTerminal').value;let phase;try{phase=autoWire(from,ft,to,tt)}catch(e){alert(e.message);return}if(!phase){alert('A vezető fázisa nem állapítható meg biztonsággal. Előbb csatlakoztasd egy ismert L1/L2/L3/N/PE kapocshoz.');return} $('wire').value=phase;oldAddConnection();window.pendingWire=false;};
+// Hide manual conductor selection: known terminals determine phase, neutral, or PE.
+const manualWire=$('wire').closest('label')||$('wire');$('wire').style.display='none';const wireLabel=[...document.querySelectorAll('label')].find(x=>x.textContent.trim()==='Vezető');if(wireLabel)wireLabel.style.display='none';
+const v05notice=document.createElement('p');v05notice.className='v05hint';v05notice.textContent='Kattints a forráskapocsra, majd a célkapocsra: a vezeték automatikusan létrejön és megjelenik az elölnézeten.';$('connections').before(v05notice);
+chooseTerminal=function(id,t){if(!window.pendingWire){$('from').value=String(id);fillTerminal('from','fromTerminal');$('fromTerminal').value=t;window.pendingWire={id,t};showWireHint('Forrás: '+(id<0?(id===-1?'N-sín':'PE-sín'):'F'+id)+' / '+t+' – kattints a célkapocsra.');}else{const start=window.pendingWire;window.pendingWire=false;if(start.id===id&&start.t===t){showWireHint('Azonos kapocs – kapcsolat megszakítva.');return}$('to').value=String(id);fillTerminal('to','toTerminal');$('toTerminal').value=t;addConnection();}};
+function getTerminalElement(id,t){if(id===-1||id===-2)return $('board').querySelector(`[data-bus="${id}"]`);const device=[...$('board').querySelectorAll('.device')].find(el=>(el.getAttribute('onclick')||'').includes('selectDevice('+id+')'));if(!device)return null;return [...device.querySelectorAll('.terminal-point')].find(el=>el.textContent===t)||device}
+function drawFrontWires(){
+  const board=$('board');board.querySelector('.wire-overlay')?.remove();
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('class','wire-overlay');svg.setAttribute('aria-label','Elölnézeti vezetékek');
+  const rect=board.getBoundingClientRect(), W=board.scrollWidth,H=board.scrollHeight;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.setAttribute('width',W);svg.setAttribute('height',H);
+  const pos=el=>{const r=el.getBoundingClientRect();return{x:r.left-rect.left+board.scrollLeft+r.width/2,y:r.top-rect.top+board.scrollTop+r.height/2}};
+  const rails=[...board.querySelectorAll('.rail')];
+  const railBox=el=>{const r=el.getBoundingClientRect();return {left:r.left-rect.left+board.scrollLeft,right:r.right-rect.left+board.scrollLeft,top:r.top-rect.top+board.scrollTop,bottom:r.bottom-rect.top+board.scrollTop}};
+  const railOf=el=>el.closest('.rail');
+  const sideOf=(el,id)=>id<0?'top':el.closest('.terminal-numbers.bottom')?'bottom':'top';
+  const busExit=el=>{const r=el.getBoundingClientRect();return {x:r.right-rect.left+board.scrollLeft-18,y:r.top-rect.top+board.scrollTop+r.height/2}};
+  const rightEdge=Math.max(0,...rails.map(r=>railBox(r).right));
+  const ns='http://www.w3.org/2000/svg';
+  connections.forEach((c,i)=>{
+    const a=getTerminalElement(c.from,c.fromTerminal),b=getTerminalElement(c.to,c.toTerminal);
+    if(!a||!b)return;
+    const ra=railOf(a),rb=railOf(b),sa=sideOf(a,c.from),sb=sideOf(b,c.to);
+    const p=c.from<0?busExit(a):pos(a),q=c.to<0?busExit(b):pos(b);
+    const lane=i%8,offset=14+lane*7;
+    const corridor=(rail,side,point)=>{
+      if(!rail)return Math.max(8,point.y-16-lane*4);
+      const box=railBox(rail);return side==='bottom'?box.bottom+offset:box.top-offset;
+    };
+    const ya=corridor(ra,sa,p),yb=corridor(rb,sb,q);
+    let route;
+    if(ra&&ra===rb&&sa===sb){
+      // Both ends exit on the same side: one horizontal channel outside the devices.
+      const y=sa==='bottom'?Math.max(ya,yb):Math.min(ya,yb);
+      route=`M${p.x} ${p.y} V${y} H${q.x} V${q.y}`;
+    }else{
+      // Different sides/rows: use the clear right-hand wiring duct, never a device body.
+      const gutter=rightEdge+20+lane*11;
+      route=`M${p.x} ${p.y} V${ya} H${gutter} V${yb} H${q.x} V${q.y}`;
+    }
+    const path=document.createElementNS(ns,'path');path.setAttribute('d',route);
+    path.setAttribute('stroke',wireColors[c.wire]||'#d2691e');
+    if(c.wire==='L2')path.classList.add('darkwire');
+    if(c.wire==='PE')path.setAttribute('stroke-dasharray','8 4');
+    const title=document.createElementNS(ns,'title');
+    title.textContent=`${c.wire}: F${c.from}/${c.fromTerminal} → F${c.to}/${c.toTerminal}`;
+    path.appendChild(title);svg.appendChild(path);
+  });board.appendChild(svg);
+}
+const oldDecorate=decorate;
+decorate=function(){oldDecorate();$('frontConnections').innerHTML='<p class="v05hint">A vezetékek a készülékek fölötti/alatti sávokban, eltérő soroknál oldalsó vezetékcsatornában futnak. Sematikus rajz, nem szerelési terv.</p>';drawFrontWires()};
+// Existing render wrapper calls the new decorate function dynamically.
+window.addEventListener('resize',()=>{if(view==='front')drawFrontWires()});
+// Save v0.5.1 independently; load v0.5 draft on first launch if present.
+const oldPersist=persist;persist=function(){oldPersist();try{localStorage.setItem('va-electro-board-v051',JSON.stringify(snapshot()))}catch(e){}};
+try{const raw=localStorage.getItem('va-electro-board-v051')||localStorage.getItem('va-electro-board-v05');if(raw){const data=JSON.parse(raw);for(const c of (data.connections||[])){for(const key of ['fromTerminal','toTerminal']){if(c[key]==='IN')c[key]='1';else if(/^OUT[1-4]$/.test(c[key]||''))c[key]=String(Math.min(4,Number(c[key].slice(3))+1))}}importData(data)}}catch(e){console.warn('v0.5 recovery',e)}
+render();
+
+/* VA ELECTRO v1.0: print layout, project metadata, busbars, one-line diagram and short routing. */
+const v1css=document.createElement('style');v1css.textContent=`
+.v1-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px}.v1-meta label{margin-top:6px}.v1-meta input{font-size:13px}.v1-bus{position:absolute;z-index:5;height:8px;background:#b87333;border:1px solid #55331c;border-radius:3px;pointer-events:none;box-shadow:0 1px 2px #333}.v1-bus:before{content:'';position:absolute;left:0;right:0;top:2px;border-top:2px solid #e9bb83}.v1-bus-pin{position:absolute;top:5px;width:3px;height:9px;background:#7b4b24}.v1-bus-label{position:absolute;left:0;top:-19px;font:11px system-ui;color:#242424;white-space:nowrap;background:#f8e8cf;padding:1px 3px;border-radius:3px}.v1-actions{display:flex;gap:6px;flex-wrap:wrap}.v1-actions button{font-size:12px}.v1-doc{font-size:12px;line-height:1.5}.v1-doc b{color:#c58d58}.v1-printhead{display:none}.v1-warning{color:#e8bd91;font-size:12px}.wire-overlay path{stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}.board{padding-right:55px!important;padding-bottom:55px!important}.rail{margin:60px 0!important}.schematic svg{min-width:0!important}.v1-printpage{display:none}
+@page{size:A4 landscape;margin:9mm}
+@media print{
+ html,body{width:100%!important;overflow:visible!important;background:white!important;color:#111!important}
+ header{padding:0 0 6mm!important;border:0!important}header h1{font-size:17px!important}header small{display:none!important}
+ main,article,.panel,#viewFront,.board{display:block!important;max-width:none!important;width:100%!important;overflow:visible!important}
+ article>.panel:first-child{break-after:page}
+ .panel{padding:2mm 0!important;margin:0!important;break-inside:auto!important}
+ .v1-printhead{display:block!important;margin:4mm 0;font:12px system-ui;color:#111}
+ .v1-printpage{display:block!important}
+ .board{position:relative!important;box-sizing:border-box!important;padding:5mm 2mm 7mm!important;overflow:visible!important;background:#b8bdc1!important}
+ .board>div:not(.busbars):not(.wire-overlay){display:block!important;break-inside:avoid!important;clear:both!important;width:100%!important}
+ .rail{display:flex!important;flex-wrap:nowrap!important;width:100%!important;min-width:0!important;min-height:100px!important;margin:12mm 0!important;padding:7px 3px!important;break-inside:avoid!important}
+ .device{width:calc(var(--m)*25px)!important;min-width:0!important;flex:none!important;min-height:95px!important;padding-left:2px!important;padding-right:2px!important;font-size:8px!important}
+ .device .brand{font-size:7px!important}.device .type{font-size:8px!important}.device .name{font-size:7px!important}
+ .terminal-point{min-width:10px!important;min-height:13px!important;font-size:7px!important;padding:0!important}
+ .busbars{min-width:0!important;margin:0 0 6mm!important}.bus{padding:3px!important;min-height:24px!important}
+ .wire-overlay{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;overflow:visible!important}
+ .v1-bus{print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}
+ .tabs,.notice,.v05hint,.v1-actions,.noprint,#frontConnections{display:none!important}
+ #viewSchematic{display:block!important;break-before:page!important}
+ .schematic{break-before:auto!important;overflow:visible!important}
+ #schematic svg{max-width:100%!important;width:100%!important;height:auto!important}
+ .line{color:#111!important;border-color:#ccc!important}.line small{color:#333!important}
+ article>.panel:not(:first-child){break-before:page}
+ .wire-overlay path{print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}
+}
+`;document.head.appendChild(v1css);
+const v1panel=document.createElement('section');v1panel.className='panel';v1panel.innerHTML=`<h2>VA ELECTRO – tervlap adatai</h2><div class="v1-meta">
+<div><label>Ügyfél neve</label><input id="v1client" placeholder="Megrendelő"></div><div><label>Munkaazonosító</label><input id="v1job" placeholder="VA-2026-00001"></div>
+<div><label>Helyszín</label><input id="v1site" placeholder="Cím / település"></div><div><label>Terv dátuma</label><input id="v1date" type="date"></div>
+<div><label>Tervező</label><input id="v1author" value="VA ELECTRO"></div><div><label>Dokumentum állapota</label><select id="v1state"><option>Tervezet</option><option>Kivitelezési terv</option><option>Megvalósulási dokumentáció</option></select></div>
+</div><p class="v1-warning">A dokumentum megnevezése nem jelent automatikus műszaki vagy szabványossági ellenőrzést.</p>`;
+document.querySelector('aside').insertBefore(v1panel,document.querySelector('aside').firstElementChild.nextElementSibling);
+const v1busPanel=document.createElement('section');v1busPanel.className='panel';v1busPanel.innerHTML=`<h2>Sorolósín hozzáadása</h2><label>DIN-sor</label><select id="v1busRow"></select><label>Első kismegszakító</label><select id="v1busStart"></select><label>Utolsó kismegszakító</label><select id="v1busEnd"></select><label>Sorolósín vezetője</label><select id="v1busPhase"><option>L1</option><option>L2</option><option>L3</option></select><label>Gyártó / típus (opcionális)</label><input id="v1busSku" placeholder="Pl. kompatibilis fésűs sín típusa"><div class="v1-actions" style="margin-top:10px"><button onclick="v1AddBus()">+ Sorolósín</button></div><div id="v1busList"></div><p class="v1-warning">Csak egymás melletti, megfelelő kapocselrendezésű kismegszakítókhoz. A fésűs sín tényleges kompatibilitását, pólussorrendjét, terhelhetőségét és táplálási módját a gyártói adatlapon ellenőrizd.</p>`;
+document.querySelector('aside').appendChild(v1busPanel);
+const v1printhead=document.createElement('div');v1printhead.className='v1-printhead';document.querySelector('article>.panel').insertBefore(v1printhead,$('boardtitle'));
+const v1doc=document.createElement('section');v1doc.className='panel';v1doc.innerHTML='<h2>Dokumentáció / tervlap</h2><div class="v1-doc" id="v1docContent"></div>';
+document.querySelector('article').appendChild(v1doc);
+const v1warning=document.createElement('p');v1warning.className='v1-warning';v1warning.textContent='Egyvonalas kapcsolati vázlat: a jelképek egyszerűsítettek, nem hitelesített szabványos rajzjelek. A sorolósín nem helyettesíti a tényleges villamos méretezést.';$('schematic').after(v1warning);
+let v1buses=[],v1isImporting=false;
+function v1Meta(){return {client:$('v1client').value,job:$('v1job').value,site:$('v1site').value,date:$('v1date').value,author:$('v1author').value,state:$('v1state').value}}
+const v1OldSnapshot=snapshot;snapshot=function(){return {...v1OldSnapshot(),version:10,meta:v1Meta(),busbars:v1buses}};
+const v1OldImport=importData;importData=function(obj){v1isImporting=true;try{v1OldImport(obj);const meta=obj.meta||{};for(const k of ['client','job','site','date','author','state'])if($('v1'+k))$('v1'+k).value=String(meta[k]??(k==='author'?'VA ELECTRO':''));v1buses=Array.isArray(obj.busbars)?obj.busbars.filter(b=>b&&Number.isInteger(b.row)&&Array.isArray(b.ids)&&['L1','L2','L3'].includes(b.phase)).map(b=>({row:b.row,ids:b.ids.filter(Number.isInteger),phase:b.phase,sku:String(b.sku||'').slice(0,100)})):[];}finally{v1isImporting=false}render()};
+const v1OldPersist=persist;persist=function(){v1OldPersist();if(!v1isImporting)try{localStorage.setItem('va-electro-board-v1',JSON.stringify(snapshot()))}catch(e){}};
+function v1RowDevices(row){return devices.filter(d=>d.row===row)}
+function v1IsMCB(d){return d&&/^MCB /.test(d.type)&&d.width===1}
+function v1RefreshBusUI(){const rows=+$('rows').value,sel=$('v1busRow'),old=sel.value;sel.innerHTML=Array.from({length:rows},(_,i)=>`<option value="${i}">${i+1}. sor</option>`).join('');if(old&&+old<rows)sel.value=old;const ds=v1RowDevices(+sel.value).filter(v1IsMCB),options=ds.map(d=>`<option value="${d.id}">F${d.id} – ${esc(d.circuit||d.type)}</option>`).join('');for(const id of ['v1busStart','v1busEnd']){const e=$(id),old=e.value;e.innerHTML=options;if(ds.some(d=>String(d.id)===old))e.value=old;}if(ds.length>1&&!ds.some(d=>String(d.id)===$('v1busEnd').value))$('v1busEnd').value=ds.at(-1).id;$('v1busList').innerHTML=v1buses.map((b,i)=>`<div class="line"><span>${b.row+1}. sor: ${esc(b.phase)} – ${b.ids.map(x=>'F'+x).join(', ')}</span><button class="alt" onclick="v1buses.splice(${i},1);render()">×</button></div>`).join('')||'<p class="muted">Nincs sorolósín.</p>'}
+$('v1busRow').addEventListener('change',v1RefreshBusUI);
+function v1AddBus(){const row=+$('v1busRow').value,ds=v1RowDevices(row),a=ds.findIndex(d=>d.id===+$('v1busStart').value),b=ds.findIndex(d=>d.id===+$('v1busEnd').value);if(a<0||b<0||a>=b)return alert('Válassz két különböző, sorrendben elhelyezkedő kismegszakítót.');const segment=ds.slice(a,b+1);if(segment.length<2||segment.some(d=>!v1IsMCB(d)))return alert('A sorolósín csak közvetlenül egymás mellett lévő, 1 modulos kismegszakítókat köthet össze.');if(v1buses.some(x=>x.ids.some(id=>segment.some(d=>d.id===id))))return alert('Egy készülék már szerepel másik sorolósínben.');const phase=$('v1busPhase').value;for(const d of segment){const connected=connections.filter(c=>(c.from===d.id&&c.fromTerminal==='1')||(c.to===d.id&&c.toTerminal==='1'));if(connected.some(c=>c.wire!==phase))return alert('Az F'+d.id+' bemenetén már eltérő vezető szerepel.');}v1buses.push({row,ids:segment.map(d=>d.id),phase,sku:$('v1busSku').value.trim()});render()}
+function v1ValidBuses(){v1buses=v1buses.filter(b=>{const ds=v1RowDevices(b.row),ix=b.ids.map(id=>ds.findIndex(d=>d.id===id));return ix.length>=2&&ix.every((x,i)=>x>=0&&v1IsMCB(ds[x])&&(i===0||x===ix[i-1]+1))})}
+function v1DrawBuses(){const board=$('board'),root=board.getBoundingClientRect();board.querySelectorAll('.v1-bus').forEach(x=>x.remove());for(const bus of v1buses){const elements=bus.ids.map(id=>getTerminalElement(id,'1'));if(elements.some(x=>!x))continue;const rr=elements.map(x=>x.getBoundingClientRect());const xs=rr.map(r=>r.left-root.left+board.scrollLeft+r.width/2),ys=rr.map(r=>r.top-root.top+board.scrollTop);const left=Math.min(...xs),right=Math.max(...xs),top=Math.min(...ys)-10;const el=document.createElement('div');el.className='v1-bus';el.style.left=left+'px';el.style.top=top+'px';el.style.width=Math.max(8,right-left)+'px';el.title=bus.phase+' sorolósín: '+bus.ids.map(x=>'F'+x).join(', ');el.innerHTML=`<span class="v1-bus-label">${esc(bus.phase)} · sorolósín</span>`;xs.forEach(x=>{const pin=document.createElement('span');pin.className='v1-bus-pin';pin.style.left=(x-left)+'px';el.appendChild(pin)});board.appendChild(el)}}
+// Each connection is routed through the nearest free top/bottom corridor.
+// Inter-row routes use the nearest safe side; no line may cross device rectangles.
+function v1Rect(el,root){const r=el.getBoundingClientRect();return {left:r.left-root.left+$('board').scrollLeft,right:r.right-root.left+$('board').scrollLeft,top:r.top-root.top+$('board').scrollTop,bottom:r.bottom-root.top+$('board').scrollTop,x:(r.left+r.right)/2-root.left+$('board').scrollLeft,y:(r.top+r.bottom)/2-root.top+$('board').scrollTop}}
+function v1WireRoute(c,i,root){const a=getTerminalElement(c.from,c.fromTerminal),b=getTerminalElement(c.to,c.toTerminal);if(!a||!b)return null;const p=v1Rect(a,root),q=v1Rect(b,root),da=a.closest('.device'),db=b.closest('.device'),ra=a.closest('.rail'),rb=b.closest('.rail');const sideA=c.from<0?'top':a.closest('.bottom')?'bottom':'top',sideB=c.to<0?'top':b.closest('.bottom')?'bottom':'top';const rA=ra?v1Rect(ra,root):null,rB=rb?v1Rect(rb,root):null;const offset=12+(i%5)*5;const exit=(r,side,pt)=>r?(side==='bottom'?r.bottom+offset:r.top-offset):pt.y-offset;const ya=exit(rA,sideA,p),yb=exit(rB,sideB,q);if(ra&&ra===rb&&sideA===sideB){const y=sideA==='top'?Math.min(ya,yb):Math.max(ya,yb);return `M${p.x} ${p.y} V${y} H${q.x} V${q.y}`}
+// Adjacent components on opposite faces: use a short detour around the closer end of their row.
+if(ra&&ra===rb){const r=rA,deviceRects=[...ra.querySelectorAll('.device')].map(el=>v1Rect(el,root));const left=Math.min(...deviceRects.map(x=>x.left))-11-offset,right=Math.max(...deviceRects.map(x=>x.right))+11+offset;const gutter=Math.abs(p.x-left)+Math.abs(q.x-left)<Math.abs(p.x-right)+Math.abs(q.x-right)?left:right;return `M${p.x} ${p.y} V${ya} H${gutter} V${yb} H${q.x} V${q.y}`}
+if(ra&&rb){const deviceRects=[...$('board').querySelectorAll('.device')].map(el=>v1Rect(el,root));const minX=Math.min(...deviceRects.map(x=>x.left)),maxX=Math.max(...deviceRects.map(x=>x.right));const left=minX-12-offset,right=maxX+12+offset;const gutter=Math.abs(p.x-left)+Math.abs(q.x-left)<Math.abs(p.x-right)+Math.abs(q.x-right)?left:right;return `M${p.x} ${p.y} V${ya} H${gutter} V${yb} H${q.x} V${q.y}`}
+const y=Math.min(ya,yb);return `M${p.x} ${p.y} V${y} H${q.x} V${q.y}`}
+drawFrontWires=function(){const board=$('board');board.querySelector('.wire-overlay')?.remove();board.querySelectorAll('.v1-bus').forEach(x=>x.remove());const root=board.getBoundingClientRect(),W=board.scrollWidth,H=board.scrollHeight,ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');svg.classList.add('wire-overlay');svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.setAttribute('preserveAspectRatio','none');svg.setAttribute('width',W);svg.setAttribute('height',H);connections.forEach((c,i)=>{const route=v1WireRoute(c,i,root);if(!route)return;const path=document.createElementNS(ns,'path');path.setAttribute('d',route);path.setAttribute('stroke',wireColors[c.wire]||'#bd6c2d');if(c.wire==='L2')path.classList.add('darkwire');if(c.wire==='PE')path.setAttribute('stroke-dasharray','7 4');const title=document.createElementNS(ns,'title');title.textContent=`${c.wire}: F${c.from}/${c.fromTerminal} – F${c.to}/${c.toTerminal}`;path.appendChild(title);svg.appendChild(path)});board.appendChild(svg);v1DrawBuses()};
+// Clear single-line overview: one horizontal supply line and compact symbols per device.
+drawSchematic=function(){const rows=+$('rows').value;const groups=Array.from({length:rows},(_,r)=>v1RowDevices(r));const max=Math.max(1,...groups.map(g=>g.length)),w=Math.max(800,180+max*100),h=100+rows*170;const E=esc;let out=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" role="img" aria-label="Egyszerűsített egyvonalas kapcsolati rajz"><rect width="${w}" height="${h}" fill="white"/><text x="20" y="28" font-size="17" font-weight="bold">${E($('project').value||'Elosztóterv')} – egyvonalas kapcsolati vázlat</text><text x="20" y="47" font-size="10">Egyszerűsített, nem szabványos kapcsolási dokumentáció</text>`;for(let r=0;r<rows;r++){const y=92+r*170,ds=groups[r];out+=`<text x="20" y="${y+4}" font-size="12" font-weight="bold">${r+1}. sor</text><path d="M95 ${y} H${Math.max(140,115+ds.length*100)}" stroke="#444" stroke-width="2" fill="none"/>`;ds.forEach((d,i)=>{const x=145+i*100,code=d.type.startsWith('HENSEL ')?d.type.split(' ')[1]:d.type.startsWith('MCB')?'QF':d.type.startsWith('RCD')?'FI':d.type.startsWith('RCBO')?'FI/LS':d.type.startsWith('SPD')?'SPD':d.type.startsWith('MAIN')?'QS':d.type==='CONTACTOR'?'KM':'X';out+=`<path d="M${x} ${y} V${y+28}" stroke="#222" stroke-width="2"/><circle cx="${x}" cy="${y+43}" r="15" fill="white" stroke="#222" stroke-width="1.7"/><text x="${x}" y="${y+47}" text-anchor="middle" font-size="10" font-weight="bold">${E(code)}</text><path d="M${x} ${y+58} V${y+76}" stroke="#222" stroke-width="2"/><text x="${x}" y="${y+92}" text-anchor="middle" font-size="10" font-weight="bold">F${d.id}</text><text x="${x}" y="${y+107}" text-anchor="middle" font-size="9">${E((d.circuit||d.type).slice(0,17))}</text>`});for(const bus of v1buses.filter(b=>b.row===r)){const ix=bus.ids.map(id=>ds.findIndex(d=>d.id===id)).filter(x=>x>=0);if(ix.length<2)continue;const x1=145+Math.min(...ix)*100,x2=145+Math.max(...ix)*100;out+=`<path d="M${x1} ${y-10} H${x2}" stroke="${wireColors[bus.phase]}" stroke-width="5"/><text x="${(x1+x2)/2}" y="${y-17}" text-anchor="middle" font-size="10" fill="#333">${E(bus.phase)} sorolósín</text>`}}out+=`<text x="20" y="${h-13}" font-size="10">Kapocsszintű összekötések: lásd vezetékjegyzék; a sín jelölése csak tervezési szándék.</text></svg>`;$('schematic').innerHTML=out};
+function v1RenderExtra(){v1ValidBuses();v1RefreshBusUI();const meta=v1Meta();const info=`<b>Projekt:</b> ${esc($('project').value)}　 <b>Ügyfél:</b> ${esc(meta.client||'–')}　 <b>Munka:</b> ${esc(meta.job||'–')}<br><b>Helyszín:</b> ${esc(meta.site||'–')}　 <b>Dátum:</b> ${esc(meta.date||'–')}　 <b>Tervező:</b> ${esc(meta.author||'–')}　 <b>Állapot:</b> ${esc(meta.state)}`;v1printhead.innerHTML=info;$('v1docContent').innerHTML=info+`<p>${devices.length} készülék, ${v1buses.length} sorolósín, ${connections.length} külön vezeték-kapcsolat.</p><p><b>Figyelem:</b> a rajz csak szerkesztési segédlet. A gyártói bekötés, fésűs sín kompatibilitása, zárlati szilárdság, vezetékkeresztmetszet és védelmi ellenőrzés a kivitelező feladata.</p>`;const list=$('bom');if(v1buses.length)list.innerHTML+=v1buses.map(b=>`<div class="line"><span>Sorolósín ${esc(b.phase)} • ${b.ids.length} készülék • ${esc(b.sku||'típus nem megadott')}</span><b>1 db</b></div>`).join('');const circuits=$('circuits');circuits.innerHTML=devices.map(d=>`<div class="line"><span><b>F${d.id}</b> – ${esc(d.circuit||'Nincs megnevezve')} <small>(${esc(d.type)}, ${d.row+1}. sor)</small></span></div>`).join('')||'<p class="muted">Még nincs áramkör.</p>';const wl=$('wirelist');if(v1buses.length)wl.innerHTML+=v1buses.map(b=>`<div class="line"><span>${esc(b.phase)} sorolósín: ${b.ids.map(id=>'F'+id+'/1').join(' – ')}</span></div>`).join('');drawSchematic()}
+const v1OldRender=render;render=function(){v1OldRender();v1RenderExtra();drawFrontWires();persist()};
+for(const id of ['v1client','v1job','v1site','v1date','v1author','v1state'])$(id).addEventListener('change',()=>{v1RenderExtra();persist()});
+function v1PrintPrepare(){v1RenderExtra();drawFrontWires()}
+window.addEventListener('beforeprint',v1PrintPrepare);window.addEventListener('afterprint',()=>{drawFrontWires()});
+// Recalculate when print CSS takes effect, and when device layout changes.
+if(window.matchMedia){const mq=window.matchMedia('print');mq.addEventListener?.('change',()=>{requestAnimationFrame(()=>{drawFrontWires()})})}
+try{const raw=localStorage.getItem('va-electro-board-v1');if(raw)importData(JSON.parse(raw));}catch(e){console.warn('v1 load',e)}
+render();
+
+/* VA ELECTRO v1.0.1 – extended residential catalog, phase-aware comb busbar,
+   professional single-line diagram, and consolidated printing. */
+const v101Style=document.createElement('style');v101Style.textContent=`
+.v101-phasegrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:8px 0}.v101-phasegrid label{font-size:11px;margin:0}.v101-phasegrid select{padding:5px;font-size:12px}.v101-status{font-size:12px;color:#d8b68b}.v101-title{font-size:13px;font-weight:700;margin:8px 0}.v1-bus[data-phase="3"]{height:11px;background:repeating-linear-gradient(to bottom,#8b5736 0 3px,#262626 3px 6px,#929292 6px 9px);border-color:#444}.v1-bus[data-phase="3"]:before{display:none}
+@page{size:A4 landscape;margin:8mm}
+@media print{
+ body,html{overflow:visible!important;width:auto!important}
+ header{height:auto!important;margin:0!important;padding:0 0 2mm!important}
+ main{margin:0!important;padding:0!important;display:block!important}
+ article{margin:0!important;padding:0!important}
+ article>.panel:first-child{break-after:page!important;page-break-after:always!important;break-inside:avoid!important}
+ article>.panel{margin:0!important;padding:2mm 0!important;break-before:auto!important;page-break-before:auto!important;break-inside:auto!important}
+ #viewFront{width:100%!important;overflow:visible!important}
+ #board{width:1250px!important;max-width:none!important;min-width:1250px!important;zoom:.72!important;overflow:visible!important;padding:8px 28px 14px!important;box-sizing:border-box!important;position:relative!important}
+ #board>div:not(.busbars):not(.wire-overlay){display:block!important;break-inside:avoid!important;page-break-inside:avoid!important}
+ #board .rail{width:1200px!important;min-width:1200px!important;max-width:1200px!important;min-height:132px!important;margin:22px 0!important;padding:9px 5px!important;flex-wrap:nowrap!important}
+ #board .device{width:calc(var(--m)*49px)!important;min-height:110px!important;padding-top:22px!important;padding-bottom:23px!important}
+ #board .wire-overlay{overflow:visible!important}
+ #viewSchematic{display:block!important;break-before:page!important;page-break-before:always!important}
+ #schematic svg{min-width:0!important;max-width:100%!important;max-height:165mm!important;width:100%!important;height:auto!important}
+ .schematic{break-before:auto!important;page-break-before:auto!important}
+ .panel{box-shadow:none!important}
+ .v1-printhead{font-size:10px!important;margin:2mm 0!important}
+ article>.panel:not(:first-child){break-before:auto!important;page-break-before:auto!important}
+ #viewSchematic{break-before:page!important;page-break-before:always!important}
+ #frontConnections,.v1-warning,.hint{display:none!important}
+ #circuits .line,#wirelist .line,#bom .line{break-inside:avoid!important}
+}
+`;document.head.appendChild(v101Style);
+// Add general device types without claiming unverified manufacturer part numbers.
+const extraCatalog=[
+ ['MCB B6 1P','Kismegszakító B6 1P',1],['MCB B20 1P','Kismegszakító B20 1P',1],['MCB B25 1P','Kismegszakító B25 1P',1],['MCB B32 1P','Kismegszakító B32 1P',1],
+ ['MCB C6 1P','Kismegszakító C6 1P',1],['MCB C10 1P','Kismegszakító C10 1P',1],['MCB C20 1P','Kismegszakító C20 1P',1],['MCB C25 1P','Kismegszakító C25 1P',1],['MCB C32 1P','Kismegszakító C32 1P',1],
+ ['MCB B16 1P+N','Kismegszakító B16 1P+N',2],['MCB C16 1P+N','Kismegszakító C16 1P+N',2],['MCB B16 2P','Kismegszakító B16 2P',2],['MCB C16 2P','Kismegszakító C16 2P',2],
+ ['MCB B10 3P','Kismegszakító B10 3P',3],['MCB B16 3P','Kismegszakító B16 3P',3],['MCB B20 3P','Kismegszakító B20 3P',3],['MCB B25 3P','Kismegszakító B25 3P',3],['MCB B32 3P','Kismegszakító B32 3P',3],
+ ['MCB C10 3P','Kismegszakító C10 3P',3],['MCB C16 3P','Kismegszakító C16 3P',3],['MCB C20 3P','Kismegszakító C20 3P',3],['MCB C25 3P','Kismegszakító C25 3P',3],['MCB C32 3P','Kismegszakító C32 3P',3],
+ ['MCB B16 3P+N','Kismegszakító B16 3P+N',4],['MCB C16 3P+N','Kismegszakító C16 3P+N',4],['MCB B16 4P','Kismegszakító B16 4P',4],['MCB C16 4P','Kismegszakító C16 4P',4],
+ ['RCD 2P A 30mA','ÁVK 2P A típus 30 mA',2],['RCD 2P AC 30mA','ÁVK 2P AC típus 30 mA',2],['RCD 4P A 30mA','ÁVK 4P A típus 30 mA',4],['RCD 4P AC 30mA','ÁVK 4P AC típus 30 mA',4],['RCD 4P A 100mA','ÁVK 4P A típus 100 mA',4],['RCD 4P A 300mA','ÁVK 4P A típus 300 mA',4],
+ ['RCBO B16 1P+N','RCBO B16 1P+N 30 mA',2],['RCBO C16 1P+N','RCBO C16 1P+N 30 mA',2],['RCBO B16 3P+N','RCBO B16 3P+N 30 mA',4],
+ ['MAIN 2P','Főkapcsoló 2P',2],['MAIN 3P','Főkapcsoló 3P',3],['SPD T2 1P+N','T2 túlfeszültség-védelem 1P+N',2],['SPD T2 3P+N','T2 túlfeszültség-védelem 3P+N',4],['SPD T1+T2 3P+N','T1+T2 túlfeszültség-védelem 3P+N',4],
+ ['CONTACTOR 4P','Mágneskapcsoló 4P',4],['IMPULSE','Impulzusrelé',1],['TIMER','Időrelé',1],['VOLTAGE RELAY','Feszültségfigyelő relé',2],['METER 1P','Fogyasztásmérő 1 fázis',2],['METER 3P','Fogyasztásmérő 3 fázis',4],['INDICATOR','Jelzőlámpa',1],['BELL TX','Csengőtranszformátor',2],['TERMINAL L','Általános fázissorkapocs',1],['TERMINAL N','Nullasorkapocs',1],['TERMINAL PE','PE sorkapocs',1]
+];
+extraCatalog.forEach(([type,label,width])=>{if(!catalog.some(c=>c.type===type))catalog.push({type,label,width})});
+$('kind').innerHTML=catalog.map(c=>`<option value="${esc(c.type)}">${esc(c.label)} (${c.width} M)</option>`).join('');
+// Simplified, generic terminals. Always verify actual product terminals against datasheet.
+for(const c of catalog){if(terminalMap[c.type])continue;const t=c.type;let terminalsList;
+ if(t.startsWith('MCB ')){const poles=t.includes('3P+N')||t.includes('4P')?4:t.includes('3P')?3:t.includes('2P')||t.includes('1P+N')?2:1;terminalsList=poles===1?['1','2']:poles===2?['1','3','2','4']:poles===3?['1','3','5','2','4','6']:['1','3','5','N','2','4','6','N2']}
+ else if(t.startsWith('RCD ')||t.startsWith('RCBO '))terminalsList=t.includes('4P')||t.includes('3P+N')?['1','3','5','N','2','4','6','N2']:['1','N','2','N2'];
+ else if(t.startsWith('MAIN '))terminalsList=t.includes('4P')?['1','3','5','7','2','4','6','8']:t.includes('3P')?['1','3','5','2','4','6']:['1','3','2','4'];
+ else if(t.startsWith('SPD '))terminalsList=t.includes('3P')?['L1','L2','L3','N','PE']:['L1','N','PE'];
+ else if(t.startsWith('CONTACTOR'))terminalsList=['1','3','5','7','2','4','6','8'];
+ else if(t==='TERMINAL L'||t==='TERMINAL N'||t==='TERMINAL PE')terminalsList=['1','2','3','4'];
+ else terminalsList=['1','2'];terminalMap[t]=terminalsList;
+}
+const v101BaseLayout=terminalLayout;terminalLayout=function(d){if(d.type?.startsWith('MCB ')&&/3P(?!\+N)/.test(d.type))return [['1','3','5'],['2','4','6']];if(d.type?.startsWith('TERMINAL '))return [['1','2'],['3','4']];return v101BaseLayout(d)};
+// Phase-aware comb busbar. 3-phase comb has fixed repeating L1,L2,L3 tooth sequence.
+const busTypeLabel=document.createElement('label');busTypeLabel.textContent='Sorolósín típusa';const busType=document.createElement('select');busType.id='v101busType';busType.innerHTML='<option value="1">1 fázisú</option><option value="3">3 fázisú (L1–L2–L3 ismétlődő)</option>';
+$('v1busPhase').before(busTypeLabel,busType);
+const phaseHint=document.createElement('p');phaseHint.className='v101-status';phaseHint.id='v101phaseHint';busType.after(phaseHint);
+function v101UpdatePhaseHint(){const three=busType.value==='3';$('v1busPhase').parentElement && ($('v1busPhase').previousElementSibling.textContent=three?'Első fog fázisa':'Egyfázisú sín fázisa');phaseHint.textContent=three?'A háromfázisú sín fogsorrendje kötött: L1 → L2 → L3. A készülékek fázisa ebből következik; nem állítható tetszőlegesen.':'A kiválasztott fázis minden csatlakoztatott készülékre érvényes.'}
+busType.addEventListener('change',v101UpdatePhaseHint);v101UpdatePhaseHint();
+function v101PhaseOf(b,i){if((b.poles||1)===1)return b.phase;const seq=['L1','L2','L3'];return seq[(seq.indexOf(b.phase)+i)%3]}
+function v101Eligible(d){return d&&/^MCB /.test(d.type)&&d.width===1&&terminals(d).includes('1')}
+// Override the v1 handlers; legacy one-phase buses remain valid.
+v1AddBus=function(){const row=+$('v1busRow').value,ds=v1RowDevices(row),a=ds.findIndex(d=>d.id===+$('v1busStart').value),b=ds.findIndex(d=>d.id===+$('v1busEnd').value);if(a<0||b<0||a>=b)return alert('Válassz két különböző, sorrendben elhelyezkedő kismegszakítót.');const segment=ds.slice(a,b+1);if(segment.length<2||segment.some(d=>!v101Eligible(d)))return alert('A sorolósín csak egymás melletti, 1P moduláris kismegszakítókhoz állítható be ebben a prototípusban.');if(v1buses.some(x=>x.ids.some(id=>segment.some(d=>d.id===id))))return alert('Egy készülék már szerepel másik sorolósínben.');const phase=$('v1busPhase').value,poles=+busType.value,seq=['L1','L2','L3'],start=seq.indexOf(phase);for(let i=0;i<segment.length;i++){const d=segment[i],want=poles===1?phase:seq[(start+i)%3];const connected=connections.filter(c=>(c.from===d.id&&c.fromTerminal==='1')||(c.to===d.id&&c.toTerminal==='1'));if(connected.some(c=>c.wire!==want))return alert('F'+d.id+' bemenetén már eltérő vezető van: '+want+' lenne szükséges.')}v1buses.push({row,ids:segment.map(d=>d.id),phase,poles,sku:$('v1busSku').value.trim()});render()};
+const v101OldImport=importData;importData=function(obj){v101OldImport(obj);if(Array.isArray(obj.busbars)){v1buses.forEach((b,i)=>{const original=obj.busbars.find(x=>x.row===b.row&&JSON.stringify(x.ids)===JSON.stringify(b.ids));b.poles=original?.poles===3?3:1})}render()};
+const v101OldRefresh=v1RefreshBusUI;v1RefreshBusUI=function(){v101OldRefresh();$('v1busList').innerHTML=v1buses.map((b,i)=>`<div class="line"><span>${b.row+1}. sor • ${b.poles===3?'3 fázis':'1 fázis'} • ${b.ids.map((id,j)=>'F'+id+' '+v101PhaseOf(b,j)).join(', ')}</span><button class="alt" onclick="v1buses.splice(${i},1);render()">×</button></div>`).join('')||'<p class="muted">Nincs sorolósín.</p>'};
+// Draw busbars as individual aligned teeth. Only the comb's actual tooth order is assigned.
+v1DrawBuses=function(){const board=$('board'),root=board.getBoundingClientRect();board.querySelectorAll('.v1-bus').forEach(x=>x.remove());for(const bus of v1buses){const elements=bus.ids.map(id=>getTerminalElement(id,'1'));if(elements.some(x=>!x))continue;const rr=elements.map(x=>x.getBoundingClientRect());const xs=rr.map(r=>r.left-root.left+board.scrollLeft+r.width/2),ys=rr.map(r=>r.top-root.top+board.scrollTop);const left=Math.min(...xs),right=Math.max(...xs),top=Math.min(...ys)-10;const el=document.createElement('div');el.className='v1-bus';el.dataset.phase=String(bus.poles||1);el.style.left=left+'px';el.style.top=top+'px';el.style.width=Math.max(8,right-left)+'px';el.title=bus.ids.map((id,i)=>'F'+id+' '+v101PhaseOf(bus,i)).join(' / ');el.innerHTML=`<span class="v1-bus-label">${bus.poles===3?'3P':'1P'} · ${esc(bus.phase)} · sorolósín</span>`;xs.forEach((x,i)=>{const pin=document.createElement('span');pin.className='v1-bus-pin';pin.style.left=(x-left)+'px';pin.title=v101PhaseOf(bus,i);el.appendChild(pin)});board.appendChild(el)}};
+// Professional-ish IEC-inspired one-line layout. Logical connectivity is represented by
+// upstream groups and branches; it is NOT a validated electrical schematic.
+function v101Symbol(d,x,y){const t=d.type||'',id='F'+d.id;let name='',symbol='';if(t.startsWith('MCB ')){name='QF'+d.id;symbol=`<path d="M${x-9} ${y-11} L${x+9} ${y+11} M${x-9} ${y+11} L${x-9} ${y+20}" stroke="#111" fill="none" stroke-width="1.8"/>`}
+else if(t.startsWith('RCD ')){name='FI'+d.id;symbol=`<rect x="${x-14}" y="${y-14}" width="28" height="28" fill="white" stroke="#111" stroke-width="1.4"/><text x="${x}" y="${y+5}" text-anchor="middle" font-size="12">Δ</text>`}
+else if(t.startsWith('RCBO ')){name='QF'+d.id;symbol=`<rect x="${x-15}" y="${y-14}" width="30" height="28" fill="white" stroke="#111"/><path d="M${x-10} ${y+9} L${x+10} ${y-9}" stroke="#111" stroke-width="1.5"/><text x="${x+9}" y="${y+11}" font-size="10">Δ</text>`}
+else if(t.startsWith('SPD ')){name='SPD'+d.id;symbol=`<rect x="${x-13}" y="${y-14}" width="26" height="28" fill="white" stroke="#111"/><path d="M${x-6} ${y+5} L${x} ${y-7} L${x+6} ${y+5}" stroke="#111" stroke-width="1.6" fill="none"/>`}
+else if(t.startsWith('MAIN ')){name='QS'+d.id;symbol=`<circle cx="${x}" cy="${y-8}" r="3" fill="white" stroke="#111"/><path d="M${x} ${y-5} L${x+13} ${y+9}" stroke="#111" stroke-width="2"/>`}
+else if(t.startsWith('CONTACTOR')){name='KM'+d.id;symbol=`<rect x="${x-13}" y="${y-12}" width="26" height="24" fill="white" stroke="#111"/><text x="${x}" y="${y+4}" text-anchor="middle" font-size="10">KM</text>`}
+else if(t.startsWith('HENSEL ')||t.startsWith('TERMINAL ')){name='X'+d.id;symbol=`<circle cx="${x}" cy="${y}" r="4" fill="white" stroke="#111" stroke-width="1.5"/>`}
+else{name='K'+d.id;symbol=`<rect x="${x-12}" y="${y-12}" width="24" height="24" fill="white" stroke="#111"/>`}
+const detail=t.replace(/^MCB /,'').replace(/^RCD /,'ÁVK ').replace(/^RCBO /,'RCBO ');return `<g><path d="M${x} ${y-30} V${y-15} M${x} ${y+21} V${y+39}" stroke="#111" stroke-width="1.4" fill="none"/>${symbol}<text x="${x+20}" y="${y-3}" font-size="11" font-weight="bold">${esc(name)}</text><text x="${x+20}" y="${y+11}" font-size="9">${esc(detail.slice(0,24))}</text><text x="${x+20}" y="${y+24}" font-size="9">${esc((d.circuit||'').slice(0,24))}</text></g>`}
+drawSchematic=function(){const rows=+$('rows').value,groups=Array.from({length:rows},(_,r)=>v1RowDevices(r)),max=Math.max(1,...groups.map(x=>x.length)),w=Math.max(1000,220+max*145),h=135+rows*220;let out=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" role="img" aria-label="Egyvonalas elosztási kapcsolati vázlat"><rect width="${w}" height="${h}" fill="white"/><text x="26" y="28" font-size="18" font-weight="bold">VA ELECTRO · ${esc($('project').value)}</text><text x="26" y="47" font-size="11">EGYVONALAS KAPCSOLATI VÁZLAT · Készülékek és tervezett sorolósínek</text><text x="26" y="72" font-size="12">Betáplálás: L1 / L2 / L3 / N / PE (a tényleges betáplálást külön ellenőrizni kell)</text>`;groups.forEach((ds,r)=>{const y=118+r*220,busY=y+14;out+=`<text x="26" y="${y+18}" font-size="12" font-weight="bold">${r+1}. DIN-sor</text><path d="M118 ${busY} H${Math.max(165,155+(ds.length-1)*145)}" stroke="#111" stroke-width="2" fill="none"/>`;ds.forEach((d,i)=>{const x=155+i*145;out+=`<path d="M${x} ${busY} V${y+54}" stroke="#111" stroke-width="1.5"/>${v101Symbol(d,x,y+84)}`});for(const b of v1buses.filter(b=>b.row===r)){const ix=b.ids.map(id=>ds.findIndex(d=>d.id===id));if(ix.some(i=>i<0))continue;const x1=155+Math.min(...ix)*145,x2=155+Math.max(...ix)*145;out+=`<path d="M${x1} ${y-1} H${x2}" stroke="#111" stroke-width="3"/><text x="${(x1+x2)/2}" y="${y-9}" font-size="11" text-anchor="middle">${b.poles===3?'3P L1/L2/L3':'1P '+esc(b.phase)} fésűs sín</text>`;b.ids.forEach((id,i)=>{const xx=155+ix[i]*145;out+=`<text x="${xx}" y="${y+38}" font-size="9" text-anchor="middle">${v101PhaseOf(b,i)}</text>`})}});out+=`<text x="26" y="${h-14}" font-size="10">Kapocsszintű vezetékek: külön vezetékjegyzék. Ez szerkesztési vázlat, nem ellenőrzött szabványos kivitelezési rajz.</text></svg>`;$('schematic').innerHTML=out};
+// Keep one-line view up-to-date after editing and include comb phase map in documentation.
+const v101OldRenderExtra=v1RenderExtra;v1RenderExtra=function(){v101OldRenderExtra();const wl=$('wirelist');if(v1buses.length){wl.querySelectorAll('.v101-phase-row').forEach(x=>x.remove());v1buses.forEach(b=>{const el=document.createElement('div');el.className='line v101-phase-row';el.textContent=`${b.poles===3?'3P':'1P'} fésűs sín: ${b.ids.map((id,i)=>'F'+id+' = '+v101PhaseOf(b,i)).join(' · ')}`;wl.appendChild(el)})}drawSchematic()};
+// Avoid drawing print coordinates from stale screen layout; print stylesheet scales
+// the complete board and overlay as one coordinate system.
+window.addEventListener('beforeprint',()=>{v101OldRenderExtra();drawFrontWires()});
+try{const raw=localStorage.getItem('va-electro-board-v1');if(raw){const obj=JSON.parse(raw);if(Array.isArray(obj.busbars))obj.busbars.forEach((b,i)=>{if(v1buses[i])v1buses[i].poles=b.poles===3?3:1})}}catch(e){}
+render();
+
+
+/* v1.0.2: elölnézet-központú tervező, áttekinthető sorolósín, javított PDF */
+const v102style=document.createElement('style');v102style.textContent=`
+#v1busList .v102-bus-card{border:1px solid #65513e;background:#252626;border-radius:9px;padding:10px;margin:9px 0}
+.v102-bus-card header{background:transparent;border:0;padding:0;display:flex;justify-content:space-between;align-items:center}
+.v102-bus-card .v102-teeth{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.v102-tooth{background:#353a3d;border:1px solid #6e7478;border-radius:5px;padding:5px 7px;font-size:12px;min-width:60px;text-align:center}
+.v102-tooth b{display:block;color:#f6f2ec}.v102-tooth em{display:block;font-style:normal;font-weight:800;font-size:13px}
+.v102-tooth[data-phase=L1] em{color:#d49b6a}.v102-tooth[data-phase=L2] em{color:#e2e2e2}.v102-tooth[data-phase=L3] em{color:#c0c0c0}
+#v102busPreview{margin-top:10px;padding:10px;background:#24292c;border:1px solid #50575c;border-radius:8px;font-size:12px;line-height:1.5}
+#v102busPreview .v102-teeth{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
+#v102busPreview .v102-tooth{min-width:53px}
+#v102busPreview .v102-note{color:#d6c6b5}
+@media print{
+ @page{size:A4 landscape;margin:6mm}
+ html,body{width:100%!important;overflow:visible!important;margin:0!important;padding:0!important}
+ header{margin:0!important;padding:0 0 2mm!important}
+ header .actions,aside,.tabs,.noprint,#viewSchematic,#tabSchematic,.schematic{display:none!important}
+ main,article,article>.panel{display:block!important;width:100%!important;max-width:none!important;overflow:visible!important;margin:0!important;padding:0!important;background:white!important;color:#111!important;border:0!important;box-shadow:none!important}
+ article>.panel:first-child{break-after:page!important;page-break-after:always!important;break-inside:avoid!important;page-break-inside:avoid!important}
+ article>.panel:not(:first-child){break-before:auto!important;page-break-before:auto!important;break-after:auto!important;page-break-after:auto!important;break-inside:auto!important;page-break-inside:auto!important;margin:0!important;padding:1.4mm 0!important}
+ article>.panel h2{font-size:12px!important;margin:1mm 0!important}
+ #viewFront{display:block!important;overflow:visible!important;width:100%!important}
+ #board{width:1250px!important;min-width:1250px!important;max-width:1250px!important;zoom:.53!important;padding:8px 32px 16px!important;margin:0!important;overflow:visible!important;position:relative!important;break-inside:avoid!important;page-break-inside:avoid!important}
+ #board .rail{width:1200px!important;min-width:1200px!important;max-width:1200px!important;min-height:132px!important;margin:38px 0!important}
+ #board .device{width:calc(var(--m)*49px)!important;min-height:110px!important}
+ #board .wire-overlay{overflow:visible!important}
+ #frontConnections,.hint,.v1-warning{display:none!important}
+ #circuits .line,#wirelist .line,#bom .line{padding:2px 0!important;font-size:9px!important;line-height:1.2!important;break-inside:avoid!important;page-break-inside:avoid!important}
+ #circuits small{font-size:8px!important}
+ #wirelist,#circuits,#bom{columns:2;column-gap:8mm}
+ #v1docContent,.v1-doc{font-size:9px!important;line-height:1.25!important}
+ .v1-printhead{display:block!important;font-size:10px!important;line-height:1.4!important;margin:2mm 0!important}
+}
+`;document.head.appendChild(v102style);
+// Az egyvonalas rajz teljes eltávolítása a felhasználói felületről és a nyomtatásból.
+$('tabSchematic')?.remove();$('viewSchematic')?.remove();
+$('tabFront')?.remove();document.querySelector('.tabs')?.remove();
+view='front';$('viewFront').hidden=false;
+// Az alap render() továbbra is hívhatja a régi rajzolót: ez többé nem csinál semmit.
+drawSchematic=function(){};
+switchView=function(){};
+// A sorolósínhez fogankénti, feliratozott, előnézeti kiosztás.
+const v102preview=document.createElement('div');v102preview.id='v102busPreview';$('v1busList').before(v102preview);
+function v102teeth(ids,phaseFn){return `<div class="v102-teeth">${ids.map((d,i)=>`<span class="v102-tooth" data-phase="${phaseFn(i)}"><b>F${d.id}</b><em>${phaseFn(i)}</em></span>`).join('')}</div>`}
+function v102BusPreview(){const row=+$('v1busRow').value,ds=v1RowDevices(row),start=ds.findIndex(d=>d.id===+$('v1busStart').value),end=ds.findIndex(d=>d.id===+$('v1busEnd').value),seg=start>=0&&end>=start?ds.slice(start,end+1):[],poles=+busType.value,phase=$('v1busPhase').value,seq=['L1','L2','L3'],offset=Math.max(0,seq.indexOf(phase)),fn=i=>poles===3?seq[(offset+i)%3]:phase;v102preview.innerHTML=`<b>Fésűs sín kiosztásának előnézete</b>${seg.length?v102teeth(seg,fn):'<p>Válassz első és utolsó kismegszakítót.</p>'}<span class="v102-note">${poles===3?'3 fázisú sín: a fogak kötött sorrendben követik egymást.':'1 fázisú sín: minden fog ugyanarra a fázisra csatlakozik.'} A kijelzés tervezési segédlet; gyártói kompatibilitás külön ellenőrizendő.</span>`}
+const v102OldRefresh=v1RefreshBusUI;
+v1RefreshBusUI=function(){v102OldRefresh();$('v1busList').innerHTML=v1buses.map((b,i)=>`<div class="v102-bus-card"><header><b>${b.row+1}. DIN-sor · ${b.poles===3?'3 fázisú':'1 fázisú'} fésűs sín</b><button class="alt" onclick="v1buses.splice(${i},1);render()">Törlés</button></header>${v102teeth(b.ids.map(id=>devices.find(d=>d.id===id)).filter(Boolean),j=>v101PhaseOf(b,j))}<small>${esc(b.sku||'Gyártói típus nincs megadva')}</small></div>`).join('')||'<p class="muted">Még nincs fésűs sín.</p>';v102BusPreview()};
+for(const id of ['v1busRow','v1busStart','v1busEnd','v1busPhase','v101busType'])$(id).addEventListener('change',v102BusPreview);
+// Korábbi verziókból származó ismétlődő sín-sorok eltávolítása az anyag- és vezetékjegyzékből.
+const v102OldExtra=v1RenderExtra;
+v1RenderExtra=function(){v102OldExtra();const bom=$('bom');const seen=new Set();for(const line of [...bom.querySelectorAll('.line')]){const key=line.textContent.trim();if(key.startsWith('Sorolósín ')&&seen.has(key))line.remove();else if(key.startsWith('Sorolósín '))seen.add(key)}const wl=$('wirelist');for(const line of [...wl.querySelectorAll('.line')]){if(line.textContent.trim().includes(' sorolósín:')&&!line.classList.contains('v101-phase-row'))line.remove()}v102BusPreview()};
+render();
+
+
+/* v1.0.3 – separate print document, text first, full-page board last */
+const v103css=document.createElement('style');
+v103css.textContent=`
+#v103print{display:none}
+@page{size:A4 landscape;margin:10mm}
+@media print{
+ html,body{background:white!important;color:#111!important;margin:0!important;padding:0!important;overflow:visible!important;width:auto!important}
+ body>header,body>main{display:none!important}
+ #v103print{display:block!important;font:11pt/1.38 Arial,sans-serif!important;color:#111!important;width:100%!important}
+ #v103print *{box-sizing:border-box}
+ #v103print .p103-header{border-bottom:2px solid #222;padding:0 0 4mm;margin-bottom:5mm;display:flex;justify-content:space-between;align-items:end;gap:8mm}
+ #v103print .p103-brand{font-weight:800;font-size:18pt;letter-spacing:.3px}
+ #v103print .p103-sub{font-size:10pt;color:#555}
+ #v103print .p103-meta{display:grid;grid-template-columns:1fr 1fr;gap:2mm 7mm;margin-bottom:5mm}
+ #v103print .p103-meta>div{padding:1.8mm 2mm;background:#f3f4f5;border:1px solid #ddd;min-width:0;overflow-wrap:anywhere}
+ #v103print h2{font-size:13pt;margin:5mm 0 2mm!important;color:#111!important}
+ #v103print table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:10pt;margin-bottom:3mm}
+ #v103print th,#v103print td{padding:1.8mm 2mm;text-align:left;vertical-align:top;border-bottom:1px solid #d2d2d2;overflow-wrap:anywhere}
+ #v103print th{background:#e9ebed;font-weight:700}
+ #v103print tr{break-inside:avoid;page-break-inside:avoid}
+ #v103print .p103-section{break-inside:auto;page-break-inside:auto}
+ #v103print .p103-section h2{break-after:avoid;page-break-after:avoid}
+ #v103print .p103-note{font-size:9pt;line-height:1.4;margin-top:3mm;color:#444}
+ #v103print .p103-boardpage{break-before:page!important;page-break-before:always!important;break-inside:avoid!important;page-break-inside:avoid!important;overflow:hidden!important;width:100%!important;height:185mm!important;position:relative!important}
+ #v103print .p103-boardtitle{font-size:17pt;font-weight:800;border-bottom:2px solid #222;padding-bottom:3mm;margin-bottom:2mm}
+ #v103print .p103-boardmeta{font-size:9pt;margin-bottom:2mm;color:#333}
+ #v103print .p103-boardframe{width:100%;height:160mm;overflow:hidden;position:relative}
+ #v103print .p103-boardscale{position:absolute;top:0;left:0;transform-origin:top left;transform:scale(var(--p103-scale, .75));width:var(--p103-width, 1250px)}
+ #v103print .p103-boardscale .board{display:block!important;zoom:1!important;position:relative!important;width:var(--p103-width, 1250px)!important;min-width:0!important;max-width:none!important;padding:8px 32px 20px!important;margin:0!important;overflow:visible!important;background:#b8bdc1!important;print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}
+ #v103print .p103-boardscale .rail{width:calc(var(--p103-width, 1250px) - 50px)!important;min-width:0!important;max-width:none!important;min-height:132px!important;margin:38px 0!important}
+ #v103print .p103-boardscale .device{width:calc(var(--m)*49px)!important;min-height:110px!important}
+ #v103print .p103-boardscale .wire-overlay{overflow:visible!important}
+ #v103print .p103-boardscale .v1-bus{print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}
+ #v103print .p103-boardscale .busbars{min-width:0!important}
+
+/* v1.0.4 – continuous-flow text pages, no table/tbody fragmentation */
+@media print{
+ #v103print .p103-docs{display:block!important;position:static!important;height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important;break-inside:auto!important;page-break-inside:auto!important;break-after:auto!important;page-break-after:auto!important}
+ #v103print .p103-section{display:block!important;position:static!important;height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important;break-before:auto!important;break-after:auto!important;break-inside:auto!important;page-break-inside:auto!important}
+ #v103print .p104-gridtable{display:block!important;width:100%!important;margin:0 0 3mm!important;break-inside:auto!important;page-break-inside:auto!important}
+ #v103print .p104-gridrow{display:grid!important;width:100%!important;align-items:start!important;break-inside:avoid!important;page-break-inside:avoid!important;min-height:0!important}
+ #v103print .p104-gridrow>div{padding:1.6mm 2mm!important;border-bottom:1px solid #d2d2d2!important;overflow-wrap:anywhere!important;font-size:10pt!important;line-height:1.25!important;min-width:0!important}
+ #v103print .p104-gridhead{background:#e9ebed!important;font-weight:700!important;break-after:avoid!important;page-break-after:avoid!important}
+ #v103print .p103-section h2{break-after:avoid!important;page-break-after:avoid!important}
+ #v103print .p103-boardpage{break-before:page!important;page-break-before:always!important}
+}
+}
+`;
+document.head.appendChild(v103css);
+const v103print=document.createElement('div');v103print.id='v103print';document.body.appendChild(v103print);
+function v103esc(x){return esc(String(x??''))}
+function v103table(headers,rows,widths){
+ const colgroup=widths&&widths.length===headers.length
+   ? `<colgroup>${widths.map(w=>`<col style="width:${w}">`).join('')}</colgroup>` : '';
+ const head=`<thead><tr>${headers.map(h=>`<th scope="col">${v103esc(h)}</th>`).join('')}</tr></thead>`;
+ const body=`<tbody>${rows.map(row=>`<tr>${row.map(v=>`<td>${v103esc(v)}</td>`).join('')}</tr>`).join('')}</tbody>`;
+ return `<table class="v107-table">${colgroup}${head}${body}</table>`;
+}
+function v103buildPrint(){
+ const m=v1Meta(),d=devices.slice(),links=connections.slice();
+ const circ=d.map(x=>[`F${x.id}`,x.circuit||'Nincs megnevezve',x.type||'–',`${x.row+1}. sor`]);
+ const wires=links.map((x,i)=>{const a=d.find(z=>z.id===x.from),b=d.find(z=>z.id===x.to);return [`${i+1}.`,`${a?'F'+a.id:'?'} / ${x.fromTerminal||'?'}`,`${b?'F'+b.id:'?'} / ${x.toTerminal||'?'}`,x.wire||'–']});
+ const busrows=v1buses.flatMap((b,i)=>b.ids.map((id,j)=>[`${i+1}. sín`,b.poles===3?'3 fázisú':'1 fázisú',`F${id}`,v101PhaseOf(b,j)]));
+ const bomrows=[];const counts=new Map();d.forEach(x=>{const key=`${x.manufacturer||''} · ${x.type||''}${x.sku?' · '+x.sku:''}`;counts.set(key,(counts.get(key)||0)+1)});counts.forEach((qty,key)=>bomrows.push([key,`${qty} db`]));
+ v1buses.forEach(b=>bomrows.push([`${b.poles===3?'3 fázisú':'1 fázisú'} fésűs sín${b.sku?' · '+b.sku:''}`,'1 db']));
+ const meta=[['Projekt', $('project').value],['Ügyfél',m.client||'–'],['Munkaazonosító',m.job||'–'],['Helyszín',m.site||'–'],['Dátum',m.date||'–'],['Tervező',m.author||'–'],['Dokumentum állapota',m.state||'–'],['Elosztó',`${$('rows').value} sor · ${$('capacity').value} modul/sor · ${d.length} készülék`]];
+ v103print.innerHTML=`<section class="p103-docs"><div class="p103-header"><div class="p103-brand">⚡ VA ELECTRO</div><div class="p103-sub">Elosztótervező · Műszaki összesítő · v1.0.7</div></div><div class="p103-meta">${meta.map(([a,b])=>`<div><b>${v103esc(a)}:</b> ${v103esc(b)}</div>`).join('')}</div><section class="p103-section"><h2>Áramköri és készülékjegyzék</h2>${v103table(['Azonosító','Áramkör / megnevezés','Készülék','Hely'],circ,['13%','43%','31%','13%'])}</section>${busrows.length?`<section class="p103-section"><h2>Fésűs sínek – fáziskiosztás</h2>${v103table(['Sín','Kivitel','Kismegszakító','Fázis'],busrows,['20%','30%','30%','20%'])}</section>`:''}<section class="p103-section"><h2>Anyagjegyzék (árak nélkül)</h2>${v103table(['Készülék / elem','Mennyiség'],bomrows,['80%','20%'])}</section>${wires.length?`<section class="p103-section"><h2>Vezetékek és kapocskapcsolatok</h2>${v103table(['Sorszám','Honnan','Hová','Vezető'],wires,['12%','35%','35%','18%'])}</section>`:''}<p class="p103-note">Tervezési segédlet. A készülékek, kapcsok, fésűs sínek és vezetékezés gyártói kompatibilitását, valamint a villamos védelmek megfelelőségét kivitelezés előtt ellenőrizni kell.</p></section><section class="p103-boardpage"><div class="p103-boardtitle">VA ELECTRO · Elosztótábla elölnézete</div><div class="p103-boardmeta">${v103esc($('project').value)} · ${v103esc(m.job||'–')} · ${v103esc(m.date||'–')}</div><div class="p103-boardframe"><div class="p103-boardscale"></div></div></section>`;
+ // v1.0.6: deterministic vector drawing, independent of mobile print CSS and DOM cloning.
+ // Every row, component, terminal rail, conductor and comb busbar is drawn into one SVG.
+ const nr=Math.max(1,Number($('rows').value)||2), capacity=Math.max(1,Number($('capacity').value)||18);
+ const pitch=49, left=48, right=30, top=72, rowPitch=185, railHeight=119;
+ const W=left+capacity*pitch+right, H=top+nr*rowPitch+26;
+ const svgNS='http://www.w3.org/2000/svg';
+ const svg=document.createElementNS(svgNS,'svg');
+ svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.setAttribute('xmlns',svgNS);
+ svg.setAttribute('role','img');svg.setAttribute('aria-label',`${nr} soros, ${capacity} modulos elosztótábla elölnézete`);
+ svg.style.cssText='display:block;width:100%;height:100%;max-width:100%;max-height:100%';
+ const node=(tag,attrs={},content)=>{const el=document.createElementNS(svgNS,tag);for(const [k,v] of Object.entries(attrs))el.setAttribute(k,String(v));if(content!==undefined)el.textContent=String(content);svg.appendChild(el);return el};
+ const text=(x,y,value,size=10,weight=400,fill='#17212b')=>node('text',{x,y,'font-size':size,'font-weight':weight,fill,'font-family':'Arial,sans-serif'},value);
+ node('rect',{x:0,y:0,width:W,height:H,fill:'#b9bec2',rx:10});
+ node('rect',{x:14,y:10,width:W-28,height:20,rx:5,fill:'#e0ecf9',stroke:'#7794ac'});
+ node('rect',{x:14,y:37,width:W-28,height:20,rx:5,fill:'#dce9d8',stroke:'#83a17d'});
+ text(22,24,'N – NULLASÍN',11,700,'#234d78');text(22,51,'PE – VÉDŐVEZETŐ SÍN',11,700,'#37663b');
+ const terminals=new Map(),rowStarts=[];
+ for(let r=0;r<nr;r++){
+   const y=top+r*rowPitch;rowStarts.push(y);
+   text(18,y-11,`${r+1}. DIN-sín – ${devices.filter(d=>d.row===r).reduce((a,d)=>a+(Number(d.width)||1),0)}/${capacity} M`,11,700);
+   node('rect',{x:left-5,y,width:capacity*pitch+10,height:railHeight,fill:'#d7dade',stroke:'#707a83','stroke-width':2});
+   node('rect',{x:left-5,y,width:capacity*pitch+10,height:13,fill:'#8c9298'});
+   node('rect',{x:left-5,y:y+railHeight-13,width:capacity*pitch+10,height:13,fill:'#8c9298'});
+   let offset=0;
+   for(const d of devices.filter(d=>d.row===r)){
+     const dw=Math.max(1,Number(d.width)||1)*pitch-2,x=left+offset*pitch,dy=y+14;
+     const phase=d.type?.startsWith('HENSEL ')?d.type.split(' ')[1]:null;
+     node('rect',{x,y:dy,width:dw,height:railHeight-28,rx:2,fill:'#f3f4f4',stroke:'#879099','stroke-width':1.5});
+     if(phase)node('rect',{x,y:dy,width:dw,height:6,fill:({L1:'#805b44',L2:'#303030',L3:'#888888',N:'#286ab2',PE:'#4b9650'})[phase]||'#777'});
+     text(x+4,dy+19,(d.manufacturer||'').replace('Schneider Electric','Schneider').slice(0,Math.max(5,Math.floor(dw/6.5))),Math.min(10,Math.max(7,dw/7)),700);
+     const lines=String(d.type||'').match(/.{1,13}/g)||[''];
+     lines.slice(0,2).forEach((line,i)=>text(x+4,dy+34+i*12,line,Math.min(11,Math.max(7,dw/8)),700));
+     text(x+4,dy+railHeight-47,'F'+d.id,9,700);
+     if(dw>=95)text(x+4,dy+railHeight-34,String(d.circuit||'').slice(0,Math.floor(dw/7)),9);
+     const cx=x+dw/2;
+     terminals.set(`${d.id}:top`,{x:cx,y:dy+4});terminals.set(`${d.id}:bottom`,{x:cx,y:dy+railHeight-32});
+     const layout=typeof terminalLayout==='function'?terminalLayout(d):[[],[]];
+     const groups=Array.isArray(layout)?layout:[[],[]];
+     for(let side=0;side<2;side++){
+       const ts=groups[side]||[];
+       ts.forEach((t,i)=>{const tx=x+(i+1)*dw/(ts.length+1),ty=side===0?dy+4:dy+railHeight-32;
+         node('circle',{cx:tx,cy:ty,r:3.2,fill:'#c79049',stroke:'#795127'});
+         terminals.set(`${d.id}:${String(t)}`,{x:tx,y:ty});
+       });
+     }
+     offset+=Math.max(1,Number(d.width)||1);
+   }
+ }
+ const colors={L1:'#80533c',L2:'#222222',L3:'#666666',N:'#2069b5',PE:'#348448'};
+ // Connection paths are constrained to the drawing bounds, and never change layout size.
+ const busPoint=(id)=>({x:W-44,y:id===-1?20:47});
+ const locate=(id,t)=>id<0?busPoint(id):terminals.get(`${id}:${String(t)}`)||terminals.get(`${id}:top`);
+ const laneOccupancy=new Map();
+ const reserveLane=(key)=>{const n=laneOccupancy.get(key)||0;laneOccupancy.set(key,n+1);return n};
+ const deviceRow=(id)=>devices.find(d=>d.id===id)?.row;
+ connections.forEach((c,i)=>{
+   const a=locate(c.from,c.fromTerminal),b=locate(c.to,c.toTerminal);
+   if(!a||!b)return;
+   const ar=deviceRow(c.from),br=deviceRow(c.to);
+   const rowA=ar===undefined?null:ar,rowB=br===undefined?null:br;
+   let lane;
+   if(rowA!==null && rowB!==null && rowA===rowB){
+     const r=rowA, railTop=rowStarts[r], railBottom=railTop+railHeight;
+     const bothBottom=a.y>railTop+railHeight/2&&b.y>railTop+railHeight/2;
+     const n=reserveLane(`row:${r}:${bothBottom?'bottom':'top'}`);
+     lane=bothBottom?railBottom+12+n*5:railTop-12-n*5;
+   }else if(rowA!==null && rowB!==null){
+     const r=Math.min(rowA,rowB),n=reserveLane(`between:${r}`);
+     lane=rowStarts[r]+railHeight+16+n*5;
+   }else{
+     const n=reserveLane('terminal-bus');
+     lane=62+n*5;
+   }
+   lane=Math.max(6,Math.min(H-7,lane));
+   // Ha két kapocs függőlegesen egy vonalban van, egyenes szakasz elegendő.
+   const path=Math.abs(a.x-b.x)<1.5
+     ? `M ${a.x} ${a.y} V ${b.y}`
+     : `M ${a.x} ${a.y} V ${lane} H ${b.x} V ${b.y}`;
+   node('path',{d:path,fill:'none',stroke:'#f5f5f5','stroke-width':4.2,'stroke-linejoin':'round'});
+   node('path',{d:path,fill:'none',stroke:colors[c.wire]||'#444','stroke-width':2.2,'stroke-linejoin':'round','stroke-linecap':'round'});
+   node('circle',{cx:a.x,cy:a.y,r:2.6,fill:colors[c.wire]||'#444',stroke:'#fff','stroke-width':0.7});
+   node('circle',{cx:b.x,cy:b.y,r:2.6,fill:colors[c.wire]||'#444',stroke:'#fff','stroke-width':0.7});
+ });
+ v1buses.forEach((bus,bi)=>{
+   const pts=bus.ids.map((id,i)=>({p:locate(id,'1'),id,phase:v101PhaseOf(bus,i)})).filter(x=>x.p);
+   if(pts.length<2)return;
+   const byRow=new Map();pts.forEach(x=>{const d=devices.find(d=>d.id===x.id);if(!d)return;const arr=byRow.get(d.row)||[];arr.push(x);byRow.set(d.row,arr)});
+   for(const [row,items] of byRow){if(items.length<2)continue;
+     const yy=rowStarts[row]+8,x1=Math.min(...items.map(x=>x.p.x)),x2=Math.max(...items.map(x=>x.p.x));
+     node('path',{d:`M ${x1} ${yy} H ${x2}`,fill:'none',stroke:'#93592e','stroke-width':5});
+     items.forEach(x=>{node('path',{d:`M ${x.p.x} ${yy} V ${x.p.y}`,stroke:'#93592e','stroke-width':3});text(x.p.x-8,yy-7,x.phase,8,700,'#633a21')});
+   }
+ });
+ const frame=v103print.querySelector('.p103-boardframe');frame.innerHTML='';frame.appendChild(svg);
+ const landscape=nr<=2;
+ v103print.classList.toggle('p106-landscape',landscape);
+ v103print.classList.toggle('p106-portrait',!landscape);
+ const styleId='v106-orientation';let orient=document.getElementById(styleId);
+ if(!orient){orient=document.createElement('style');orient.id=styleId;document.head.appendChild(orient)}
+ orient.textContent=`@page{size:A4 ${landscape?'landscape':'portrait'};margin:10mm}`;
+ frame.style.height=landscape?'158mm':'225mm';
+
+}
+window.addEventListener('beforeprint',()=>{try{drawFrontWires();v103buildPrint()}catch(e){console.error('PDF előkészítés:',e)}});
+window.addEventListener('afterprint',()=>{v103print.innerHTML=''});
+// v1.0.5: mobile/Android print geometry and a readable full-width board sheet.
+const v105style=document.createElement('style');
+v105style.textContent=`
+@page{size:A4 portrait;margin:9mm}
+@media print{
+ body{margin:0!important;padding:0!important}
+ #v103print{font:10pt/1.32 Arial,sans-serif!important}
+ #v103print .p103-docs{margin:0!important;padding:0!important}
+ #v103print .p103-section{margin:0!important;padding:0!important}
+ #v103print .p104-gridtable{margin-bottom:2mm!important}
+ #v103print .p104-gridrow>div{padding:1.1mm 1.7mm!important;font-size:9.5pt!important;line-height:1.22!important}
+ #v103print .p103-boardpage{height:267mm!important;width:100%!important;break-before:page!important;page-break-before:always!important;overflow:hidden!important}
+ #v103print .p103-boardframe{width:100%!important;max-height:230mm!important;overflow:hidden!important;margin:8mm auto 0!important}
+ #v103print .p103-boardscale{left:50%!important;transform:translateX(-50%) scale(var(--p103-scale, .57))!important;transform-origin:top center!important}
+ #v103print .p103-boardscale .board{width:var(--p103-width)!important;min-width:var(--p103-width)!important;max-width:var(--p103-width)!important;padding:8px 14px 25px!important;overflow:hidden!important}
+ #v103print .p103-boardscale .rail{width:var(--p105-railwidth)!important;min-width:var(--p105-railwidth)!important;max-width:var(--p105-railwidth)!important;margin:38px 0!important}
+ #v103print .p103-boardscale .busbars{width:var(--p105-railwidth)!important;max-width:var(--p105-railwidth)!important;overflow:hidden!important}
+ #v103print .p103-boardscale .bus{max-width:100%!important;box-sizing:border-box!important}
+ #v103print .p105-wire-overlay{position:absolute;top:0;left:0;pointer-events:none;z-index:5;overflow:hidden!important}
+}
+`;
+document.head.appendChild(v105style);
+
+
+
+// v1.0.6: no cloned HTML boards; use one fitted, self-contained SVG.
+const v106style=document.createElement('style');v106style.textContent=`
+@media print{
+ #v103print .p103-boardpage{height:auto!important;min-height:0!important;max-height:none!important;overflow:hidden!important;break-before:page!important;page-break-before:always!important;break-after:auto!important;padding:0!important}
+ #v103print .p103-boardframe{display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;max-height:none!important;overflow:hidden!important;margin:4mm 0 0!important}
+ #v103print .p103-boardframe svg{display:block!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;overflow:hidden!important}
+ #v103print .p103-boardtitle{font-size:14pt!important}
+ #v103print .p103-boardmeta{font-size:9pt!important}
+}
+`;document.head.appendChild(v106style);
+
+// v1.0.7 – egységes dokumentáció és egyoldalas, méretarányos SVG elölnézet.
+const v107style=document.createElement('style');
+v107style.textContent=`
+@media print{
+  html,body{margin:0!important;padding:0!important;overflow:visible!important}
+  body>header,body>main{display:none!important}
+  #v103print{display:block!important;width:100%!important;font-family:Arial,Helvetica,sans-serif!important;font-size:11pt!important;line-height:1.32!important;color:#111!important}
+  #v103print .p103-docs{display:block!important;position:static!important;width:100%!important;height:auto!important;overflow:visible!important;break-inside:auto!important}
+  #v103print .p103-header{margin-bottom:4mm!important;padding-bottom:3mm!important}
+  #v103print .p103-meta{margin-bottom:4mm!important;gap:1.5mm 5mm!important}
+  #v103print .p103-meta>div{padding:1.2mm 1.8mm!important;font-size:10pt!important}
+  #v103print .p103-section{display:block!important;break-inside:auto!important;page-break-inside:auto!important;overflow:visible!important;margin:0!important;padding:0!important}
+  #v103print .p103-section h2{font-size:12pt!important;margin:3.5mm 0 1.5mm!important;break-after:avoid!important}
+  #v103print .v107-table{display:table!important;width:100%!important;table-layout:fixed!important;border-collapse:collapse!important;font-size:11pt!important;line-height:1.24!important;margin:0 0 2mm!important;break-inside:auto!important;page-break-inside:auto!important}
+  #v103print .v107-table thead{display:table-header-group!important}
+  #v103print .v107-table tbody{display:table-row-group!important}
+  #v103print .v107-table tr{display:table-row!important;break-inside:avoid!important;page-break-inside:avoid!important}
+  #v103print .v107-table th,#v103print .v107-table td{display:table-cell!important;font-size:11pt!important;line-height:1.24!important;padding:1.2mm 1.8mm!important;vertical-align:top!important;overflow-wrap:anywhere!important}
+  #v103print .v107-table th{background:#e9ebed!important;font-weight:700!important}
+  #v103print .p103-note{font-size:10pt!important}
+  #v103print .p103-boardpage{display:block!important;break-before:page!important;page-break-before:always!important;break-inside:avoid!important;page-break-inside:avoid!important;width:100%!important;height:auto!important;overflow:hidden!important;padding:0!important;margin:0!important}
+  #v103print .p103-boardtitle{font-size:14pt!important;margin:0 0 2mm!important}
+  #v103print .p103-boardmeta{font-size:10pt!important;margin:0 0 2mm!important}
+  #v103print .p103-boardframe{display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;max-height:none!important;margin:0!important;padding:0!important;overflow:hidden!important}
+  #v103print .p103-boardframe svg{display:block!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important}
+}
+`;
+document.head.appendChild(v107style);
+
+/* VA ELECTRO v1.0.8 — Munkáim, helyi projektkezelés */
+(function () {
+  const KEY = "va-electro-jobs-v108";
+  const copy = obj => JSON.parse(JSON.stringify(obj));
+  const makeId = () => "job-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
+  const cleanName = name => String(name || "Névtelen munka").trim().slice(0, 150) || "Névtelen munka";
+  let loading = false;
+
+  function loadStore() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(KEY));
+      if (saved && Array.isArray(saved.jobs) && saved.jobs.length &&
+          saved.jobs.every(j => j && j.id && j.data && Array.isArray(j.data.devices))) return saved;
+    } catch (e) { console.warn("Munkák beolvasása:", e); }
+    return null;
+  }
+
+  let store = loadStore();
+  function writeStore() {
+    try { localStorage.setItem(KEY, JSON.stringify(store)); }
+    catch (e) { alert("Nem sikerült elmenteni a munkákat. Ellenőrizd a böngésző tárhelyét!"); }
+  }
+  const active = () => store.jobs.find(j => j.id === store.activeId);
+
+  const panel = document.createElement("section");
+  panel.id = "v108Jobs";
+  panel.className = "panel noprint";
+  panel.innerHTML = `
+    <h2>📁 Munkáim</h2>
+    <p class="hint">Automatikus mentés ezen a készüléken. Telefoncsere vagy böngészőadatok törlése előtt készíts biztonsági mentést!</p>
+    <label>Aktív munka</label><select id="v108JobSelect"></select>
+    <div class="actions" style="margin-top:9px">
+      <button type="button" id="v108New">+ Új munka</button>
+      <button type="button" class="alt" id="v108Copy">Másolás</button>
+    </div>
+    <div class="actions" style="margin-top:8px">
+      <button type="button" class="alt" id="v108Rename">Átnevezés</button>
+      <button type="button" class="alt" id="v108Delete">Törlés</button>
+    </div>
+    <div class="actions" style="margin-top:8px">
+      <button type="button" class="alt" id="v108Backup">Összes munka mentése</button>
+      <button type="button" class="alt" id="v108Restore">Visszatöltés</button>
+    </div>
+    <input id="v108RestoreFile" type="file" accept=".json,application/json" hidden>
+    <p id="v108Status" class="muted"></p>`;
+  document.querySelector("aside").prepend(panel);
+
+  function refreshList() {
+    const selector = document.getElementById("v108JobSelect");
+    selector.innerHTML = store.jobs.map(j => `<option value="${j.id}">${esc(j.name)}</option>`).join("");
+    selector.value = store.activeId;
+    document.getElementById("v108Status").textContent = `${store.jobs.length} mentett munka · Automatikus mentés bekapcsolva`;
+  }
+  function saveActive() {
+    if (loading || !store) return;
+    const job = active();
+    if (!job) return;
+    job.data = copy(snapshot());
+    job.name = cleanName(job.data.project);
+    job.updated = new Date().toISOString();
+    writeStore();
+    refreshList();
+  }
+  function openJob(id) {
+    const job = store.jobs.find(j => j.id === id);
+    if (!job) return;
+    loading = true;
+    try {
+      importData(copy(job.data));
+      store.activeId = id;
+      selected = null;
+      writeStore();
+      refreshList();
+    } catch (e) {
+      alert("Nem sikerült megnyitni a munkát: " + e.message);
+      refreshList();
+    } finally { loading = false; }
+  }
+
+  const previousPersist = persist;
+  persist = function () { previousPersist(); saveActive(); };
+
+  // Megőrizzük a jelenlegi v1.0.7-es tervet az első indításkor.
+  if (!store) {
+    const id = makeId(), data = copy(snapshot());
+    store = {activeId:id, jobs:[{id, name:cleanName(data.project), updated:new Date().toISOString(), data}]};
+    writeStore();
+  }
+  openJob(store.activeId);
+
+  function emptyPlan(name) {
+    return {version:10,project:cleanName(name),rows:2,capacity:18,
+      devices:[],connections:[],busbars:[],
+      meta:{client:"",job:"",site:"",date:"",author:"VA ELECTRO",state:"Tervezet"}};
+  }
+
+  document.getElementById("v108JobSelect").onchange = e => openJob(e.target.value);
+  document.getElementById("v108New").onclick = () => {
+    const name = prompt("Új munka neve:", "Új elosztó");
+    if (name === null) return;
+    const id = makeId(), data = emptyPlan(name);
+    store.jobs.push({id,name:data.project,updated:new Date().toISOString(),data});
+    writeStore(); openJob(id);
+  };
+  document.getElementById("v108Copy").onclick = () => {
+    const data = copy(active().data), id = makeId();
+    data.project = cleanName(active().name + " – másolat");
+    store.jobs.push({id,name:data.project,updated:new Date().toISOString(),data});
+    writeStore(); openJob(id);
+  };
+  document.getElementById("v108Rename").onclick = () => {
+    const name = prompt("Munka új neve:", active().name);
+    if (name === null) return;
+    document.getElementById("project").value = cleanName(name);
+    render();
+  };
+  document.getElementById("v108Delete").onclick = () => {
+    if (store.jobs.length === 1) return alert("Az utolsó munka nem törölhető. Előbb hozz létre egy másikat.");
+    if (!confirm("Biztosan végleg törlöd ezt a munkát?")) return;
+    store.jobs = store.jobs.filter(j => j.id !== store.activeId);
+    store.activeId = store.jobs[0].id;
+    writeStore(); openJob(store.activeId);
+  };
+  document.getElementById("v108Backup").onclick = () => {
+    saveActive();
+    const payload = {format:"va-electro-all-projects-v108",exported:new Date().toISOString(),jobs:store.jobs};
+    const url = URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}));
+    const a = document.createElement("a");
+    a.href = url; a.download = "VA-ELECTRO-Munkaim-" + new Date().toISOString().slice(0,10) + ".json";
+    a.click(); setTimeout(() => URL.revokeObjectURL(url),3000);
+  };
+  document.getElementById("v108Restore").onclick = () => document.getElementById("v108RestoreFile").click();
+  document.getElementById("v108RestoreFile").onchange = async e => {
+    const file = e.target.files[0]; e.target.value = "";
+    if (!file) return;
+    try {
+      const payload = JSON.parse(await file.text());
+      if (payload.format !== "va-electro-all-projects-v108" ||
+          !Array.isArray(payload.jobs) || !payload.jobs.length || payload.jobs.length > 500 ||
+          payload.jobs.some(j => !j.data || !Array.isArray(j.data.devices) || !Array.isArray(j.data.connections)))
+        throw Error("Érvénytelen mentési fájl.");
+      if (!confirm("A visszatöltés lecseréli az összes jelenleg tárolt munkát. Folytatod?")) return;
+      const restored = payload.jobs.map(j => ({
+        id:makeId(), name:cleanName(j.name), updated:j.updated || "", data:copy(j.data)
+      }));
+      // Az első projektet még a meglévő állomány lecserélése előtt ellenőrizzük.
+      loading = true;
+      try { importData(copy(restored[0].data)); }
+      finally { loading = false; }
+      store = {activeId:restored[0].id,jobs:restored};
+      writeStore(); openJob(store.activeId);
+      alert("A munkák visszatöltése sikeres.");
+    } catch (err) { alert("Visszatöltési hiba: " + err.message); }
+  };
+})();
+
+</script></body></html>
