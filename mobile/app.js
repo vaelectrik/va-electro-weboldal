@@ -2372,6 +2372,10 @@ function openJob(id) {
       Megjegyzés mentése
     </button>
 
+    <button id="trashJobButton" class="secondary" type="button">
+      Törlés
+    </button>
+
     ${detailRow("Ajánlat elküldve", job.offer_sent_at)}
     ${detailRow(
       "Létrehozva",
@@ -2382,6 +2386,7 @@ function openJob(id) {
   `;
 
   $("saveStatusButton").addEventListener("click", saveJobStatus);
+  $("trashJobButton").addEventListener("click", () => trashJob(job));
   $("saveAdminNotesButton").addEventListener("click", saveAdminNotes);
 
   document.querySelectorAll(".app-page").forEach(page => {
@@ -2776,6 +2781,56 @@ async function loadFinancialRecords() {
   materialCosts = materialResult.data || [];
 }
 
+async function trashJob(job) {
+  if (!navigator.onLine) {
+    showMessage("A törléshez internetkapcsolat szükséges.", true);
+    return;
+  }
+  const label = [job.customer_name || "Névtelen ügyfél", job.work_number, job.service_type]
+    .filter(Boolean).join(" · ");
+  if (!confirm(label + " – kukába helyezed ezt a tételt? A webes Admin Kukájából visszaállítható.")) return;
+
+  const button = $("trashJobButton");
+  button.disabled = true;
+  try {
+    const { data, error } = await supabaseClient.rpc("set_va_electro_inquiry_deleted", {
+      p_inquiry_id: String(job.id), p_deleted: true
+    });
+    if (error) throw error;
+    if (!data) throw new Error("A tétel már nem található.");
+    inquiries = inquiries.filter(item => item.id !== job.id);
+    notificationItems = notificationItems.filter(item => item.jobId !== job.id);
+    if (currentJobId === job.id) {
+      currentJobId = null;
+      $("detailView").classList.add("hidden");
+      showPage("jobs");
+    }
+    updateCounters();
+    renderJobs();
+    renderHomeJobs();
+    renderSearchResults();
+    renderNotifications();
+    renderDashboardFinance();
+    if (offlineCryptoKey) {
+      try {
+        await persistOfflineSnapshot();
+      } catch {
+        showMessage("A tétel a Kukába került. Az offline másolat frissítése sikertelen.", true);
+        return;
+      }
+    }
+    showMessage("A tétel a Kukába került.");
+  } catch (error) {
+    if (error.code === "PGRST202") {
+      showMessage("A törléshez először futtasd a Supabase beállító SQL-t.", true);
+    } else {
+      showMessage("A törlés sikertelen: " + error.message, true);
+    }
+  } finally {
+    button.disabled = false;
+  }
+}
+
 /* ADMIN MEGJEGYZÉS MENTÉSE */
 
 async function saveAdminNotes() {
@@ -2998,12 +3053,16 @@ renderDashboardFinance();
   const { data, error } = await supabaseClient
     .from("inquiries")
     .select("*")
+    .is("deleted_at", null)
     .order("created_at", { ascending: false })
     .limit(500);
 
   if (error) throw error;
 
   inquiries = data || [];
+  notificationItems = notificationItems.filter(item =>
+    !item.jobId || inquiries.some(job => job.id === item.jobId)
+  );
 
   await loadFinancialRecords();
 

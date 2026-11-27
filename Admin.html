@@ -92,6 +92,7 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0}
   <button data-tab="rejected" type="button">Elutasítva</button>
   <button data-tab="closed" type="button">Lezárva</button>
   <button data-tab="payments" type="button">Fizetések</button><button data-tab="information" type="button">Információk</button>
+  <button data-tab="trash" type="button">Kuka</button>
 </nav>
 
 <section id="tab-new" class="tab-panel">
@@ -194,6 +195,7 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0}
   <div class="actions">
     <button id="save" type="button">Mentés</button>
     <button id="back" class="secondary" type="button">Vissza a listához</button>
+    <button id="trashRequest" class="secondary" type="button">Törlés</button>
   </div>
 </section>
 
@@ -324,6 +326,11 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0}
     </div>
   </div>
 </section>
+<section id="tab-trash" class="tab-panel hidden">
+  <h2>Kuka</h2>
+  <p class="muted">A törölt munkák és ajánlatkérések itt állíthatók vissza.</p>
+  <div id="trashedRequests"></div>
+</section>
 </main>
 
 <script>
@@ -335,6 +342,7 @@ const $ = id => document.getElementById(id);
 let selectedRequest = null;
 let selectedPaymentJob = null;
 let requests = [];
+let trashedRequests = [];
 let payments = [];
 let materialCosts = [];
 function message(text) { $("message").textContent = text; }
@@ -444,9 +452,12 @@ async function loadRequests() {
     const { data, error } = await client
       .from("inquiries").select("*").order("created_at", {ascending:false});
     if (error) throw error;
-    requests = data || [];
+    const entries = data || [];
+    requests = entries.filter(item => !item.deleted_at);
+    trashedRequests = entries.filter(item => item.deleted_at);
+    renderTrashedRequests();
 
-    const jobIds = requests
+    const jobIds = entries
       .filter(item => ["accepted","completed"].includes(item.status))
       .map(item => item.id);
 
@@ -719,9 +730,9 @@ function renderPaymentOverview() {
     0
   );
 
-  const paidTotal = jobs.reduce(
-    (sum, job) => sum + getPaid(job.id), 0
-  );
+  const paidTotal = [...jobs, ...trashedRequests.filter(job =>
+    ["accepted", "completed"].includes(job.status)
+  )].reduce((sum, job) => sum + getPaid(job.id), 0);
 
   const debtTotal = jobs.reduce(
     (sum, job) =>
@@ -1056,6 +1067,67 @@ $("notes").value = item.admin_notes || "";
   $("requestDetail").classList.remove("hidden");loadWorkDocuments();
   $("requestDetail").scrollIntoView({behavior:"smooth",block:"start"});
 }
+
+function renderTrashedRequests() {
+  const list = $("trashedRequests");
+  list.replaceChildren();
+  if (!trashedRequests.length) {
+    list.textContent = "A kuka üres.";
+    return;
+  }
+  for (const item of trashedRequests) {
+    const row = document.createElement("div");
+    row.className = "item";
+    const title = document.createElement("p");
+    title.textContent = [item.customer_name || "Névtelen ügyfél", item.work_number, item.service_type]
+      .filter(Boolean).join(" · ");
+    const restore = document.createElement("button");
+    restore.type = "button";
+    restore.className = "secondary";
+    restore.textContent = "Visszaállítás";
+    restore.addEventListener("click", () => setRequestDeleted(item, false, restore));
+    row.append(title, restore);
+    list.append(row);
+  }
+}
+
+async function setRequestDeleted(item, deleted, button) {
+  if (!navigator.onLine) {
+    message("Ehhez a művelethez internetkapcsolat szükséges.");
+    return;
+  }
+  if (deleted) {
+    const label = [item.customer_name || "Névtelen ügyfél", item.work_number, item.service_type]
+      .filter(Boolean).join(" · ");
+    if (!confirm(label + " – kukába helyezed ezt a tételt? A Kukából visszaállítható.")) return;
+  }
+  button.disabled = true;
+  try {
+    const { data, error } = await client.rpc("set_va_electro_inquiry_deleted", {
+      p_inquiry_id: String(item.id), p_deleted: deleted
+    });
+    if (error) throw error;
+    if (!data) throw new Error("A tétel már nem található.");
+    if (selectedRequest?.id === item.id) {
+      selectedRequest = null;
+      $("requestDetail").classList.add("hidden");
+    }
+    message(deleted ? "A tétel a Kukába került." : "A tételt visszaállítottuk.");
+    await loadRequests();
+  } catch (error) {
+    if (error.code === "PGRST202") {
+      message("A törléshez először futtasd a Supabase beállító SQL-t.");
+    } else {
+      message("Sikertelen művelet: " + error.message);
+    }
+  } finally {
+    button.disabled = false;
+  }
+}
+
+$("trashRequest").addEventListener("click", () => {
+  if (selectedRequest) setRequestDeleted(selectedRequest, true, $("trashRequest"));
+});
 
 $("save").addEventListener("click", async () => {
   if (!selectedRequest) return;
