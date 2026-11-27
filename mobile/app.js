@@ -5,8 +5,6 @@
    + Titkosított offline pénzügyi mentés
 ========================================= */
 
-const SUPABASE_URL = "https://fxxhxnpirxpjqadrwyzf.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_Zpk6zDDtgqFpkDc38ms6_g_gjzvn-ZS";
 
 const DOCUMENT_BUCKET = "va-electro-documents";
 const MAX_DOCUMENT_SIZE = 15 * 1024 * 1024;
@@ -26,6 +24,8 @@ const DOCUMENT_CATEGORIES = [
   "Egyéb dokumentum"
 ];
 
+const SUPABASE_URL = "https://fxxhxnpirxpjqadrwyzf.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_Zpk6zDDtgqFpkDc38ms6_g_gjzvn-ZS";
 const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
@@ -562,6 +562,32 @@ function showDashboard() {
 let currentPage = "home";
 let navigationInitialized = false;
 let notificationItems = [];
+const seenOfferNotices = new Set();
+try {
+  for (const id of JSON.parse(localStorage.getItem("vaElectroOfferNotices") || "[]")) seenOfferNotices.add(id);
+} catch {}
+function rememberOffers(items) {
+  for (const item of items) if (item.type === "offer") seenOfferNotices.add(item.id);
+  try { localStorage.setItem("vaElectroOfferNotices", JSON.stringify([...seenOfferNotices].slice(-500))); } catch {}
+}
+function refreshOfferNotices() {
+  const warnings = inquiries.flatMap(job => {
+    const deadline = offerDeadlines.get(job);
+    if (!deadline?.urgent) return [];
+    const id = "offer:" + job.id + ":" + job.offer_sent_at + ":" + deadline.remaining;
+    return seenOfferNotices.has(id) ? [] : [{
+      type: "offer", id, jobId: job.id, title: "Hamarosan lejár az ajánlat",
+      message: (job.customer_name || job.service_type || "Ajánlat") + " · " + deadline.label,
+    }];
+  });
+  notificationItems = [...warnings, ...notificationItems.filter(item => item.type !== "offer")];
+}
+function offerBadge(job) {
+  const deadline = offerDeadlines.get(job);
+  if (!deadline) return "";
+  return '<span class="offer-deadline' + (deadline.urgent || deadline.remaining < 0 ? ' urgent' : '') +
+    '">' + escapeHtml(deadline.label + " · " + deadline.deadline) + '</span>';
+}
 let notificationChannel = null;
 let calendarEvents = [];
 let calendarReminderNotifiedIds = new Set();
@@ -1044,10 +1070,24 @@ function setupNavigation() {
   });
 
   $("globalSearch").addEventListener("input", renderSearchResults);
+  const refreshDeadlines = () => {
+    if ($("dashboardView").classList.contains("hidden")) return;
+    renderNotifications();
+    document.querySelectorAll("[data-job-id]").forEach(card => {
+      const badge = card.querySelector(".offer-deadline");
+      const job = inquiries.find(entry => entry.id === card.dataset.jobId);
+      if (badge && job) badge.outerHTML = offerBadge(job);
+    });
+  };
+  window.setInterval(refreshDeadlines, 60_000);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) refreshDeadlines();
+  });
 
     $("notificationButton").addEventListener("click", () => {
     const panel = $("notificationPanel");
     const opening = panel.classList.contains("hidden");
+    if (opening) renderNotifications();
 
     panel.classList.toggle("hidden", !opening);
 
@@ -1079,6 +1119,7 @@ function setupNavigation() {
   });
 
   $("markNotificationsRead").addEventListener("click", () => {
+    rememberOffers(notificationItems);
     notificationItems = [];
 
     renderNotifications();
@@ -1095,6 +1136,7 @@ $("notificationList").addEventListener("click", event => {
     item => (item.id || item.jobId) === id
   );
 
+  if (selectedNotification) rememberOffers([selectedNotification]);
   notificationItems = notificationItems.filter(
     item => (item.id || item.jobId) !== id
   );
@@ -1116,7 +1158,7 @@ $("notificationList").addEventListener("click", event => {
     return;
   }
 
-  openJob(id);
+  openJob(selectedNotification?.jobId || id);
 });
    
   $("homeJobList").addEventListener("click", event => {
@@ -1268,7 +1310,7 @@ function renderHomeJobs() {
           ${escapeHtml(statusLabel(job.status))}
         </span>
 
-        <div class="open-hint">Adatlap megnyitása →</div>
+        ${offerBadge(job)}
       </button>
     `).join("")
     : `<p class="notice">Jelenleg nincs megjeleníthető munka.</p>`;
@@ -1378,6 +1420,7 @@ function renderNotifications() {
 
   if (!container || !badge) return;
 
+  refreshOfferNotices();
   const count = notificationItems.length;
 
   badge.textContent = count;
@@ -1546,6 +1589,7 @@ function renderJobs() {
 
   $("jobList").innerHTML = jobs.length
     ? jobs.map(item => `
+      <article class="job-result">
       <button
         class="job job-button"
         type="button"
@@ -1566,8 +1610,11 @@ function renderJobs() {
           ${escapeHtml(statusLabel(item.status))}
         </span>
 
-        <div class="open-hint">Adatlap megnyitása →</div>
+        ${offerBadge(item)}
       </button>
+      ${item.status === "offer_sent" ? `<button type="button" class="secondary offer-sms-button"
+        data-offer-sms="${escapeHtml(item.id)}">Gyors SMS</button>` : ""}
+      </article>
     `).join("")
     : `
       <div class="job-empty">
@@ -1584,6 +1631,13 @@ jobsPanel.addEventListener("click", event => {
   if (tab) {
     currentFilter = tab.dataset.filter;
     renderJobs();
+    return;
+  }
+
+  const smsButton = event.target.closest("[data-offer-sms]");
+  if (smsButton) {
+    const job = inquiries.find(item => item.id === smsButton.dataset.offerSms);
+    if (job?.status === "offer_sent") offerFollowUp.open(job);
     return;
   }
 
@@ -2376,7 +2430,8 @@ function openJob(id) {
       Törlés
     </button>
 
-    ${detailRow("Ajánlat elküldve", job.offer_sent_at)}
+    ${offerBadge(job)}
+    ${detailRow("Ajánlat elküldve", job.offer_sent_at ? new Date(job.offer_sent_at).toLocaleString("hu-HU") : "")}
     ${detailRow(
       "Létrehozva",
       job.created_at
@@ -2898,6 +2953,8 @@ async function saveJobStatus() {
     if (!navigator.onLine) {
       const oldStatus = job.status;
 
+      const oldSentAt = job.offer_sent_at;
+      job.offer_sent_at = offerDeadlines.sentAtForStatus(job, newStatus);
       job.status = newStatus;
 
       try {
@@ -2908,6 +2965,7 @@ async function saveJobStatus() {
         });
       } catch (error) {
         job.status = oldStatus;
+        job.offer_sent_at = oldSentAt;
         throw error;
       }
 
@@ -2918,20 +2976,24 @@ async function saveJobStatus() {
       updateCounters();
       renderJobs();
       renderDashboardFinance();
+      renderHomeJobs();
+      renderNotifications();
       openJob(currentJobId);
 
       showMessage("Offline mentés sikeres. Szinkronizálásra vár.");
       return;
     }
 
-    const { error } = await supabaseClient
+    const { data, error } = await supabaseClient
       .from("inquiries")
       .update({ status: newStatus })
-      .eq("id", currentJobId);
+      .eq("id", job.id)
+      .select("status,offer_sent_at")
+      .single();
 
     if (error) throw error;
 
-    job.status = newStatus;
+    Object.assign(job, data);
 
     if (currentFilter !== "all") {
       currentFilter = newStatus;
@@ -2951,6 +3013,8 @@ async function saveJobStatus() {
     updateCounters();
     renderJobs();
     renderDashboardFinance();
+    renderHomeJobs();
+    renderNotifications();
     openJob(currentJobId);
 
     showMessage("A munka állapota sikeresen módosult.");
@@ -2995,6 +3059,34 @@ function createDashboardFinance() {
   `;
 }
 
+function renderPaymentTrend() {
+  const now = new Date();
+  const months = Array.from({ length: 6 }, (_, index) => {
+    const month = new Date(now.getFullYear(), now.getMonth() + index - 5, 1);
+    const key = month.getFullYear() + "-" + String(month.getMonth() + 1).padStart(2, "0");
+    return {
+      label: month.toLocaleDateString("hu-HU", { month: "short" }),
+      total: payments.reduce((sum, payment) =>
+        sum + (String(payment.payment_date).startsWith(key) ? numeric(payment.amount) : 0), 0)
+    };
+  });
+  const max = Math.max(1, ...months.map(month => month.total));
+  const points = months.map((month, index) => [20 + index * 64, 102 - 80 * month.total / max]);
+  const line = points.map((point, index) => (index ? "L" : "M") + point.join(" ")).join(" ");
+  return `
+    <section class="payment-trend">
+      <h3>Beérkezett befizetések</h3>
+      <p class="muted">Elmúlt 6 hónap · Ft</p>
+      <svg viewBox="0 0 360 114" role="img" aria-label="${escapeHtml(months.map(m => m.label + " " + formatMoney(m.total)).join(", "))}">
+        <path d="M20 22H340 M20 62H340 M20 102H340" class="trend-grid"/>
+        <path d="${line} L340 102 H20 Z" class="trend-area"/>
+        <path d="${line}" class="trend-line"/>
+        ${points.map(([x,y]) => `<circle cx="${x}" cy="${y}" r="3.5" />`).join("")}
+      </svg>
+      <div class="trend-months">${months.map(m => `<span title="${escapeHtml(formatMoney(m.total))}">${escapeHtml(m.label)}</span>`).join("")}</div>
+    </section>`;
+}
+
 function renderDashboardFinance() {
   const container = $("dashboardFinanceContent");
   if (!container) return;
@@ -3002,25 +3094,36 @@ function renderDashboardFinance() {
   const sentOffers = inquiries
     .filter(job => job.status === "offer_sent")
     .reduce((sum, job) => sum + numeric(job.offer_amount), 0);
-
-  const totalReceived = payments.reduce(
-    (sum, item) => sum + numeric(item.amount), 0
-  );
-
-  const totalBalance = inquiries
-    .filter(job => job.status === "accepted")
-    .reduce((sum, job) => {
-      const numbers = getFinancialNumbers(job);
-      return sum + numbers.balance;
-    }, 0);
+  const totalReceived = payments.reduce((sum, item) => sum + numeric(item.amount), 0);
+  const outstanding = inquiries
+    .filter(job => ["accepted", "completed"].includes(job.status))
+    .map(job => ({ job, ...getFinancialNumbers(job) }))
+    .filter(entry => entry.balance > 0)
+    .sort((left, right) => right.balance - left.balance);
+  const totalBalance = outstanding.reduce((sum, entry) => sum + entry.balance, 0);
 
   container.innerHTML = `
+    ${renderPaymentTrend()}
     <div class="finance-summary-grid">
       ${financeCard("Kiküldött ajánlatok összege", sentOffers)}
       ${financeCard("Összes beérkezett kifizetés", totalReceived)}
       ${financeCard("Fennmaradó hátralék", totalBalance)}
     </div>
+    <section class="outstanding-jobs">
+      <h3>Fennálló tartozások</h3>
+      ${outstanding.length ? outstanding.map(({job, balance, received, accepted}) => `
+        <button type="button" class="outstanding-row" data-outstanding-job="${escapeHtml(job.id)}">
+          <span><strong>${escapeHtml(job.customer_name || "Névtelen ügyfél")}</strong>
+            <small>${escapeHtml(job.work_number || job.service_type || "")}</small>
+            <small>Befizetve ${formatMoney(received)} / ${formatMoney(accepted)}</small>
+          </span><strong>${formatMoney(balance)}</strong>
+        </button>
+      `).join("") : '<p class="muted">Jelenleg nincs fennálló tartozás.</p>'}
+    </section>
   `;
+  container.querySelectorAll("[data-outstanding-job]").forEach(button => {
+    button.addEventListener("click", () => openJob(button.dataset.outstandingJob));
+  });
 }
 
 /* ADATOK BETÖLTÉSE */
@@ -3082,7 +3185,7 @@ renderDashboardFinance();
 renderNotifications();
 setupRealtimeNotifications();
 await checkCalendarReminders();
-  showMessage("Kapcsolódva a VA ELECTRO adatbázishoz.");
+  showMessage("");
 }
 
 /* =========================================

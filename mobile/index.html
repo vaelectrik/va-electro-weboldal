@@ -2,10 +2,12 @@
 <html lang="hu">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#121212">
   <meta name="description" content="VA ELECTRO Mobile – privát vállalkozáskezelő alkalmazás">
-  <title>VA ELECTRO Mobile</title>
+  <title>VA ELECTRO Mobil Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css">
@@ -16,7 +18,7 @@
       <div class="brand-mark">VA</div>
       <div>
         <div class="brand-name">VA ELECTRO</div>
-        <div class="brand-sub">MOBILE MANAGEMENT</div>
+        <div class="brand-sub">MOBIL ADMIN</div>
       </div>
     </header>
 
@@ -81,7 +83,7 @@
 
       <div class="mobile-topbar">
         <div class="mobile-topbar-title">
-          <span class="eyebrow">VA ELECTRO / MANAGEMENT</span>
+          <span class="eyebrow mobile-kicker">VA ELECTRO / MOBIL ADMIN</span>
           <h1 id="currentPageTitle">Kezdőképernyő</h1>
         </div>
 
@@ -118,7 +120,7 @@
       </div>
 
       <section id="homePage" class="app-page">
-        <p class="muted">VA ELECTRO – Áttekintés</p>
+        
 
         <div class="grid">
           <div class="stat">
@@ -136,7 +138,7 @@
         </div>
 
         <section class="panel">
-          <h2>Aktuális munkák</h2>
+          <h2>Legutóbbi munkák</h2>
           <div id="homeJobList">
             <p class="notice">Adatok betöltése…</p>
           </div>
@@ -153,9 +155,29 @@
       </section>
 
       <section id="financePage" class="app-page hidden">
-        <section id="financePageContent" class="panel">
-          <h2>Pénzügyek</h2>
-          <p class="notice">Pénzügyi adatok betöltése…</p>
+        <div class="finance-tabs" aria-label="Pénzügyi nézet">
+          <button type="button" class="secondary" data-finance-tab="overview" aria-pressed="true">Áttekintés</button>
+          <button type="button" class="secondary" data-finance-tab="expenses" aria-pressed="false">Kiadások</button>
+        </div>
+        <div id="financeOverview">
+          <section id="financePageContent" class="panel">
+            <h2>Pénzügyek</h2>
+          </section>
+        </div>
+        <section id="expensePanel" class="panel hidden">
+          <h2>Kiadások</h2>
+          <form id="expenseForm">
+            <label class="field" for="expenseNote"><span>Megjegyzés</span></label>
+            <textarea id="expenseNote" placeholder="Pl. 2 db utánfutógumi" maxlength="300" rows="2" required></textarea>
+            <label class="field" for="expenseAmount"><span>Összeg (Ft)</span></label>
+            <input id="expenseAmount" type="number" min="1" max="999999999" step="1" inputmode="numeric" required>
+            <button type="submit" class="primary">Kiadás mentése</button>
+          </form>
+          <p id="expenseStatus" class="notice" role="status"></p>
+          <label class="field" for="expenseMonth"><span>Hónap</span></label>
+          <input type="month" id="expenseMonth">
+          <div class="expense-total"><span>Összes kiadás</span><strong id="expenseTotal"></strong></div>
+          <div id="expenseList"></div>
         </section>
       </section>
 
@@ -292,23 +314,23 @@
       <nav id="bottomNavigation" class="bottom-navigation"
         aria-label="Fő navigáció">
         <button type="button" class="nav-item active" data-page="home">
-          <span class="nav-icon">⌂</span>
-          <span>Kezdőképernyő</span>
+          <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20h-6v-5H9v5H3z"/></svg></span>
+          <span>Kezdőlap</span>
         </button>
         <button type="button" class="nav-item" data-page="jobs">
-          <span class="nav-icon">▤</span>
+          <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v14H4z M9 6V4h6v2 M4 11h16"/></svg></span>
           <span>Munkák</span>
         </button>
         <button type="button" class="nav-item" data-page="finance">
-          <span class="nav-icon">▥</span>
+          <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v13H4z M4 10h16 M8 15h4"/></svg></span>
           <span>Pénzügyek</span>
         </button>
         <button type="button" class="nav-item" data-page="search">
-          <span class="nav-icon">⌕</span>
+          <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16l4 4 M17 10.5a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0"/></svg></span>
           <span>Keresés</span>
         </button>
         <button type="button" class="nav-item" data-page="calendar">
-          <span class="nav-icon">▦</span>
+          <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v14H4z M8 3v5m8-5v5 M4 10h16"/></svg></span>
           <span>Naptár</span>
         </button>
       </nav>
@@ -316,9 +338,26 @@
     </section>
 
     <footer>PRECIZITÁS. BIZTONSÁG. MEGBÍZHATÓSÁG.</footer>
+    <dialog id="offerSmsDialog" aria-labelledby="offerSmsTitle">
+      <div class="offer-sms-heading">
+        <h2 id="offerSmsTitle">Gyors SMS</h2>
+        <button type="button" class="secondary" id="closeOfferSms">Bezárás</button>
+      </div>
+      <p id="offerSmsTo" class="muted"></p>
+      <label for="offerSmsText">Üzenet szövege</label>
+      <textarea id="offerSmsText" rows="5"></textarea>
+      <div class="offer-sms-actions">
+        <a id="openOfferSms" hidden>SMS megnyitása</a>
+        <button type="button" class="secondary" id="copyOfferSms">Szöveg másolása</button>
+      </div>
+      <p class="muted" id="offerSmsStatus" role="status"></p>
+    </dialog>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./offer-deadlines.js"></script>
+  <script src="./offer-follow-up.js"></script>
   <script src="./app.js"></script>
+  <script src="./expenses.js"></script>
 </body>
 </html>

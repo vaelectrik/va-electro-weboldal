@@ -1,11 +1,16 @@
 
-const CACHE_NAME = "va-electro-mobile-v5";
+const CACHE_NAME = "va-electro-mobile-v6";
 
 const APP_FILES = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
+  "./offer-deadlines.js",
+  "./offer-follow-up.js",
+  "./expenses.js",
+  "./icon-192.png",
+  "./icon-512.png",
   "./manifest.json",
   "./icon.svg"
 ];

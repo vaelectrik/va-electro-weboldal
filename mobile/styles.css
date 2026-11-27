@@ -1288,3 +1288,161 @@ footer {
   font-size: 11px;
   font-weight: 750;
 }
+
+/* VA ELECTRO mobile preview */
+:root {
+  color-scheme: dark;
+  --ve-text: #f9f2ea;
+  --ve-copper-light: #e8b98f;
+  --ve-copper-pale: #f1d1b5;
+}
+body {
+  background: #141211;
+  color: #f9f2ea;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.app-shell { width: min(100%, 720px); padding: 18px 16px max(16px, env(safe-area-inset-bottom)); }
+.app-shell:has(#dashboardView:not(.hidden)) > .brand { display: none; }
+.app-shell:has(#dashboardView:not(.hidden)) > footer { display: none; }
+#dashboardView { padding-bottom: calc(82px + env(safe-area-inset-bottom)); }
+.mobile-topbar {
+  margin: 0 0 18px; padding: 4px 0 15px; align-items: center;
+  border-bottom: 1px solid #3e322a;
+}
+.mobile-topbar h1 { margin: 8px 0 0; font-size: clamp(1.6rem, 6vw, 2rem); letter-spacing: -.04em; }
+.mobile-topbar-actions { flex: 0 0 auto; gap: 5px; }
+.mobile-kicker { display: flex; flex-wrap: wrap; gap: 4px 7px; align-items: center; color: #e9baa0; font-size: .76rem; letter-spacing: .08em; }
+.mobile-kicker span {
+  display: inline-block; padding: 2px 5px; border: 1px solid #695140; border-radius: 4px;
+  color: #e4c6ae; background: #2e2118; letter-spacing: 0; text-transform: none;
+}
+#homePage > .grid { margin: 0 0 14px; gap: 7px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+#homePage .stat {
+  background: #201a17; border: 1px solid #43352c; border-radius: 9px; padding: 9px;
+  min-height: 83px; display: grid; gap: 4px; align-content: space-between; box-shadow: none;
+}
+#homePage .stat::after { display: none; }
+#homePage .stat span { font-size: .79rem; color: #d3bfb0; line-height: 1.3; }
+#homePage .stat strong { margin: 0; color: #eabb93; font-size: 1.6rem; line-height: 1.2; }
+#homePage > .panel, .app-page > .panel, #detailView {
+  background: #1a1715; box-shadow: none; border-radius: 10px; border-color: #3e352f;
+}
+#homePage > .panel { margin-top: 0; padding: 12px; }
+#homePage > .panel h2 { color: #f9f2ea; font-size: 1.1rem; margin-bottom: 10px; }
+#homeJobList { gap: 6px; }
+#homeJobList .job {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 3px 8px;
+  padding: 10px; background: #221d19; box-shadow: none; border: 1px solid #47392f; border-radius: 7px;
+}
+#homeJobList .job .job-meta { grid-column: 1; margin: 0; font-size: .8rem; color: #c9b6a7; line-height: 1.45; }
+#homeJobList .job .status { grid-column: 2; grid-row: 1/3; margin: 0; align-self: center; }
+#homeJobList .job .open-hint { display: none; }
+.bottom-navigation {
+  bottom: 0; min-height: 66px; width: 100%; max-width: 720px;
+  padding: 5px 8px calc(5px + env(safe-area-inset-bottom)); background: #1c1815;
+  border: 1px solid #44362c; border-bottom: 0; border-radius: 11px 11px 0 0;
+  box-shadow: 0 -4px 20px #0006;
+}
+.nav-item { border-radius: 7px; min-height: 52px; gap: 3px; font-size: .75rem; color: #c4b8ae; }
+.nav-icon { color: inherit; display: flex; }
+.nav-item.active { background: #37261c !important; color: #ffdbbd; border-color: #64472f; }
+.nav-item.active .nav-icon { transform: none; color: #f2bd93; }
+.app-shell :focus-visible { outline: 2px solid #edbc94; outline-offset: 2px; }
+#appMessage:empty { display: none; }
+#trashJobButton { color: #ffb2a8; border-color: #795249; }
+@media (max-width: 385px) {
+  .app-shell { padding-inline: 11px; }
+  .mobile-topbar h1 { font-size: 1.55rem; }
+  .mobile-topbar-actions button:last-child { padding-inline: 6px; }
+  #homePage .stat span { font-size: .74rem; }
+  .nav-item { font-size: .7rem; }
+}
+
+#loginView::before, #pinView::before { content: none; }
+
+/* Mobile dashboard */
+:root { --ve-copper-light: #f1aa72; --ve-copper-pale: #ffd2aa; }
+body {
+  background: #0e0e0f;
+  background-image: radial-gradient(ellipse at 90% -8%, #3b2519 0, transparent 360px);
+}
+.mobile-topbar { border-bottom-color: #8e5433; }
+.mobile-topbar-title { min-width: 0; }
+.mobile-topbar h1 { font-weight: 850; letter-spacing: -.055em; }
+#homePage .stat {
+  position: relative; overflow: hidden; border-radius: 5px;
+  background: linear-gradient(139deg, #2e211a, #191515 80%); border-color: #50362a;
+}
+#homePage .stat::after {
+  display: block; position: absolute; top: 0; right: 0; width: 29px; height: 32px;
+  background: #a86b43; opacity: .7; clip-path: polygon(100% 0, 100% 100%, 0 0);
+}
+#homePage .stat strong { font-weight: 900; color: #ffc192; }
+#homeJobList .job, #jobList .job {
+  border-radius: 6px; border-left: 2px solid #aa673f;
+  background: linear-gradient(95deg, #231a16, #191717 70%);
+}
+.bottom-navigation { border-color: #614330; }
+.nav-item.active { box-shadow: inset 0 -2px #d28d5c; border-color: #8c5f42; }
+.offer-deadline {
+  display: inline-block; width: fit-content; max-width: 100%; margin-top: 6px; padding: 4px 7px;
+  border: 1px solid #74523c; border-radius: 4px; color: #ffd5b5; background: #322219;
+  font-size: .79rem; font-weight: 700;
+}
+#homeJobList .offer-deadline { grid-column: 1/-1; }
+.offer-deadline.urgent { color: #ffd0bc; border-color: #a46151; background: #43251e; }
+.notification-item[data-notification-type="offer"] { border-left: 3px solid #d48759; }
+.finance-tabs { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; }
+.finance-tabs button { border-radius: 5px; min-height: 45px; }
+.finance-tabs button[aria-pressed="true"] { background: #3b261b; color: #ffd4b2; border-color: #986643; }
+#financePageContent, #expensePanel { margin-top: 10px; }
+.payment-trend {
+  padding: 12px; margin-bottom: 11px; border: 1px solid #795035; border-radius: 7px;
+  background: linear-gradient(140deg, #302017, #181617 75%); overflow: hidden;
+}
+.payment-trend h3, .outstanding-jobs h3 { margin: 0 0 4px; font-size: 1rem; }
+.payment-trend p { margin: 0 0 6px; }
+.payment-trend svg { width: 100%; max-height: 132px; display: block; }
+.trend-grid { stroke: #594034; fill: none; stroke-dasharray: 3 4; }
+.trend-area { fill: #a35732; opacity: .32; }
+.trend-line { stroke: #ffa36b; fill: none; stroke-width: 3; stroke-linejoin: round; }
+.payment-trend circle { fill: #ffd5b8; stroke: #a35c34; stroke-width: 1; }
+.trend-months { display: grid; grid-template-columns: repeat(6,minmax(0,1fr)); text-align: center; color: #d3b7a6; font-size: .78rem; }
+.outstanding-jobs { margin-top: 16px; }
+.outstanding-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%;
+  padding: 10px; margin-top: 7px; text-align: left; border: 1px solid #563a2e; border-left: 2px solid #d08058;
+  border-radius: 6px; background: #261c17; color: #fff1e5;
+}
+.outstanding-row small, .expense-row small { display: block; color: #d0b8a7; margin-top: 3px; font-size: .8rem; }
+.outstanding-row > strong { color: #ffc391; white-space: nowrap; }
+#expenseForm button { margin-top: 10px; }
+#expenseStatus:empty { display: none; }
+.expense-total, .expense-row {
+  display: flex; justify-content: space-between; gap: 10px; align-items: center;
+  margin-top: 9px; padding: 10px; border: 1px solid #533b30; border-radius: 6px; background: #251d19;
+}
+.expense-row span { overflow-wrap: anywhere; }
+.expense-total strong, .expense-row strong { color: #ffc391; white-space: nowrap; }
+
+#jobList .job-result { min-width: 0; }
+.offer-sms-button.secondary {
+  min-height: 44px; margin: 4px 0 10px; padding: 7px 12px;
+  border: 1px solid #875638; border-radius: 6px; color: #ffd0ae; background: #2d1f18;
+}
+.offer-sms-button.secondary:hover { border-color: #e5a173; }
+#offerSmsDialog {
+  box-sizing: border-box; width: min(470px, calc(100% - 24px));
+  max-height: calc(100dvh - 32px); padding: 16px;
+  border: 1px solid #805637; border-radius: 9px; background: #1b1715; color: #f9f2ea;
+}
+#offerSmsDialog::backdrop { background: #080707be; }
+.offer-sms-heading, .offer-sms-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.offer-sms-heading { justify-content: space-between; }
+.offer-sms-heading h2 { margin: 0; }
+#offerSmsText { display: block; width: 100%; margin: 6px 0 12px; }
+#openOfferSms:not([hidden]) {
+  display: inline-flex; align-items: center; min-height: 44px; padding: 8px 12px;
+  border-radius: 6px; background: #d59e75; color: #18100a; font-weight: 750; text-decoration: none;
+}
+#offerSmsStatus { margin: 10px 0 0; }
